@@ -1,0 +1,27 @@
+node_modules/
+.env
+*.log
+*.txt
+*.txe
+*.output
+
+node_modules/
+.env
+*.log
+controllers/threeTableCall/testData.js
+db/backup/*.tar
+deltaStore
+*.sh
+*.pem
+test_data/
+
+# Generated Files
+
+GE_Cath
+GE_Imaging
+Philips_CT
+Philips_Cath
+Philips_MRI
+Siemens_Files
+
+configWriter/*.sql
