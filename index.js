@@ -123,7 +123,6 @@ const crothal_demo = [
   "SME12445",
 ];
 
-
 const determineManufacturer = async (jobId, sme) => {
   try {
     let queryString =
@@ -172,7 +171,7 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot(["SME12444"]);
+onBoot([...filePaths.siemens.ct_systems, ...filePaths.ge.ct_systems, ...filePaths.ge.cv_systems, ...filePaths.ge.mri_systems]);
 
 /* 
 const determineManufacturer = async (jobId, system) => {

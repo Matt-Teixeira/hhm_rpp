@@ -34,7 +34,7 @@ async function ge_mri_gesys(jobId, sysConfigData, fileToParse) {
     const prevFileSize = await getRedisFileSize(sme, fileToParse.file_name);
 
     let fileData;
-    if (prevFileSize === null || prevFileSize === "0") {
+    if (prevFileSize === null || prevFileSize === 0) {
       console.log("This needs to be read from file");
       fileData = (await fs.readFile(complete_file_path)).toString();
     }
@@ -48,7 +48,15 @@ async function ge_mri_gesys(jobId, sysConfigData, fileToParse) {
         sysConfigData.hhm_config.file_path,
         fileToParse.file_name
       );
-      console.log("CURRENT FILE SIZE: " + currentFileSize);
+      
+      // Break out of function if no file found
+      if (currentFileSize === null) {
+        await log("warn", "NA", sme, "ge_mri_gesys", "FN CALL", {
+          message: "File not found in dir",
+        });
+
+        return;
+      }
 
       const delta = currentFileSize - prevFileSize;
       await log("info", jobId, sme, "delta", "FN CALL", { delta: delta });
