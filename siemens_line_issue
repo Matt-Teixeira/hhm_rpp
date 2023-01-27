@@ -1,0 +1,40 @@
+I       2023-01-26      12:46:18        CT_CCS  36      (E 01 13 24 00 7F 00 03) Water outlet temperature monitoring
+I       2023-01-26      12:46:14        CT_GSA  129     (E 51 13 81 32 00 00 00) Hardware info XGS
+I       2023-01-26      12:46:11        CT_GSA  129     (E 51 13 81 31 00 00 00) Hardware info XGS
+I       2023-01-26      12:46:10        CT_GSA  129     (E 51 13 81 39 00 00 00) Hardware info XGS
+I       2023-01-26      12:46:10        CT_GSA  129     (E 51 13 81 38 00 00 00) Hardware info XGS
+I       2023-01-26      12:46:10        CT_GSA  129     (E 51 13 81 37 EA 60 00) Hardware info XGS
+I       2023-01-26      12:45:48        CT_CCS  36      (E 01 13 24 00 8A 00 03) Water outlet temperature monitoring
+I       2023-01-26      12:45:28        CT_CCS  37      (E 01 13 25 00 7D 00 03) Water inlet temperature monitoring
+I       2023-01-26      12:45:14        CT_GSA  129     (E 51 13 81 32 00 00 00) Hardware info XGS
+I       2023-01-26      12:45:11        CT_GSA  129     (E 51 13 81 31 00 00 00) Hardware info XGS
+I       2023-01-26      12:45:10        CT_GSA  129     (E 51 13 81 39 00 00 00) Hardware info XGS
+I       2023-01-26      12:45:10        CT_GSA  129     (E 51 13 81 38 00 00 00) Hardware info XGS
+I       2023-01-26      12:45:10        CT_GSA  129     (E 51 13 81 37 EA 60 00) Hardware info XGS
+I       2023-01-26      12:45:01        CT_PRF  4       Free Resources: DB: Local 2825 MB Exchangeboard 758 MB PixelPartition[store]: 86663 MB PixelPartition[scan]: 88599 MB PixelPartition
+
+I       2023-01-26      12:14:57        CT_CCS  36      (E 01 13 24 00 70 00 03) Water outlet temperature monitoring
+
+
+
+
+
+
+
+
+
+1) Previous rpp line
+I       2023-01-26      12:44:38        CT_CCS  44      (E 01 13 2C FD E1 00 5F) Waterflow monitoring
+
+
+*************   /opt/hhm-files/C0137/SHIP005/SME00894  ***********************
+[FIRST ROW] - [array] - [["SME00894","I","2023-01-26","17:00:00","CT_GSA","129","(E 51 13 81 39 00 00 00) Hardware info XGS",null,null,null,null,null,"2023-01-26T17:00:00.000-05:00"]]
+
+I       2023-01-26      17:00:02        CT_SCF  7       Current system configuration: SerialNumber=91966; SystemType=Definition AS - Option slice configuration 128; Computername=CTAWP91966; SMBIOSAssetTag=11062028; Version=VB10B; SWUpgradePacks=VB10B_SP1,VB10B_SP4,VB10B_SP5,VB10B_SP6; WorkplaceType=Navigator; MaterialNumber=8098027; Country=USA; HospitalName=Piedmont Athens Regional  TJC5J/RH16R; City=Athens; Data Slipring=slpr1SpStp; Power Slipring=SlprPowSrs; Patient Table=Phs4; DMS=P46BSil100; Cooling=WaterP46_2; ConsecutiveDayId=1717; Versionstring=VB10B_SP6; Buildlabel=VB10B_SP5_PATCH_SP6_BUILD_12; BuildDate=May 15  19:38:47 CEST 2022;
+I       2023-01-26      17:00:02        CT_ISV  47      Client 'SConfigMachineConfiguration' called SRI method SriOperatingApi::getSystemConfiguration() with arguments: SriConfigDefault, , ,
+            *********************
+I       2023-01-26      16:30:00        CT_GSA  129     (E 51 13 81 39 00 00 00) Hardware info XGS
+I       2023-01-26      16:30:00        CT_GSA  129     (E 51 13 81 38 00 00 00) Hardware info XGS
+I       2023-01-26      16:30:00        CT_GSA  129     (E 51 13 81 37 EA 60 00) Hardware info XGS
+I       2023-01-26      16:30:00        CT_GSA  129     (E 51 13 81 31 00 00 00) Hardware info XGS
+I       2023-01-26      16:29:59        CT_COC  112     (E C0 13 70 41 00 7E F4) Measurement value of the PCB temperature

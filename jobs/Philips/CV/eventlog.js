@@ -38,8 +38,12 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
     const prevFileSize = await getRedisFileSize(sme, fileToParse.file_name);
     console.log("Redis File Size: " + prevFileSize);
 
+    // rl is set conditionaly. Holds file data
     let rl;
-    if (prevFileSize === null) {
+    // prevFileSize will be null if it is new system (first time running rpp).
+    // prevFileSize will be 0 if log has rotated.
+    // In both scenarios, read and parse entire file.
+    if (prevFileSize === null || prevFileSize === 0) {
       console.log("This needs to be read from file");
       rl = readline.createInterface({
         input: fs.createReadStream(complete_file_path),
@@ -67,9 +71,9 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
         return;
       }
 
-      let tailDelta = await execHead(headPath, delta, complete_file_path);
+      let headDelta = await execHead(headPath, delta, complete_file_path);
 
-      rl = tailDelta.toString().split(/(?:\r\n|\r|\n)/g);
+      rl = headDelta.toString().split(/(?:\r\n|\r|\n)/g);
     }
 
     for await (const line of rl) {

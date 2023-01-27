@@ -1,12 +1,13 @@
 ("use strict");
 require("dotenv").config();
 const { log } = require("../../logger");
-const fs = require("node:fs").promises;
 const win_10_parsers = require("./win_10/index.js");
 const win_7_parsers = require("./win_7/index");
 
 const determineOsVersion = async (jobId, sysConfigData) => {
   await log("info", jobId, sysConfigData.id, "determineOsVersion", "FN CALL");
+
+  // Check for windows OS version
 
   const fileConfigs = sysConfigData.hhm_file_config;
 

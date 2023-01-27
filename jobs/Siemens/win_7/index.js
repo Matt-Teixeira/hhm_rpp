@@ -7,6 +7,8 @@ const win_7_siemens_ct = require("./siemens_cv");
 const win_7_parsers = async (jobId, sysConfigData, fileConfig) => {
   await log("info", jobId, sysConfigData.id, "win_7_parsers", "FN CALL");
 
+  // Check for modality
+
   switch (sysConfigData.hhm_config.modality) {
     case "CV":
       const files = await fs.readdir(sysConfigData.hhm_config.file_path);

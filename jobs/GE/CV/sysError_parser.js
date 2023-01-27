@@ -34,7 +34,7 @@ async function ge_cv_sys_error(jobId, sysConfigData, fileToParse) {
     console.log("Redis File Size: " + prevFileSize);
 
     let rl;
-    if (prevFileSize === null) {
+    if (prevFileSize === null || prevFileSize === 0) {
       console.log("This needs to be read from file");
       rl = readline.createInterface({
         input: fs.createReadStream(complete_file_path),
@@ -51,7 +51,15 @@ async function ge_cv_sys_error(jobId, sysConfigData, fileToParse) {
         sysConfigData.hhm_config.file_path,
         fileToParse.file_name
       );
-      console.log("CURRENT FILE SIZE: " + currentFileSize);
+
+      // Break out of function if no file found
+      if (currentFileSize === null) {
+        await log("warn", "NA", sme, "ge_cv_sys_error", "FN CALL", {
+          message: "File not found in dir",
+        });
+
+        return;
+      }
 
       const delta = currentFileSize - prevFileSize;
       await log("info", jobId, sme, "delta", "FN CALL", { delta: delta });

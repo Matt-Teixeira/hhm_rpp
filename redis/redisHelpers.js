@@ -5,10 +5,9 @@ const execReadFileSize = require("../read/exec-readFileSize");
 const initRedis = require(".");
 
 async function updateRedisFileSize(sme, exec_path, file_path, file) {
+  const redisClient = await initRedis();
   try {
     await log("info", "NA", sme, "updateRedisFileSize", "FN CALL");
-
-    const redisClient = await initRedis();
 
     const newFileSize = await execReadFileSize(
       exec_path,
@@ -34,7 +33,9 @@ async function getRedisFileSize(sme, file) {
     const redisClient = await initRedis();
 
     const getKey = `${sme}.${file}`;
-    const fileSize = await redisClient.get(getKey);
+    let fileSize = await redisClient.get(getKey);
+    // if key does not exitst in redis, null will be returned, otherwise a string will be returned.
+    if (typeof fileSize === "string") fileSize = parseInt(fileSize);
     redisClient.quit();
     return fileSize;
   } catch (error) {
@@ -51,11 +52,22 @@ async function getCurrentFileSize(sme, exec_path, file_path, file) {
 
     const redisClient = await initRedis();
 
-    const currentFileSize = await execReadFileSize(
+    let currentFileSize = await execReadFileSize(
       exec_path,
       `${file_path}/${file}`
     );
     redisClient.quit();
+
+    // If file does not exist in dir, stdout returns new line character '\n'. Set size to null
+    if (currentFileSize === "\n") {
+      await log("warn", "NA", sme, "getCurrentFileSize", "FN CALL", {
+        message: "File not found in dir",
+      });
+      currentFileSize = null;
+      return currentFileSize;
+    }
+
+    currentFileSize = parseInt(currentFileSize);
     return currentFileSize;
   } catch (error) {
     await log("error", "NA", sme, "getCurrentFileSize", "FN CALL", {
@@ -85,11 +97,45 @@ async function passForProcessing(sme, array) {
   }
 }
 
+async function getRedisLine(sme, file) {
+  const redisClient = await initRedis();
+  try {
+    const key = `${sme}.${file}`;
+    let line = await redisClient.get(key);
+    await redisClient.quit();
+    return line;
+  } catch (error) {
+    await log("error", "NA", sme, "getRedisLine", "FN CALL", {
+      error: error,
+    });
+    await redisClient.quit();
+  }
+}
+
+async function updateRedisLine(sme, file, first_line) {
+  const redisClient = await initRedis();
+  try {
+    const setKey = `${sme}.${file}`;
+    await redisClient.set(setKey, first_line);
+    await redisClient.quit();
+    return;
+  } catch (error) {
+    await log("error", "NA", sme, "updateRedisLine", "FN CALL", {
+      error: error,
+    });
+    await redisClient.quit();
+  }
+}
+
 module.exports = {
   updateRedisFileSize,
   getCurrentFileSize,
   getRedisFileSize,
   passForProcessing,
+  updateRedisLine,
+  getRedisLine
 };
+
+"I       2023-01-26      11:14:43        CT_PRF  4       Free Resources: DB: Local 2827 MB Exchangeboard 758 MB PixelPartition[store]: 86612 MB PixelPartition[scan]: 88745 MB PixelPartition[stamp]: 121064 MB IPT partition: 25675 MB phys MEM: 4095 MB"
 
 // "{\"host_date\":\"12-Jan-23\",\"host_time\":\"01:08\",\"capture_datetime\":\"2023-01-12T08:15:00Z\",\"system_id\":\"SME09782\",\"pg_table\":\"mmb_ge_mm3\"}"
