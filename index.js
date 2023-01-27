@@ -122,7 +122,7 @@ const crothal_demo = [
   "SME12451",
   "SME12445",
 ];
-
+/* 
 const determineManufacturer = async (jobId, sme) => {
   try {
     let queryString =
@@ -172,8 +172,8 @@ const onBoot = async (systems_list) => {
 };
 
 onBoot(filePaths.philips.cv_systems); //...filePaths.siemens.ct_systems, ...filePaths.ge.ct_systems, ...filePaths.ge.cv_systems, ...filePaths.ge.mri_systems
+ */
 
-/* 
 const determineManufacturer = async (jobId, system) => {
   try {
     await log("info", jobId, system.id, "determineManufacturer", "FN CALL", {
@@ -206,11 +206,21 @@ const onBoot = async () => {
     await log("info", "NA", "NA", "onBoot", `FN CALL`);
     console.time();
 
-    let queryString =
-      "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = $1"; //  AND modality = $1
-    let value = [process.argv[2]];
+    let shell_value = [process.argv[2]];
 
-    const system_array = await pgPool.query(queryString, value);
+    const queries = {
+      CT: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CT' AND hhm_config->'run_group' = '1'",
+      CV: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND hhm_config->'run_group' = '1'",
+      MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1'",
+      phil_cv_hr_24:
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND manufacturer = 'Philips' AND hhm_config->'run_group' = '2'",
+    };
+
+    let queryString = queries[shell_value];
+
+    const system_array = await pgPool.query(queryString);
+
+    console.log(system_array.rows)
 
     for await (const system of system_array.rows) {
       let jobId = crypto.randomUUID();
@@ -227,4 +237,3 @@ const onBoot = async () => {
 };
 
 onBoot();
- */
