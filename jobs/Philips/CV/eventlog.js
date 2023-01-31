@@ -32,6 +32,14 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
   try {
     const complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
 
+    if (!fs.existsSync(complete_file_path)) {
+      await log("warn", jobId, sme, "phil_cv_eventlog", "FN CALL", {
+        message: "File not found in directory",
+        file: complete_file_path,
+      });
+      return
+    } 
+
     await log("info", jobId, sme, "phil_cv_eventlog", "FN CALL", {
       file: complete_file_path,
     });
