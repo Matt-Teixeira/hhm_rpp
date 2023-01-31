@@ -122,7 +122,8 @@ const crothal_demo = [
   "SME12451",
   "SME12445",
 ];
-/* 
+ 
+
 const determineManufacturer = async (jobId, sme) => {
   try {
     let queryString =
@@ -171,9 +172,9 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot(filePaths.philips.cv_systems); //...filePaths.siemens.ct_systems, ...filePaths.ge.ct_systems, ...filePaths.ge.cv_systems, ...filePaths.ge.mri_systems
- */
+onBoot(filePaths.siemens.mri_systems); //...filePaths.siemens.ct_systems, ...filePaths.ge.ct_systems, ...filePaths.ge.cv_systems, ...filePaths.ge.mri_systems
 
+/* 
 const determineManufacturer = async (jobId, system) => {
   try {
     await log("info", jobId, system.id, "determineManufacturer", "FN CALL", {
@@ -237,3 +238,4 @@ const onBoot = async () => {
 };
 
 onBoot();
+ */

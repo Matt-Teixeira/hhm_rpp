@@ -3,7 +3,6 @@ require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
 const fs = require("node:fs").promises;
 const { ge_re } = require("../../../parse/parsers");
-const groupsToArrayObj = require("../../../parse/prep-groups-for-array");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { ge_mri_gesys_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
@@ -17,6 +16,8 @@ const generateDateTime = require("../../../processing/date_processing/generateDa
 
 async function ge_mri_gesys(jobId, sysConfigData, fileToParse) {
   const sme = sysConfigData.id;
+  // an array in each config accossiated with a file
+  const parsers = fileToParse.parsers;
 
   const updateSizePath = "./read/sh/readFileSize.sh";
   const fileSizePath = "./read/sh/readFileSize.sh";
@@ -27,40 +28,41 @@ async function ge_mri_gesys(jobId, sysConfigData, fileToParse) {
   try {
     await log("info", jobId, sme, "ge_mri_gesys", "FN CALL");
 
+    // /opt/hhm-files/C0051/SHIP003/SME02524/gesys_mr2-ow0.log
     let complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
 
-    // Check mod date/time
-
+    // File size stored in redis. Size at last pull
     const prevFileSize = await getRedisFileSize(sme, fileToParse.file_name);
 
+    const currentFileSize = await getCurrentFileSize(
+      sme,
+      fileSizePath,
+      sysConfigData.hhm_config.file_path,
+      fileToParse.file_name
+    );
+
+    const delta = currentFileSize - prevFileSize;
+
+    // Conditionaly set fileData based on what's stored in redis or delta signed integer.
+    // If prevFileSize is null, system not in redis and likely not ran before.
+    // If prevFileSize is 0, log rotation set redis cache to 0.
+    // If delta is less than 0 (negitive number) file got smaller: i.e. log rotated without redis set to 0. Happens on system end.
     let fileData;
-    if (prevFileSize === null || prevFileSize === 0) {
+    if (prevFileSize === null || prevFileSize === 0 || delta < 0) {
       console.log("This needs to be read from file");
       fileData = (await fs.readFile(complete_file_path)).toString();
     }
 
-    if (prevFileSize > 0 && prevFileSize !== null) {
-      console.log("File Size prev saved in Redis");
-
-      const currentFileSize = await getCurrentFileSize(
-        sme,
-        fileSizePath,
-        sysConfigData.hhm_config.file_path,
-        fileToParse.file_name
-      );
-      
+    if (prevFileSize > 0) {
       // Break out of function if no file found
       if (currentFileSize === null) {
         await log("warn", "NA", sme, "ge_mri_gesys", "FN CALL", {
           message: "File not found in dir",
         });
-
         return;
       }
 
-      const delta = currentFileSize - prevFileSize;
       await log("info", jobId, sme, "delta", "FN CALL", { delta: delta });
-      console.log(delta);
 
       if (delta === 0) {
         await log("warn", jobId, sme, "delta-0", "FN CALL");
@@ -72,10 +74,11 @@ async function ge_mri_gesys(jobId, sysConfigData, fileToParse) {
       fileData = tailDelta.toString();
     }
 
-    let matches = fileData.match(ge_re.mri.gesys.block);
+    // Begin parsing file data
+    let matches = fileData.match(ge_re.mri.gesys[parsers[0]]);
 
     for await (let match of matches) {
-      const matchGroups = match.match(ge_re.mri.gesys.new);
+      const matchGroups = match.match(ge_re.mri.gesys[parsers[1]]);
       // matchGroups will be null if no match
       if (!matchGroups) {
         await log("warn", sme, "ge_mri_gesys", "FN CALL", {

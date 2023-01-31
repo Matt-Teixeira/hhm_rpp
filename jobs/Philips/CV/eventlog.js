@@ -4,7 +4,6 @@ const { log } = require("../../../logger");
 const fs = require("node:fs");
 const readline = require("readline");
 const { philips_re } = require("../../../parse/parsers");
-const groupsToArrayObj = require("../../../parse/prep-groups-for-array");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_cv_eventlog_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
@@ -21,6 +20,8 @@ const generateDateTime = require("../../../processing/date_processing/generateDa
 
 async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
   const sme = sysConfigData.id;
+  // an array in each config accossiated with a file
+  const parsers = fileToParse.parsers;
 
   const updateSizePath = "./read/sh/readFileSize.sh";
   const fileSizePath = "./read/sh/readFileSize.sh";
@@ -77,7 +78,7 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
     }
 
     for await (const line of rl) {
-      let matches = line.match(philips_re.cv.eventlog);
+      let matches = line.match(philips_re.cv[parsers[0]]);
       if (matches === null) {
         const isNewLine = blankLineTest(line);
         if (isNewLine) {
