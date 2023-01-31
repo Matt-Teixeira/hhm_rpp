@@ -14,8 +14,11 @@ const {
 const execTail = require("../../../read/exec-tail");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
+// File to parse is read into string for regEx to match
 async function ge_ct_gesys(jobId, sysConfigData, fileToParse) {
   const sme = sysConfigData.id;
+  // an array in each config accossiated with a file
+  const parsers = fileToParse.parsers;
 
   const updateSizePath = "./read/sh/readFileSize.sh";
   const fileSizePath = "./read/sh/readFileSize.sh";
@@ -26,28 +29,33 @@ async function ge_ct_gesys(jobId, sysConfigData, fileToParse) {
   try {
     await log("info", jobId, sme, "ge_ct_gesys", "FN CALL");
 
+    // Example: /opt/hhm-files/C0051/SHIP098/SME12444/gesys_GECT1.log
     let complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
 
-    let prevFileSize = await getRedisFileSize(sme, fileToParse.file_name);
+    // File size stored in redis. Size at last pull
+    const prevFileSize = await getRedisFileSize(sme, fileToParse.file_name);
 
-    // If no file size in redis, read entire file
+    const currentFileSize = await getCurrentFileSize(
+      sme,
+      fileSizePath,
+      sysConfigData.hhm_config.file_path,
+      fileToParse.file_name
+    );
+
+    const delta = currentFileSize - prevFileSize;
+
+    // Conditionaly set fileData based on what's stored in redis or delta signed integer.
+    // If prevFileSize is null, system not in redis and likely not ran before.
+    // If prevFileSize is 0, log rotation set redis cache to 0.
+    // If delta is less than 0 (negitive number) file got smaller: i.e. log rotated without redis set to 0. Happens on system end.
     let fileData;
-    if (prevFileSize === null || prevFileSize === 0) {
+    if (prevFileSize === null || prevFileSize === 0 || delta < 0) {
       console.log("This needs to be read from file");
       fileData = (await fs.readFile(complete_file_path)).toString();
     }
 
-    // If there is a file size in redis, get delta and tail delta
-    if (prevFileSize > 0 && prevFileSize !== null) {
-      console.log("File Size prev saved in Redis");
-
-      const currentFileSize = await getCurrentFileSize(
-        sme,
-        fileSizePath,
-        sysConfigData.hhm_config.file_path,
-        fileToParse.file_name
-      );
-
+    // If there is a file size in redis, pull delta via tail
+    if (prevFileSize > 0) {
       // Break out of function if no file found
       if (currentFileSize === null) {
         await log("warn", "NA", sme, "ge_ct_gesys", "FN CALL", {
@@ -56,9 +64,7 @@ async function ge_ct_gesys(jobId, sysConfigData, fileToParse) {
         return;
       }
 
-      const delta = currentFileSize - prevFileSize;
       await log("info", jobId, sme, "delta", "FN CALL", { delta: delta });
-      console.log("DELTA: " + delta);
 
       if (delta === 0) {
         await log("warn", jobId, sme, "delta-0", "FN CALL");
@@ -71,10 +77,10 @@ async function ge_ct_gesys(jobId, sysConfigData, fileToParse) {
     }
 
     // Begin parsing file data
-    let matches = fileData.match(ge_re.ct.gesys.block);
+    let matches = fileData.match(ge_re.ct.gesys[parsers[0]]);
 
     for await (let match of matches) {
-      const matchGroups = match.match(ge_re.ct.gesys.new);
+      const matchGroups = match.match(ge_re.ct.gesys[parsers[1]]);
 
       matchGroups.groups.host_date = `${
         matchGroups.groups.day.length === 1

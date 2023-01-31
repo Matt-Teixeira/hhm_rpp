@@ -14,7 +14,7 @@ const {
 } = require("../../../redis/redisHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
-const win10_siemens_ct = async (jobId, sysConfigData, fileConfig) => {
+const win10_siemens_mri = async (jobId, sysConfigData, fileConfig) => {
   const sme = sysConfigData.id;
   const dirPath = sysConfigData.hhm_config.file_path;
   // an array in each config accossiated with a file
@@ -26,7 +26,7 @@ const win10_siemens_ct = async (jobId, sysConfigData, fileConfig) => {
   // first_line will be the most recent line data
   let first_line;
   try {
-    await log("info", jobId, sme, "win10_siemens_ct", "FN CALL");
+    await log("info", jobId, sme, "win10_siemens_mri", "FN CALL");
 
     let redis_line = await getRedisLine(sme, fileConfig.file_name);
 
@@ -88,7 +88,7 @@ const win10_siemens_ct = async (jobId, sysConfigData, fileConfig) => {
 
     // No data in array if most recently parsed line in redis === first line in file. Indication of no change in file.
     if (data.length === 0) {
-      await log("warn", jobId, sme, "win10_siemens_ct", "FN CALL", {
+      await log("warn", jobId, sme, "win10_siemens_mri", "FN CALL", {
         message: "No new data in file",
         file: fileConfig.file_name,
       });
@@ -110,7 +110,7 @@ const win10_siemens_ct = async (jobId, sysConfigData, fileConfig) => {
 
     return true;
   } catch (error) {
-    await log("error", jobId, sme, "win10_siemens_ct", "FN CATCH", {
+    await log("error", jobId, sme, "win10_siemens_mri", "FN CATCH", {
       line: line_num,
       error: error,
       file: fileConfig,
@@ -118,7 +118,4 @@ const win10_siemens_ct = async (jobId, sysConfigData, fileConfig) => {
   }
 };
 
-module.exports = win10_siemens_ct;
-
-// "I\t2023-01-26\t11:14:43\tCT_PRF\t4\tFree Resources: DB: Local 2827 MB Exchangeboard 758 MB PixelPartition[store]: 86612 MB PixelPartition[scan]: 88745 MB PixelPartition[stamp]: 121064 MB IPT partition: 25675 MB phys MEM: 4095 MB"
-// "I       2023-01-26      11:44:49        CT_PRF  4       Free Resources: DB: Local 2826 MB Exchangeboard 758 MB PixelPartition[store]: 85692 MB PixelPartition[scan]: 87728 MB PixelPartition[stamp]: 121062 MB IPT partition: 25674 MB phys MEM: 4095 MB"
+module.exports = win10_siemens_mri;
