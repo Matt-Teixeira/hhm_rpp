@@ -29,10 +29,19 @@ async function ge_cv_sys_error(jobId, sysConfigData, fileToParse) {
   const data = [];
 
   try {
-    await log("info", jobId, sme, "ge_ct_gesys", "FN CALL");
+    await log("info", jobId, sme, "ge_cv_sys_error", "FN CALL");
 
     // Example: /opt/hhm-files/C0137/SHIP008/SME00868/EvtApplication_Today.txt
     let complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
+
+    if (!fs.existsSync(complete_file_path)) {
+      await log("warn", jobId, sme, "ge_cv_sys_error", "FN CALL", {
+        message: "File not found in directory",
+        file: complete_file_path,
+      });
+      return
+    } 
+
 
     // File size stored in redis. Size at last pull
     const prevFileSize = await getRedisFileSize(sme, fileToParse.file_name);

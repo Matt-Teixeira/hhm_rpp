@@ -32,6 +32,14 @@ const win10_siemens_ct = async (jobId, sysConfigData, fileConfig) => {
 
     const complete_file_path = `${dirPath}/${fileConfig.file_name}`;
 
+    if (!fs.existsSync(complete_file_path)) {
+      await log("warn", jobId, sme, "win10_siemens_ct", "FN CALL", {
+        message: "File not found in directory",
+        file: complete_file_path,
+      });
+      return
+    } 
+
     rl = readline.createInterface({
       input: fs.createReadStream(complete_file_path),
       crlfDelay: Infinity,

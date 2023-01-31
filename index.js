@@ -172,7 +172,7 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot(filePaths.siemens.mri_systems); //...filePaths.siemens.ct_systems, ...filePaths.ge.ct_systems, ...filePaths.ge.cv_systems, ...filePaths.ge.mri_systems
+onBoot(["SME00446"]); //...filePaths.siemens.ct_systems, ...filePaths.ge.ct_systems, ...filePaths.ge.cv_systems, ...filePaths.ge.mri_systems
 
 /* 
 const determineManufacturer = async (jobId, system) => {
