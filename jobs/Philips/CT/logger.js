@@ -47,8 +47,6 @@ async function philipsLogger(jobId, sysConfigData, fileToParse) {
       jobId,
       sysConfigData,
       fileToParse,
-      eal_delta,
-      last_line
     );
 
     /* await phil_ct_events(
