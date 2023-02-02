@@ -11,9 +11,10 @@ async function execLastEalLine(exec_path, args) {
   try {
     const { stdout: newData } = await execFile(exec_path, args, execOptions);
 
-    let last_line = newData.replace(/\d+-/, "");
+    // Example match '2023/02/01 08:19:35.864",3,'
+    let last_line = newData.match(/(\d{4}\/\d{2}\/\d{2})\s\d{2}:\d{2}:\d{2}\.\d{3}",.+?,/);
 
-    return last_line;
+    return last_line[0];
   } catch (error) {
     console.log(error);
     return null;

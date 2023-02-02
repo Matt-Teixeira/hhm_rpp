@@ -6,8 +6,8 @@ const { philips_re } = require("../../../parse/parsers");
 const phil_ct_eal = require("./eal_parser");
 const phil_ct_events = require("./events_parser");
 
-const execLineNumber = require("../../../read/exec-lineNumber");
-const execLastEalLine = require("../../../read/exec-lasteEalLine");
+const execLineNumber = require("../../../read/exec-eal_delta");
+const execLastEalLine = require("../../../read/exec-last_parsed_line");
 const { getRedisLine } = require("../../../redis/redisHelpers");
 
 async function philipsLogger(jobId, sysConfigData, fileToParse) {
@@ -32,6 +32,7 @@ async function philipsLogger(jobId, sysConfigData, fileToParse) {
       eal_info_line_path,
       [complete_file_path, last_eal_line_redis]
     );
+
 
     const last_line = await execLastEalLine(eal_info_parsed_line_path, [complete_file_path]);
 
