@@ -145,6 +145,7 @@ const philips_ct_events_schema = {
   message: null,
   eal: null,
   blob: null,
+  na: null,
   event_time: null,
   host_datetime: null,
 };

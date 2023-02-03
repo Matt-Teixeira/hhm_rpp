@@ -103,6 +103,11 @@ async function getRedisLine(sme, file) {
     const key = `${sme}.${file}`;
     let line = await redisClient.get(key);
     await redisClient.quit();
+    if(line === null) {
+      await log("warn", "NA", sme, "getRedisLine", "FN CALL", {
+        message: "Redis returned null. This may be a new system.",
+      });
+    }
     return line;
   } catch (error) {
     await log("error", "NA", sme, "getRedisLine", "FN CALL", {

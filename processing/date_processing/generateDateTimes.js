@@ -1,11 +1,13 @@
 const { log } = require("../../logger");
 const dateTimeTemplate = require("./dateTimeTemplate");
+const {remove__} = require("./incoming_date_cleaning");
 
 async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
   try {
     let date;
     switch (pgTable) {
       case "philips_ct_events":
+        hostTime = remove__(hostTime);
         date = await dateTimeTemplate(
           jobId,
           sme,
@@ -15,6 +17,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         );
         break;
       case "philips_ct_eal":
+        hostTime = remove__(hostTime);
         date = await dateTimeTemplate(
           jobId,
           sme,
