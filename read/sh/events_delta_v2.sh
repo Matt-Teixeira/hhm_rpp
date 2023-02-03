@@ -70,7 +70,7 @@ else
 
         FILE_DATA=$(grep -Fa -B "$LINE_DELTA" "[/reading] : Events" $1)
 
-        echo $CURRENT_EVENT_LINES "**" $PREV_EVENTS_LINE_END
+        echo $FILE_DATA "new_events_line_count: "$CURRENT_EVENT_LINES "new_eal_end_line_num: "$EAL_END_LINE_NUM
         exit
     fi
     

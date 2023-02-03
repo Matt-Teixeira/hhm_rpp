@@ -52,7 +52,8 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
       [complete_file_path, prev_line_positions.eal, prev_line_positions.events]
     );
 
-    console.log(events_delta);
+    console.log(events_delta.new_events_line_count);
+    console.log(events_delta.new_eal_end_line_num);
 
     if (events_delta === false) {
       await log("warn", jobId, sme, "phil_ct_events", "FN CALL", {
@@ -94,6 +95,8 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
 
       data.push(match.groups);
     }
+
+    return
 
     const mappedData = mapDataToSchema(data, philips_ct_events_schema);
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
