@@ -9,10 +9,13 @@ const generateDateTime = require("../../../processing/date_processing/generateDa
 
 const exec_eal_delta = require("../../../read/exec-eal_delta");
 const exec_last_parsed_line = require("../../../read/exec-last_parsed_line");
-const { getRedisLine, updateRedisLine } = require("../../../redis/redisHelpers");
+const {
+  getRedisLine,
+  updateRedisLine,
+} = require("../../../redis/redisHelpers");
 
 async function phil_ct_eal(jobId, sysConfigData, fileToParse) {
-  const parsers = fileToParse.parsers
+  const parsers = fileToParse.parsers;
   const sme = sysConfigData.id;
   const data = [];
 
@@ -34,7 +37,7 @@ async function phil_ct_eal(jobId, sysConfigData, fileToParse) {
       fileToParse.query
     );
 
-    console.log(last_parsed_line);
+    console.log("EALInfo - LINE FROM REDIS: " + last_parsed_line);
 
     // Current line number of end of EALInfo block
     const eal_delta = await exec_eal_delta(
@@ -44,12 +47,12 @@ async function phil_ct_eal(jobId, sysConfigData, fileToParse) {
       [complete_file_path, last_parsed_line]
     );
 
-    if(eal_delta === false) {
+    if (eal_delta === false) {
       await log("warn", jobId, sme, "phil_ct_eal", "FN CALL", {
         message: "Line delta indicates no new data or file is empty",
-        file: complete_file_path
+        file: complete_file_path,
       });
-      return
+      return;
     }
 
     //
@@ -72,23 +75,27 @@ async function phil_ct_eal(jobId, sysConfigData, fileToParse) {
       console.log(match.groups)
     }
 
+    return
+
     const mappedData = mapDataToSchema(data, philips_ct_eal_schema);
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
-    const insertSuccess = await bulkInsert(
-      jobId,
-      dataToArray,
-      sysConfigData,
-      fileToParse
-    );
-    if (insertSuccess) {
-      const last_line = await exec_last_parsed_line(eal_info_parsed_line_path, [
-        complete_file_path,
-      ]);
-      console.log(last_line);
+    const last_line = await exec_last_parsed_line(jobId, sme, eal_info_parsed_line_path, [
+      complete_file_path,
+    ]);
 
-      // Using .query value instead of file name due to conflict in same sme and file name format. Ex: "SME07847.Logger.output" for both data sets
-      await updateRedisLine(sme, fileToParse.query, last_line);
+    // last_line will be false if not captured. Do not insert into db until last line saved in redis
+    if (last_line) {
+      const insertSuccess = await bulkInsert(
+        jobId,
+        dataToArray,
+        sysConfigData,
+        fileToParse
+      );
+      if (insertSuccess) {
+        // Using .query value instead of file name due to conflict in same sme and file name format. Ex: "SME07847.Logger.output" for both data sets
+        await updateRedisLine(sme, fileToParse.query, last_line);
+      }
     }
   } catch (error) {
     console.log(error);

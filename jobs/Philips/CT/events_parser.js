@@ -59,7 +59,7 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
           match.groups.na = na_reduced.groups.na;
         }
 
-       // console.log(match.groups);
+        // console.log(match.groups);
         let blob_reduced = match.groups.blob.match(/(?<blob>\w+)/);
         if (blob_reduced) {
           match.groups.blob = blob_reduced.groups.blob;
@@ -83,20 +83,26 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
     const mappedData = mapDataToSchema(data, philips_ct_events_schema);
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
-    const insertSuccess = await bulkInsert(
-      jobId,
-      dataToArray,
-      sysConfigData,
-      fileToParse
-    );
+    const last_line = await execLastEventsLine(jobId, sme, events_info_parsed_line_path, [
+      complete_file_path,
+    ]);
 
-    if (insertSuccess) {
-      const last_line = await execLastEventsLine(events_info_parsed_line_path, [
-        complete_file_path,
-      ]);
+    console.log("\n" + "LAST LINE" + "\n" + last_line + "\n");
 
-      // Using .query value instead of file name due to conflict in same sme and file name format. Ex: "SME07847.Logger.output" for both data sets
-      await updateRedisLine(sme, fileToParse.query, last_line);
+    if (last_line) {
+
+      const insertSuccess = await bulkInsert(
+        jobId,
+        dataToArray,
+        sysConfigData,
+        fileToParse
+      );
+
+      if (insertSuccess) {
+        // Using .query value instead of file name due to conflict in same sme and file name format. Ex: "SME07847.Logger.output" for both data sets
+        await updateRedisLine(sme, fileToParse.query, last_line);
+      }
+
     }
   } catch (error) {
     console.log(error);

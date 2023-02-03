@@ -9,7 +9,6 @@ async function exec_events_delta(jobId, sme, exec_path, args) {
     maxBuffer: 1024 * 1024 * 10,
   };
   try {
-   
     const { stdout: newData } = await execFile(exec_path, args, execOptions);
     if (newData == "") {
       console.log(

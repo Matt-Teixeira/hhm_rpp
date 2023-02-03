@@ -8,7 +8,7 @@ if [ "null" == "$2" ]; then # Get all blocked Event data
 
     EVENTS_BEGINNING__LINE_NUM=$(grep -F -na "[reading] : Events" $1 | cut -d : -f 1)
 
-    # Will be true if file is empty. BAIL OUT!!!
+    # Will resolve to "true" if file is empty. BAIL OUT!!!
     if [ -z "$EVENTS_BEGINNING__LINE_NUM" ]; then
         echo false
         exit
