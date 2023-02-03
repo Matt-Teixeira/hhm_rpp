@@ -69,6 +69,7 @@ async function phil_ct_eal(jobId, sysConfigData, fileToParse) {
       match.groups.host_datetime = dtObject;
 
       data.push(match.groups);
+      console.log(match.groups)
     }
 
     const mappedData = mapDataToSchema(data, philips_ct_eal_schema);

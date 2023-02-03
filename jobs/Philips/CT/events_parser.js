@@ -59,8 +59,11 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
           match.groups.na = na_reduced.groups.na;
         }
 
+       // console.log(match.groups);
         let blob_reduced = match.groups.blob.match(/(?<blob>\w+)/);
-        match.groups.blob = blob_reduced.groups.blob;
+        if (blob_reduced) {
+          match.groups.blob = blob_reduced.groups.blob;
+        }
       }
       match.groups.system_id = sme;
 
