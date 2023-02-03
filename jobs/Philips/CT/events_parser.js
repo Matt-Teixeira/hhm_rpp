@@ -8,9 +8,12 @@ const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
 const exec_events_delta = require("../../../read/exec-events_delta");
+const exec_events_delta_v2 = require("../../../read/exec-events_delta_v2");
 const {
   getRedisLine,
   updateRedisLine,
+  updateRedisLinePositions,
+  getRedisLinePositions,
 } = require("../../../redis/redisHelpers");
 const execLastEventsLine = require("../../../read/exec-events_last_parsed_line");
 
@@ -21,6 +24,8 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
 
   const events_delta_path =
     "/home/matt-teixeira/hep3/hhm_rpp/read/sh/events_delta.sh";
+  const events_delta_v2_path =
+    "/home/matt-teixeira/hep3/hhm_rpp/read/sh/events_delta_v2.sh";
   const events_info_parsed_line_path =
     "/home/matt-teixeira/hep3/hhm_rpp/read/sh/get_last_parsed_events_line.sh";
 
@@ -30,17 +35,24 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
     const complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
 
     // Current line number of last line parsed in EALInfo block
-    const last_parsed_line = await getRedisLine(
+    const prev_line_positions = await getRedisLinePositions(
       sysConfigData.id,
       fileToParse.query
     );
 
-    const events_delta = await exec_events_delta(
+
+    console.log(prev_line_positions)
+
+    // {eal: 4934, events: 11639}
+
+    const events_delta = await exec_events_delta_v2(
       jobId,
       sysConfigData.id,
-      events_delta_path,
-      [complete_file_path, last_parsed_line]
+      events_delta_v2_path,
+      [complete_file_path, prev_line_positions.eal, prev_line_positions.events]
     );
+
+    console.log(events_delta);
 
     if (events_delta === false) {
       await log("warn", jobId, sme, "phil_ct_events", "FN CALL", {
@@ -49,7 +61,10 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
       });
       return;
     }
-    const events_block_groups = events_delta.matchAll(philips_re[parsers[0]]);
+
+    const events_block_groups = events_delta.file_data.matchAll(
+      philips_re[parsers[0]]
+    );
 
     for (let match of events_block_groups) {
       // non-utf8 characters existing in ERROR_BLOB entries
@@ -80,29 +95,25 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
       data.push(match.groups);
     }
 
+    console.log(data);
+
     const mappedData = mapDataToSchema(data, philips_ct_events_schema);
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
-    const last_line = await execLastEventsLine(jobId, sme, events_info_parsed_line_path, [
-      complete_file_path,
-    ]);
+    const insertSuccess = await bulkInsert(
+      jobId,
+      dataToArray,
+      sysConfigData,
+      fileToParse
+    );
 
-    console.log("\n" + "LAST LINE" + "\n" + last_line + "\n");
-
-    if (last_line) {
-
-      const insertSuccess = await bulkInsert(
-        jobId,
-        dataToArray,
-        sysConfigData,
-        fileToParse
+    if (insertSuccess) {
+      await updateRedisLinePositions(
+        sysConfigData.id,
+        fileToParse.query,
+        events_delta.new_eal_end_line_num,
+        events_delta.new_events_line_count
       );
-
-      if (insertSuccess) {
-        // Using .query value instead of file name due to conflict in same sme and file name format. Ex: "SME07847.Logger.output" for both data sets
-        await updateRedisLine(sme, fileToParse.query, last_line);
-      }
-
     }
   } catch (error) {
     console.log(error);
