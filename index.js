@@ -9,6 +9,7 @@ const ge_parser = require("./jobs/GE");
 
 const filePaths = {
   philips: {
+    ct_systems: ['SME07847', 'SME07846', 'SME07856', 'SME07867', 'SME02589', 'SME07859', 'SME10056', 'SME02471'],
     cv_systems: [
       "SME00445",
       "SME00446",
@@ -172,7 +173,7 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot(["SME10056"]); //...filePaths.siemens.ct_systems, ...filePaths.ge.ct_systems, ...filePaths.ge.cv_systems, ...filePaths.ge.mri_systems
+onBoot(filePaths.philips.ct_systems); //...filePaths.siemens.ct_systems, ...filePaths.ge.ct_systems, ...filePaths.ge.cv_systems, ...filePaths.ge.mri_systems
 
 /* 
 const determineManufacturer = async (jobId, system) => {

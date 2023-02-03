@@ -15,12 +15,13 @@ if [ "null" == "$2" ]; then # Get all blocked Event data
         exit
     fi
     EVENTS_ENDING_LINE_NUM=$(grep -F -na "[/reading] : Events" $1 | cut -d : -f 1)
+    CURRENT_EVENT_LINES=$(($EVENTS_ENDING_LINE_NUM - $EVENTS_BEGINNING_LINE_NUM))
 
     let LINE_DELTA=($EVENTS_ENDING_LINE_NUM - $EVENTS_BEGINNING_LINE_NUM)
 
     FILE_DATA=$(grep -Fa -B "$LINE_DELTA" "[/reading] : Events" $1)
 
-    echo $FILE_DATA "new_events_end_line_num: "$EVENTS_ENDING_LINE_NUM "new_eal_end_line_num: "$EAL_END_LINE_NUM
+    echo $FILE_DATA "new_events_line_count: "$CURRENT_EVENT_LINES "new_eal_end_line_num: "$EAL_END_LINE_NUM
 
     exit
 
@@ -69,8 +70,8 @@ else
 
         FILE_DATA=$(grep -Fa -B "$LINE_DELTA" "[/reading] : Events" $1)
 
-        echo $FILE_DATA
+        echo $CURRENT_EVENT_LINES "**" $PREV_EVENTS_LINE_END
         exit
     fi
-    echo $EVENTS_LINES_ADDED
+    
 fi

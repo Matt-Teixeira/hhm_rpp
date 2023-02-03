@@ -9,7 +9,6 @@ async function exec_events_delta_v2(jobId, sme, exec_path, args) {
     maxBuffer: 1024 * 1024 * 10,
   };
   try {
-    console.log(args);
     const { stdout: newData } = await execFile(exec_path, args, execOptions);
     if (newData == "") {
       console.log(
@@ -19,8 +18,6 @@ async function exec_events_delta_v2(jobId, sme, exec_path, args) {
         "In search for the last parsed line, empty string was returned"
       );
     }
-
-    console.log("NEW DATA : " + newData)
 
     if (newData.trim() === "false") {
       return false;
@@ -32,7 +29,7 @@ async function exec_events_delta_v2(jobId, sme, exec_path, args) {
 
     const data = {
       file_data: newData,
-      new_events_line_count: matches.groups.new_events_line_count,
+      new_events_line_count: matches.groups.new_events_line_count, 
       new_eal_end_line_num: matches.groups.new_eal_end_line_num
     }
 
