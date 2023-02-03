@@ -103,6 +103,11 @@ async function getRedisLine(sme, file) {
     const key = `${sme}.${file}`;
     let line = await redisClient.get(key);
     await redisClient.quit();
+    if (line === null) {
+      await log("warn", "NA", sme, "getRedisLine", "FN CALL", {
+        message: "Redis returned null. This may be a new system.",
+      });
+    }
     return line;
   } catch (error) {
     await log("error", "NA", sme, "getRedisLine", "FN CALL", {
@@ -127,15 +132,65 @@ async function updateRedisLine(sme, file, first_line) {
   }
 }
 
+async function getRedisLinePositions(sme, file) {
+  const redisClient = await initRedis();
+  try {
+    const key = `${sme}.${file}`;
+    let line = await redisClient.get(key);
+    await redisClient.quit();
+    if (line === null) {
+      await log("warn", "NA", sme, "getRedisLinePositions", "FN CALL", {
+        message: "Redis returned null. This may be a new system.",
+      });
+      return {
+        eal: null,
+        events: null
+      };
+    }
+
+    line = JSON.parse(line);
+    return line;
+  } catch (error) {
+    await log("error", "NA", sme, "getRedisLinePositions", "FN CALL", {
+      error: error,
+    });
+    await redisClient.quit();
+  }
+}
+
+async function updateRedisLinePositions(sme, file, eal, events) {
+  const redisClient = await initRedis();
+  try {
+    let testData = {
+      eal,
+      events,
+    };
+
+    testData = JSON.stringify(testData);
+
+    const setKey = `${sme}.${file}`;
+    await redisClient.set(setKey, testData);
+    await redisClient.quit();
+    return;
+  } catch (error) {
+    await log("error", "NA", sme, "updateRedisLinePositions", "FN CALL", {
+      error: error,
+    });
+    await redisClient.quit();
+  }
+}
+
 module.exports = {
   updateRedisFileSize,
   getCurrentFileSize,
   getRedisFileSize,
   passForProcessing,
   updateRedisLine,
-  getRedisLine
+  getRedisLine,
+  updateRedisLinePositions,
+  getRedisLinePositions
 };
 
-"I       2023-01-26      11:14:43        CT_PRF  4       Free Resources: DB: Local 2827 MB Exchangeboard 758 MB PixelPartition[store]: 86612 MB PixelPartition[scan]: 88745 MB PixelPartition[stamp]: 121064 MB IPT partition: 25675 MB phys MEM: 4095 MB"
+("I       2023-01-26      11:14:43        CT_PRF  4       Free Resources: DB: Local 2827 MB Exchangeboard 758 MB PixelPartition[store]: 86612 MB PixelPartition[scan]: 88745 MB PixelPartition[stamp]: 121064 MB IPT partition: 25675 MB phys MEM: 4095 MB");
 
 // "{\"host_date\":\"12-Jan-23\",\"host_time\":\"01:08\",\"capture_datetime\":\"2023-01-12T08:15:00Z\",\"system_id\":\"SME09782\",\"pg_table\":\"mmb_ge_mm3\"}"
