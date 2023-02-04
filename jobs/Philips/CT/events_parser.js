@@ -96,8 +96,6 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
       data.push(match.groups);
     }
 
-    return
-
     const mappedData = mapDataToSchema(data, philips_ct_events_schema);
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
