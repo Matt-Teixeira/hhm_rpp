@@ -47,11 +47,11 @@ const philips_re = {
   ct_eal_v_1:
     /"(?<host_date>.*?)\s(?<host_time>.*?)",(?<controller>.*?),"(?<data_type>.*?)",(?<log_number>.*?),(?<tm_stamp>.*?),"(?<err_type>.*?)",(?<err_number>.*?),(?<vxw_err_no>.*?),(?<file>.*?),(?<line>.*?),(?<param_1>.*?),(?<param_2>.*?),"?(?<info>.*?)"?,"(?<eal_time>.*?)"?[\r\n]/gs,
   ct_eal_v_2:
-    /"(?<host_date>.*?)\s(?<host_time>.*?)",(?<controller>.*?),"(?<data_type>.*?)",(?<log_number>.*?),(?<tm_stamp>.*?),"(?<err_type>.*?)",(?<err_number>.*?),(?<vxw_err_no>.*?),(?<file>.*?),(?<line>.*?),(?<param_1>.*?),(?<param_2>.*?),"?(?<info>.*?)"?,"(?<eal_time>.*?)"/gs,
+    /"(?<host_date>\d{4}\/\d{2}\/\d{2})\s(?<host_time>.*?)",(?<controller>.*?),"(?<data_type>.*?)",(?<log_number>.*?),(?<tm_stamp>.*?),"(?<err_type>.*?)",(?<err_number>.*?),(?<vxw_err_no>.*?),(?<file>.*?),(?<line>.*?),(?<param_1>.*?),(?<param_2>.*?),"?(?<info>.*?)(\s+)?"?,"(?<eal_time>.*?)"/g,
   ct_events_v_1:
     /"(?<type>.*?)",(?<level>.*?),"?(?<module>.*?)"?,(?<time_stamp>.*?),"(?<host_date>.*?)\s(?<host_time>.*?)","?(?<message>.*?)","?(?<eal>.*?)"?,"?(?<blob>.*?)"?,(?<na>.*?)"?,?"?(?<event_time>\d{2}\/\d{2}\/\d{2}\s\d{2}:\d{2}:\d{2})"/gs,
-  ct_events:
-    /"(?<type>.*?)",(?<level>.*?),"?(?<module>.*?)"?,(?<time_stamp>.*?),"(?<host_date>.*?)\s(?<host_time>.*?)","?(?<message>.*?)"?,"?(?<eal>.*?)"?,"?(?<blob>.*?),?"?,"(?<event_time>.*?)"/gs,
+  ct_events_v2:
+    /"(?<event_time>\d{2}\/\d{2}\/\d{2}\s\d{2}:\d{2}:\d{2})"\s"?(?<type>.*?)"?\s(?<level>\d+?)\s"?(?<module>.*?)"?\s(?<time_stamp>\d+?)\s"?(?<host_date>\d{4}\/\d{2}\/\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2}\.\d{3})"\s"?(?<message>.*?)"?\s"?(?<eal>.*?)"/g,
   mri_logcurrent:
     /((?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2}\.\d+)\s(?<row_type>\w+)\s(?<event_type>\w+)\s(?<subsystem>.*?)\s+(?<code_1>\w+)\s(?<code_2>\w+)(\s(?<group_1>\w+))?\s+(?<message>.*))|(Number\sof\sPackets\sCreated\s:\s(?<packets_created>\d*\.?\d*)|Total\sSize\sof\sData\sCreated\s:\s(?<data_created_value>\d*\.?\d*)\s[A-Z]+|Size\sof\sCopy\sDone\s:\s(?<size_copy_value>\d*\.?\d*)\s[A-Z]+|(?<data_8>>.*)|(?<reconstructor>[A-Za-z].*))/,
   cv: {
