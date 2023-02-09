@@ -12,11 +12,11 @@ const philips_ct_parsers = async (jobId, sysConfigData) => {
 
     for await (const file of sysConfigData.hhm_file_config) {
       switch (file.query) {
-        case "events":
-          await phil_ct_events(jobId, sysConfigData, file);
-          break;
         case "eal":
           await phil_ct_eal(jobId, sysConfigData, file);
+          break;
+        case "events":
+          await phil_ct_events(jobId, sysConfigData, file);
           break;
         default:
           break;

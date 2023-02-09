@@ -1,65 +1,96 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
+const fs = require("node:fs").promises;
 const { philips_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_ct_eal_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
-const exec_eal_delta = require("../../../read/exec-eal_delta");
-const exec_last_parsed_line = require("../../../read/exec-last_parsed_line");
 const {
-  getRedisLine,
-  updateRedisLine,
+  getRedisFileSize,
+  getCurrentFileSize,
+  updateRedisFileSize,
 } = require("../../../redis/redisHelpers");
+
+const execTail = require("../../../read/exec-tail");
 
 async function phil_ct_eal(jobId, sysConfigData, fileToParse) {
   const parsers = fileToParse.parsers;
   const sme = sysConfigData.id;
   const data = [];
 
-  const eal_delta_path =
-    "/home/matt-teixeira/hep3/hhm_rpp/read/sh/eal_delta.sh";
-  const eal_info_parsed_line_path =
-    "/home/matt-teixeira/hep3/hhm_rpp/read/sh/get_last_parsed_eal_line.sh";
+  const updateSizePath = "./read/sh/readFileSize.sh";
+  const fileSizePath = "./read/sh/readFileSize.sh";
+  const tailPath = "./read/sh/tail.sh";
 
   try {
     await log("info", jobId, sme, "phil_ct_eal", "FN CALL");
 
     const complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
 
-    //
+    // ** Start Data Acquisition
 
-    // Current line number of last line parsed in EALInfo block
-    const last_parsed_line = await getRedisLine(
+    // File size from last parse job. Stored in redis.
+    const prev_file_size = await getRedisFileSize(
       sysConfigData.id,
-      fileToParse.query
+      fileToParse.file_name
     );
 
-    console.log("EALInfo - LINE FROM REDIS: " + last_parsed_line);
+    console.log("EALInfo - Previous File Size: " + prev_file_size);
 
-    // Current line number of end of EALInfo block
-    const eal_delta = await exec_eal_delta(
-      jobId,
-      sysConfigData.id,
-      eal_delta_path,
-      [complete_file_path, last_parsed_line]
+    const current_file_size = await getCurrentFileSize(
+      sme,
+      fileSizePath,
+      sysConfigData.hhm_config.file_path,
+      fileToParse.file_name
     );
 
-    if (eal_delta === false) {
-      await log("warn", jobId, sme, "phil_ct_eal", "FN CALL", {
-        message: "Line delta indicates no new data or file is empty",
-        file: complete_file_path,
+    // Break out of function if no file found
+    if (current_file_size === null) {
+      await log("warn", "NA", sme, "ge_ct_gesys", "FN CALL", {
+        message: "File not found in dir",
       });
       return;
     }
 
-    //
+    console.log("EALInfo - Current File Size: " + current_file_size);
 
-    const eal_block_groups = eal_delta.matchAll(philips_re[parsers[0]]);
+    const delta = current_file_size - prev_file_size;
 
-    for (let match of eal_block_groups) {
+    console.log("EALInfo - Delta: " + delta);
+
+    // Conditionaly set fileData based on what's stored in redis or delta signed integer.
+    // If prev_file_size is null, system not in redis and likely not ran before.
+    // If prev_file_size is 0, log rotation set redis cache to 0.
+    // If delta is less than 0 (negitive number) file got smaller: i.e. log rotated without redis set to 0. Happens on system's end.
+    let fileData;
+    if (prev_file_size === null || prev_file_size === 0 || delta < 0) {
+      console.log("This needs to be read from file");
+      fileData = (await fs.readFile(complete_file_path)).toString();
+    }
+
+    if (prev_file_size > 0) {
+      await log("info", jobId, sme, "delta", "FN CALL", { delta: delta });
+
+      if (delta === 0) {
+        await log("warn", jobId, sme, "delta-0", "FN CALL");
+        return;
+      }
+
+      let tailDelta = await execTail(tailPath, delta, complete_file_path);
+
+      fileData = tailDelta.toString();
+    }
+
+    // ** End Data Acquisition
+
+    // ** Start rpp
+
+    const eal_block = fileData.matchAll(philips_re[parsers[0]]);
+
+    for await (const match of eal_block) {
       match.groups.system_id = sme;
       const dtObject = await generateDateTime(
         jobId,
@@ -77,22 +108,22 @@ async function phil_ct_eal(jobId, sysConfigData, fileToParse) {
     const mappedData = mapDataToSchema(data, philips_ct_eal_schema);
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
-    const last_line = await exec_last_parsed_line(jobId, sme, eal_info_parsed_line_path, [
-      complete_file_path,
-    ]);
-
     // last_line will be false if not captured. Do not insert into db until last line saved in redis
-    if (last_line) {
-      const insertSuccess = await bulkInsert(
-        jobId,
-        dataToArray,
-        sysConfigData,
-        fileToParse
+    const insertSuccess = await bulkInsert(
+      jobId,
+      dataToArray,
+      sysConfigData,
+      fileToParse
+    );
+
+    if (insertSuccess) {
+      console.log("SUCCESSFUL INSERT");
+      await updateRedisFileSize(
+        sme,
+        updateSizePath,
+        sysConfigData.hhm_config.file_path,
+        fileToParse.file_name
       );
-      if (insertSuccess) {
-        // Using .query value instead of file name due to conflict in same sme and file name format. Ex: "SME07847.Logger.output" for both data sets
-        await updateRedisLine(sme, fileToParse.query, last_line);
-      }
     }
   } catch (error) {
     console.log(error);

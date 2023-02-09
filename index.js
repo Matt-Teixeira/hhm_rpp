@@ -6,125 +6,8 @@ const pgPool = require("./db/pg-pool");
 const siemens_parser = require("./jobs/Siemens");
 const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");
+const { systems } = require("./test_data/systems");
 
-const filePaths = {
-  philips: {
-    ct_systems: ['SME07847', 'SME07846', 'SME07856', 'SME07867', 'SME02589', 'SME07859', 'SME10056', 'SME02471'],
-    cv_systems: [
-      "SME00445",
-      "SME00446",
-      "SME00782",
-      "SME00785",
-      "SME00786",
-      "SME01227",
-      "SME02548",
-      "SME02535",
-      "SME02552",
-      "SME07852",
-      "SME07855",
-      "SME07860",
-      "SME07862",
-      "SME08102",
-      "SME11259",
-      "SME11532",
-      "SME11925",
-      "SME11927",
-      "SME00886",
-      "SME00888",
-      "SME00892",
-      "SME11722",
-      //"SME11723", no such file or directory
-      //"SME11677", no such file or directory
-    ],
-    mri_systems: ["SME01138"],
-  },
-  ge: {
-    ct_systems: [
-      "SME12444",
-      "SME12446",
-      "SME12450",
-      "SME12445",
-      "SME12451",
-      "SME12412",
-      "SME12413",
-      "SME12443",
-      "SME00896",
-      "SME01091",
-      "SME00847",
-      "SME01076",
-      "SME01430",
-      "SME01429",
-      "SME01431",
-      "SME01432",
-      "SME01433",
-      "SME01434",
-      "SME01176",
-      "SME10071",
-    ],
-    cv_systems: ["SME00865", "SME00498", "SME01442"],
-    mri_systems: [
-      "SME02524",
-      //"SME02583", // +1 mil rows
-      "SME12424",
-      "SME01123",
-      "SME01096",
-      "SME01422",
-    ],
-  },
-  siemens: {
-    ct_systems: [
-      "SME00885",
-      "SME00894",
-      "SME01092",
-      "SME01129",
-      "SME00868",
-      "SME01112",
-      "SME00854",
-      "SME00855",
-      "SME00871",
-    ],
-    mri_systems: ["SME01118", "SME01136", "SME08716", "SME01101"],
-    cv_systems: ["SME00884", "SME01440", "SME01444"],
-  },
-};
-
-const crothal_demo = [
-  "SME00444", // Phil CV
-  "SME00445",
-  "SME00446",
-  "SME02524",
-  "SME07761", // Phil CV
-  "SME00782",
-  "SME00784", // Phil CV
-  "SME00785",
-  "SME00786",
-  "SME01227",
-  "SME02548",
-  "SME02583",
-  "SME02535",
-  "SME02377", // Phil CV
-  "SME02378", // Phil CV
-  "SME02579", // Phil CV
-  "SME02580", // Phil CV
-  "SME02552",
-  "SME07852",
-  "SME07855",
-  "SME07860",
-  "SME07862",
-  "SME07864", // Phil CV
-  "SME08102",
-  "SME12444",
-  "SME12446",
-  "SME12450",
-  "SME12443",
-  "SME12424",
-  "SME12413",
-  "SME12412",
-  "SME12451",
-  "SME12445",
-];
- 
-/* 
 const determineManufacturer = async (jobId, sme) => {
   try {
     let queryString =
@@ -173,9 +56,10 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot([...filePaths.ge.ct_systems, ...filePaths.ge.cv_systems, ...filePaths.ge.mri_systems, ...filePaths.philips.ct_systems, ...filePaths.philips.cv_systems]); //...filePaths.siemens.ct_systems, ...filePaths.ge.ct_systems, ...filePaths.ge.cv_systems, ...filePaths.ge.mri_systems
- */
+onBoot([...systems.ge.ct_systems, ...systems.ge.cv_systems, ...systems.ge.mri_systems, ...systems.philips.ct_systems, ...systems.philips.cv_systems]);
 
+
+/* 
 const determineManufacturer = async (jobId, system) => {
   try {
     await log("info", jobId, system.id, "determineManufacturer", "FN CALL", {
@@ -239,3 +123,4 @@ const onBoot = async () => {
 };
 
 onBoot();
+ */

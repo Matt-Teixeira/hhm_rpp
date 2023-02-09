@@ -208,13 +208,11 @@ module.exports = queries = {
       host_time,
       message,
       eal,
-      blob,
-      na,
       event_time,
       host_datetime
     )
     SELECT * FROM UNNEST (
-      $1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[], $7::text[], $8::text[], $9::text[], $10::text[], $11::text[], $12::text[], $13::timestamptz[]
+      $1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[], $7::text[], $8::text[], $9::text[], $10::text[], $11::timestamptz[]
     )
       `,
     },
