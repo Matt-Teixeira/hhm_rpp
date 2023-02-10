@@ -56,7 +56,7 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot([...systems.ge.ct_systems, ...systems.ge.cv_systems, ...systems.ge.mri_systems, ...systems.philips.ct_systems, ...systems.philips.cv_systems]);
+onBoot(systems.philips.ct_systems);
 
 
 /* 

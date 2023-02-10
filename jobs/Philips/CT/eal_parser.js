@@ -1,101 +1,52 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
-const fs = require("node:fs").promises;
-const { philips_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_ct_eal_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
-const {
-  getRedisFileSize,
-  getCurrentFileSize,
-  updateRedisFileSize,
-} = require("../../../redis/redisHelpers");
-
-const execTail = require("../../../read/exec-tail");
-
-async function phil_ct_eal(jobId, sysConfigData, fileToParse) {
-  const parsers = fileToParse.parsers;
-  const sme = sysConfigData.id;
+async function phil_ct_eal(system) {
   const data = [];
 
-  const updateSizePath = "./read/sh/readFileSize.sh";
-  const fileSizePath = "./read/sh/readFileSize.sh";
-  const tailPath = "./read/sh/tail.sh";
-
   try {
-    await log("info", jobId, sme, "phil_ct_eal", "FN CALL");
-
-    const complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
+    await log(
+      "info",
+      system.jobId,
+      system.sysConfigData.id,
+      "phil_ct_eal",
+      "FN CALL"
+    );
 
     // ** Start Data Acquisition
-
-    // File size from last parse job. Stored in redis.
-    const prev_file_size = await getRedisFileSize(
-      sysConfigData.id,
-      fileToParse.file_name
-    );
-
-    console.log("EALInfo - Previous File Size: " + prev_file_size);
-
-    const current_file_size = await getCurrentFileSize(
-      sme,
-      fileSizePath,
-      sysConfigData.hhm_config.file_path,
-      fileToParse.file_name
-    );
+    await system.getRedisFileSize();
+    await system.getCurrentFileSize();
+    system.getFileSizeDelta();
 
     // Break out of function if no file found
-    if (current_file_size === null) {
-      await log("warn", "NA", sme, "ge_ct_gesys", "FN CALL", {
+    if (system.current_file_size === null) {
+      await log("warn", system.jobId, system.sme, "phil_ct_eal", "FN CALL", {
         message: "File not found in dir",
       });
       return;
     }
 
-    console.log("EALInfo - Current File Size: " + current_file_size);
+    await system.getFileData();
 
-    const delta = current_file_size - prev_file_size;
-
-    console.log("EALInfo - Delta: " + delta);
-
-    // Conditionaly set fileData based on what's stored in redis or delta signed integer.
-    // If prev_file_size is null, system not in redis and likely not ran before.
-    // If prev_file_size is 0, log rotation set redis cache to 0.
-    // If delta is less than 0 (negitive number) file got smaller: i.e. log rotated without redis set to 0. Happens on system's end.
-    let fileData;
-    if (prev_file_size === null || prev_file_size === 0 || delta < 0) {
-      console.log("This needs to be read from file");
-      fileData = (await fs.readFile(complete_file_path)).toString();
-    }
-
-    if (prev_file_size > 0) {
-      await log("info", jobId, sme, "delta", "FN CALL", { delta: delta });
-
-      if (delta === 0) {
-        await log("warn", jobId, sme, "delta-0", "FN CALL");
-        return;
-      }
-
-      let tailDelta = await execTail(tailPath, delta, complete_file_path);
-
-      fileData = tailDelta.toString();
-    }
+    if (system.file_data === null) return;
 
     // ** End Data Acquisition
 
     // ** Start rpp
 
-    const eal_block = fileData.matchAll(philips_re[parsers[0]]);
+    const matches = system.getMatchBlocks();
 
-    for await (const match of eal_block) {
-      match.groups.system_id = sme;
+    for await (const match of matches) {
+      match.groups.system_id = system.sme;
       const dtObject = await generateDateTime(
-        jobId,
+        system.jobId,
         match.groups.system_id,
-        fileToParse.pg_table,
+        system.fileToParse.pg_table,
         match.groups.host_date,
         match.groups.host_time
       );
@@ -108,28 +59,29 @@ async function phil_ct_eal(jobId, sysConfigData, fileToParse) {
     const mappedData = mapDataToSchema(data, philips_ct_eal_schema);
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
-    // last_line will be false if not captured. Do not insert into db until last line saved in redis
     const insertSuccess = await bulkInsert(
-      jobId,
+      system.jobId,
       dataToArray,
-      sysConfigData,
-      fileToParse
+      system.sysConfigData,
+      system.fileToParse
     );
 
     if (insertSuccess) {
       console.log("SUCCESSFUL INSERT");
-      await updateRedisFileSize(
-        sme,
-        updateSizePath,
-        sysConfigData.hhm_config.file_path,
-        fileToParse.file_name
-      );
+      await system.updateRedisFileSize();
     }
   } catch (error) {
     console.log(error);
-    await log("error", jobId, sme, "phil_ct_eal", "FN CALL", {
-      error,
-    });
+    await log(
+      "error",
+      system.jobId,
+      system.sysConfigData.id,
+      "phil_ct_eal",
+      "FN CALL",
+      {
+        error,
+      }
+    );
   }
 }
 
