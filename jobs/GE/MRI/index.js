@@ -2,6 +2,7 @@
 require("dotenv").config();
 const { log } = require("../../../logger");
 const ge_mri_gesys = require("./gesys_parser");
+const GE_CT_MRI = require("../../../data_acquisition/GE_CT_MRI");
 
 const ge_mri_parsers = async (jobId, sysConfigData) => {
   try {
@@ -9,7 +10,8 @@ const ge_mri_parsers = async (jobId, sysConfigData) => {
     for await (const file of sysConfigData.hhm_file_config) {
       switch (file.query) {
         case "gesys":
-          await ge_mri_gesys(jobId, sysConfigData, file);
+          const system = new GE_CT_MRI(sysConfigData, file, jobId);
+          await ge_mri_gesys(system);
           break;
         default:
           break;

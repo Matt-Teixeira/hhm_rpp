@@ -56,8 +56,7 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot(systems.philips.ct_systems);
-
+onBoot(["SME00865"]);
 
 /* 
 const determineManufacturer = async (jobId, system) => {
