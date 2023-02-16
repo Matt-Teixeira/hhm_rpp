@@ -8,7 +8,7 @@ const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");
 const { systems } = require("./test_data/systems");
 
-/* const determineManufacturer = async (jobId, sme) => {
+const determineManufacturer = async (jobId, sme) => {
   try {
     let queryString =
       "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE id = $1";
@@ -56,9 +56,9 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot(["SME00865"]);
- */
-
+onBoot(["SME01138"]);
+ 
+/* 
 const determineManufacturer = async (jobId, system) => {
   try {
     await log("info", jobId, system.id, "determineManufacturer", "FN CALL", {
@@ -124,3 +124,4 @@ const onBoot = async () => {
 
 onBoot();
 
+ */

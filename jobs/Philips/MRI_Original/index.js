@@ -9,18 +9,8 @@ const phil_mri_rmmu_magnet = require("./rmmu_magnet");
 const phil_mri_monitor_jsonb = require("./insert_jsonb_data");
 const phil_mri_monitor_display = require("./insert_display_data");
 const phil_mri_rmmu_history = require("./rmmu_history");
-const PHILIPS_MRI = require("../../../data_acquisition/PHILIPS_MRI");
 
 const philips_mri_parsers = async (jobId, sysConfigData) => {
-  const system = new PHILIPS_MRI(jobId, sysConfigData);
-  //console.log(system.sysConfigData);
-  //console.log("\n ************* \n");
-  //console.log(system.sysConfigData.hhm_file_config)
-  //console.log("\n ************* \n");
-  /*  for(let i of system.sysConfigData.hhm_file_config) {
-    console.log("\n *** \n");
-    console.log(i)
-  } */
   try {
     await log(
       "info",
@@ -30,36 +20,27 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
       "FN CALL"
     );
 
-    for await (const directory of system.sysConfigData.hhm_file_config) {
-      let dir = Object.keys(directory)[0];
-      switch (dir) {
+    for await (const file of sysConfigData.hhm_file_config) {
+      switch (file.query) {
         case "logcurrent":
-          //await phil_mri_logcurrent(jobId, sysConfigData, file);
+          await phil_mri_logcurrent(jobId, sysConfigData, file);
           break;
         case "rmmu_short":
-          //await phil_mri_rmmu_short(jobId, sysConfigData, file);
+          await phil_mri_rmmu_short(jobId, sysConfigData, file);
           break;
         case "rmmu_long":
-          //await phil_mri_rmmu_long(jobId, sysConfigData, file);
+          await phil_mri_rmmu_long(jobId, sysConfigData, file);
           break;
         case "rmmu_magnet":
-          //await phil_mri_rmmu_magnet(jobId, sysConfigData, file);
-          break;
-        case "monitoring":
-          const json_data = await phil_mri_monitor_jsonb(
-            system,
-            directory
-          );
+          await phil_mri_rmmu_magnet(jobId, sysConfigData, file);
           break;
         default:
           break;
       }
     }
 
-    return;
-
     // Verify that this Phil MRI has a monitoring folder. If so, parse data from it.
-    const monitoring_file_path = `${sysConfigData.hhm_config.file_path}/monitoring`;
+   const monitoring_file_path = `${sysConfigData.hhm_config.file_path}/monitoring`;
     let files = await fs.readdir(monitoring_file_path);
 
     if (files.length > 0) {

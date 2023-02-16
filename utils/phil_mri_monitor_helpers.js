@@ -125,11 +125,11 @@ const process_file_config = {
   },
   monitor_cryocompressor_palm: {
     type: "bool",
-    col: "cryo_comp_press_alarm_value",
+    col: "cryo_comp_press_alarm_state",
   },
   monitor_cryocompressor_talm: {
     type: "bool",
-    col: "cryo_comp_temp_alarm_value",
+    col: "cryo_comp_temp_alarm_state",
   },
   monitor_magnet_quench: {
     type: "bool",

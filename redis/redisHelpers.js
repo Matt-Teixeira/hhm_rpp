@@ -1,5 +1,3 @@
-("use strict");
-require("dotenv").config({ path: "../.env" });
 const { log } = require("../logger");
 const execReadFileSize = require("../read/exec-readFileSize");
 const initRedis = require(".");
