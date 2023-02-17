@@ -12,12 +12,12 @@ const phil_mri_rmmu_history = require("./rmmu_history");
 const PHILIPS_MRI = require("../../../data_acquisition/PHILIPS_MRI");
 
 const philips_mri_parsers = async (jobId, sysConfigData) => {
-  const system = new PHILIPS_MRI(jobId, sysConfigData);
-  //console.log(system.sysConfigData);
+  const System = new PHILIPS_MRI(jobId, sysConfigData);
+  //console.log(System.sysConfigData);
   //console.log("\n ************* \n");
-  //console.log(system.sysConfigData.hhm_file_config)
+  //console.log(System.sysConfigData.hhm_file_config)
   //console.log("\n ************* \n");
-  /*  for(let i of system.sysConfigData.hhm_file_config) {
+  /*  for(let i of System.sysConfigData.hhm_file_config) {
     console.log("\n *** \n");
     console.log(i)
   } */
@@ -30,7 +30,7 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
       "FN CALL"
     );
 
-    for await (const directory of system.sysConfigData.hhm_file_config) {
+    for await (const directory of System.sysConfigData.hhm_file_config) {
       let dir = Object.keys(directory)[0];
       switch (dir) {
         case "logcurrent":
@@ -47,17 +47,17 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
           break;
         case "monitoring":
           const json_data = await phil_mri_monitor_jsonb(
-            system,
+            System,
             directory
           );
+          console.log(json_data);
+          //await phil_mri_monitor_display(System.jobId, System.sysConfigData, json_data);
           break;
         default:
           break;
       }
     }
-
-    return;
-
+return
     // Verify that this Phil MRI has a monitoring folder. If so, parse data from it.
     const monitoring_file_path = `${sysConfigData.hhm_config.file_path}/monitoring`;
     let files = await fs.readdir(monitoring_file_path);

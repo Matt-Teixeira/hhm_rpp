@@ -12,9 +12,10 @@ async function insertJsonB(jobId, value) {
     const date = new Date();
     value.unshift(date);
     const queryString =
-      "INSERT INTO hhm.philips_mri_monitor(capture_time, equipment_id, monitoring_data) VALUES($1, $2, $3)";
+      "INSERT INTO log.philips_mri_json(capture_time, system_id, monitoring_data) VALUES($1, $2, $3)";
     return await pgPool.query(queryString, value);
   } catch (error) {
+    console.log(error);
     await log("error", jobId, sme, "insertJsonB", "FN CALL", {
       sme: sme,
     });

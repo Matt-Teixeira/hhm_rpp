@@ -12,10 +12,8 @@ async function exec_monitor_delta(jobId, exec_path, args) {
   try {
     const { stdout: newData } = await execFile(exec_path, args, execOptions);
 
-    /*    
-    console.log("NEW DATA:");
-    console.log(newData);
-     */
+    if(newData === '') return null;
+    
     return newData;
   } catch (error) {
     console.log(error);
