@@ -6,6 +6,7 @@ const {
   updateTable,
   insertData,
 } = require("../../../utils/phil_mri_monitor_helpers");
+const {convertDT} = require("../../../utils/dates");
 
 async function minValue(jobId, sme, data, column) {
   try {
@@ -22,7 +23,7 @@ async function minValue(jobId, sme, data, column) {
 
     // Aggregation bucket
     let bucket = [];
-    let prevData = data[0].host_date; //Set to first date in file data(file capture groups)
+    let prevData = data[data.length - 1].host_date; //Set to first date in file data(file capture groups)
 
     // loop through each observation in the array of match groups. Seperated by column name.
     for await (const obs of data) {
@@ -46,7 +47,8 @@ async function minValue(jobId, sme, data, column) {
           bucket.push(obs[column]); // Begin by pushing new data to our aggregation bucket
         } else {
           // If date dose not exist: INSERT new row
-          await insertData(jobId, column, [sme, prevData, minValue]);
+          let dtObj = await convertDT(prevData);
+          await insertData(jobId, column, [sme, dtObj, prevData, minValue]);
           bucket = [];
           prevData = obs.host_date;
           bucket.push(obs[column]);
@@ -61,14 +63,16 @@ async function minValue(jobId, sme, data, column) {
       await updateTable(jobId, column, [
         minValue,
         sme,
-        data[data.length - 1].host_date,
+        data[0].host_date,
       ]);
     } else {
       // If date dose not exist: INSERT new row
       const minValue = Math.min(...bucket);
+      let dtObj = await convertDT(prevData);
       await insertData(jobId, column, [
         sme,
-        data[data.length - 1].host_date,
+        dtObj,
+        data[0].host_date,
         minValue,
       ]);
     }

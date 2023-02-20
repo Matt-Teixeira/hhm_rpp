@@ -35,6 +35,9 @@ class PHILIPS_MRI {
   async get_redis_line(file) {
     let last_line = await getRedisLine(this.sme, file.file_name);
 
+    /* console.log("\n" + file.file_name);
+    console.log("LAST LINE FROM REDIS" + last_line); */
+
     if (last_line === null || last_line === "") return null;
 
     last_line = last_line.match(/\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}/)[0];
