@@ -7,7 +7,7 @@ const {
 const exec_tail_last_line = require("../read/exec-tail-last-line");
 const exec_monitor_delta = require("../read/exec-monitor_delta");
 
-class PHILIPS_MRI {
+class PHILIPS_MRI_MONITORING {
   constructor(jobId, sysConfigData) {
     (this.jobId = jobId), (this.sysConfigData = sysConfigData);
     this.sme = this.sysConfigData.id;
@@ -34,9 +34,6 @@ class PHILIPS_MRI {
 
   async get_redis_line(file) {
     let last_line = await getRedisLine(this.sme, file.file_name);
-
-    /* console.log("\n" + file.file_name);
-    console.log("LAST LINE FROM REDIS" + last_line); */
 
     if (last_line === null || last_line === "") return null;
 
@@ -73,9 +70,12 @@ class PHILIPS_MRI {
     }
     return delta.toString();
   }
+
+  // Logcurrent.log
+
 }
 
-module.exports = PHILIPS_MRI;
+module.exports = PHILIPS_MRI_MONITORING;
 
 // grep -P -na "2023-01-03\t15:38:35\t0\t00000\t " monitor_magnet_quench.dat | cut -d : -f 1
 

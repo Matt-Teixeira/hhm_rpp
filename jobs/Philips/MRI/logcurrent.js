@@ -1,123 +1,137 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
-const fs = require("node:fs");
-const readline = require("readline");
 const { philips_re } = require("../../../parse/parsers");
-const groupsToArrayObj = require("../../../parse/prep-groups-for-array");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { phil_mri_logcurrent_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const { blankLineTest } = require("../../../utils/regExHelpers");
-const { convertDates } = require("../../../utils/dates");
-const constructFilePath = require("../../../utils/constructFilePath");
-const {
-  getCurrentFileSize,
-  getRedisFileSize,
-  updateRedisFileSize,
-} = require("../../../redis/redisHelpers");
-const execTail = require("../../../read/exec-tail");
+const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
-async function phil_mri_logcurrent(jobId, sysConfigData, fileToParse) {
-  const dateTimeVersion = fileToParse.datetimeVersion;
-  const sme = sysConfigData.id;
-
-  const updateSizePath = "./read/sh/readFileSize.sh";
-  const fileSizePath = "./read/sh/readFileSize.sh";
-  const tailPath = "./read/sh/tail.sh";
-
+async function phil_mri_logcurrent(fileToParse, System_Logcurrent) {
+  const parsers = fileToParse.logcurrent.parsers;
   const data = [];
 
   try {
-    await log("info", jobId, sme, "phil_mri_logcurrent", "FN CALL");
-
-    const complete_file_path = await constructFilePath(
-      sysConfigData.hhm_config.file_path,
-      fileToParse,
-      fileToParse.regEx
+    await log(
+      "info",
+      System_Logcurrent.jobId,
+      System_Logcurrent.sme,
+      "phil_mri_logcurrent",
+      "FN CALL"
     );
 
-    const prevFileSize = await getRedisFileSize(sme, fileToParse.file_name);
-    console.log("Redis File Size: " + prevFileSize);
+    // ** Start Data Acquisition
 
-    let rl;
-    if (prevFileSize === null) {
-      console.log("This needs to be read from file");
-      rl = readline.createInterface({
-        input: fs.createReadStream(complete_file_path),
-        crlfDelay: Infinity,
-      });
-    }
+    await System_Logcurrent.getRedisFileSize();
 
-    if (prevFileSize > 0 && prevFileSize !== null) {
-      console.log("File Size prev saved in Redis");
+    await System_Logcurrent.getCurrentFileSize();
 
-      const currentFileSize = await getCurrentFileSize(
-        sme,
-        fileSizePath,
-        sysConfigData.hhm_config.file_path,
-        fileToParse.file_name
-      );
-      console.log("CURRENT FILE SIZE: " + currentFileSize);
+    await System_Logcurrent.getFileData();
 
-      const delta = currentFileSize - prevFileSize;
-      await log("info", jobId, sme, "delta", "FN CALL", { delta: delta });
-      console.log("DELTA: " + delta);
+    if (System_Logcurrent.file_data === null) return;
 
-      if (delta === 0) {
-        await log("warn", jobId, sme, "delta-0", "FN CALL");
-        return;
-      }
+    // ** End Data Acquisition
 
-      let tailDelta = await execTail(tailPath, delta, complete_file_path);
+    // ** Begin Parse
 
-      rl = tailDelta.toString().split(/(?:\r\n|\r|\n)/g);
-      console.log(rl);
-    }
+    for await (const line of System_Logcurrent.file_data) {
+      let matches = line.match(philips_re[parsers[0]]);
 
-    for await (const line of rl) {
-      let matches = line.match(philips_re.mri_logcurrent);
-
+      // Account for lines that are blank (\n)
       if (matches === null) {
         const isNewLine = blankLineTest(line);
         if (isNewLine) {
           continue;
         } else {
-          await log("error", jobId, sme, "Not_New_Line", "FN CALL", {
-            message: "This is not a blank new line - Bad Match",
-            line,
-          });
+          await log(
+            "error",
+            System_Logcurrent.jobId,
+            System_Logcurrent.sme,
+            "Not_New_Line",
+            "FN CALL",
+            {
+              message: "This is not a blank or new line - Bad Match",
+              line,
+            }
+          );
         }
       } else {
-        convertDates(matches.groups, dateTimeVersion);
-        const matchData = groupsToArrayObj(sme, matches.groups);
-        data.push(matchData);
+        matches.groups.system_id = System_Logcurrent.sme;
+        const dtObject = await generateDateTime(
+          System_Logcurrent.jobId,
+          matches.groups.system_id,
+          System_Logcurrent.fileToParse.logcurrent.pg_table,
+          matches.groups.host_date,
+          matches.groups.host_time
+        );
+
+        // Matches astray data no related to anything. Skip this iteration
+        if (
+          !!matches.groups.reconstructor ||
+          !!matches.groups.data_created_value ||
+          !!matches.groups.packets_created ||
+          !!matches.groups.size_copy_value
+        ) {
+          continue;
+        }
+
+        if (dtObject === null) {
+          await log(
+            "warn",
+            System_Logcurrent.jobId,
+            System_Logcurrent.sme,
+            "date_time",
+            "FN CALL",
+            {
+              message: "date_time object null",
+              date: matches.groups.host_date,
+              time: matches.groups.host_time,
+              line
+            }
+          );
+        }
+
+        matches.groups.host_datetime = dtObject;
+
+        data.push(matches.groups);
       }
     }
 
-    // homogenize data to prep for insert to db
+    // Homogenize data to prep for insert to db
     const mappedData = mapDataToSchema(data, phil_mri_logcurrent_schema);
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
+    // ** End Parse
+
+    // ** Begin Persist
+
     const insertSuccess = await bulkInsert(
-      jobId,
+      System_Logcurrent.jobId,
       dataToArray,
-      sysConfigData,
-      fileToParse
+      System_Logcurrent.sysConfigData,
+      System_Logcurrent.fileToParse.logcurrent
     );
+
+    // ** End Persist
+
+    // Update Redis Cache
+
     if (insertSuccess) {
-      await updateRedisFileSize(
-        sme,
-        updateSizePath,
-        sysConfigData.hhm_config.file_path,
-        fileToParse.file_name
-      );
+      await System_Logcurrent.updateRedisFileSize();
     }
   } catch (error) {
-    await log("error", jobId, sme, "phil_mri_logcurrent", "FN CALL", {
-      sme: sme,
-      error: error.message,
-    });
+    console.log(error);
+    await log(
+      "error",
+      System_Logcurrent.jobId,
+      System_Logcurrent.sme,
+      "phil_mri_logcurrent",
+      "FN CALL",
+      {
+        error: error,
+      }
+    );
   }
 }
 

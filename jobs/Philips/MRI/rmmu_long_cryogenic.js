@@ -1,27 +1,65 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
-const fs = require("node:fs").promises;
+const fsp = require("node:fs").promises;
 const { philips_re } = require("../../../parse/parsers");
 const groupsToArrayObj = require("../../../parse/prep-groups-for-array");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { phil_mri_rmmu_long_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
-const {convertDates} = require("../../../utils/dates");
+const { convertDates } = require("../../../utils/dates");
 const constructFilePath = require("../../../utils/constructFilePath");
 const {
   isFileModified,
   updateFileModTime,
 } = require("../../../utils/isFileModified");
 
-async function phil_mri_rmmu_long(jobId, sysConfigData, fileToParse) {
+async function phil_mri_rmmu_long(jobId, sysConfigData, fileToParse, System) {
   const dateTimeVersion = fileToParse.datetimeVersion;
   const sme = sysConfigData.id;
 
   const data = [];
-
   try {
     await log("info", jobId, sme, "phil_mri_rmmu_long", "FN CALL");
+
+    // ** Start Data Acquisition
+
+    console.log(fileToParse);
+    console.log(System);
+    await System.get_directory_files();
+    console.log(System.files_in_dir);
+    if (System.files_in_dir.length === 0) {
+      await log(
+        "warn",
+        System.jobId,
+        System.sme,
+        "phil_mri_rmmu_long",
+        "FN CALL",
+        {
+          message: "Directory is empty",
+          directory: System.directory_path,
+        }
+      );
+      return;
+    }
+
+    // ** End Data Acquisition
+
+    // ** Begin Parse
+
+    for await (const file of System.files_in_dir) {
+      const complete_file_path = `${System.directory_path}/${file}`;
+      console.log("\n" + complete_file_path);
+      const fileData = (await fsp.readFile(complete_file_path)).toString();
+
+      let matches = fileData.matchAll(philips_re.mri.rmmu_long_re);
+
+      for await (const match of matches) {
+        console.log(match.groups)
+      }
+    }
+
+    return;
 
     const complete_file_path = await constructFilePath(
       sysConfigData.hhm_config.file_path,
@@ -68,6 +106,7 @@ async function phil_mri_rmmu_long(jobId, sysConfigData, fileToParse) {
       await updateFileModTime(jobId, sme, complete_file_path, fileToParse);
     }
   } catch (error) {
+    console.log(error);
     await log("error", jobId, sme, "phil_mri_rmmu_long", "FN CALL", {
       sme: sme,
       error: error.message,
