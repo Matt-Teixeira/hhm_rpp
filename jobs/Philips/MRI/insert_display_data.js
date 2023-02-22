@@ -1,8 +1,8 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
-const initialUpdate = require("../../../persist/phil_mri_monitor_data/initialUpdate");
-const updatePhilMriTable = require("../../../persist/phil_mri_monitor_data/updateTable/updatePhilMriTable");
+const initialUpdate = require("../../../processing/phil_mri_monitor_data/initialUpdate");
+const updatePhilMriTable = require("../../../processing/phil_mri_monitor_data/updateTable/updatePhilMriTable");
 const { getSystemDbData } = require("../../../utils/phil_mri_monitor_helpers");
 
 async function insertDisplayData(jobId, sysConfigData, data) {

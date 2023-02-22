@@ -2,7 +2,7 @@
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
 const { philips_re } = require("../../../parse/parsers");
-const insertJsonB = require("../../../persist/phil_mri_monitor_data/bulk_jsonb_insert");
+const insertJsonB = require("../../../processing/phil_mri_monitor_data/bulk_jsonb_insert");
 
 async function phil_mri_monitor(System, directory) {
   try {
@@ -91,7 +91,7 @@ async function phil_mri_monitor(System, directory) {
         "phil_mri_monitor",
         "FN CALL",
         {
-          message: "No keys found in json object",
+          message: "No new monitoring data found.",
         }
       );
       return;
@@ -130,11 +130,4 @@ monitor_magnet_quench -
 monitor_System_HumTechRoom
 monitor_System_TempTechRoom
 monitor_magnet_pressure_avg
-
-
-console.log("*********");
-        console.log("\nLast Line From Redis: " + file.file_name);
-        console.log(last_line + "\n");
-        console.log(file_delta);
-        console.log(jsonData);
 */

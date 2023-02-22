@@ -58,7 +58,6 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
             directory.rmmu_magnet,
             jobId
           );
-          console.log(Rmmu_Magnet_System);
           await phil_mri_rmmu_magnet(directory.rmmu_magnet, Rmmu_Magnet_System);
           break;
         case "monitoring":
