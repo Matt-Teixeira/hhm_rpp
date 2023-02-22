@@ -27,7 +27,6 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
       let dir = Object.keys(directory)[0];
       switch (dir) {
         case "logcurrent":
-          break;
           const System_Logcurrent = new PHILIPS_MRI_LOGCURRENT(
             sysConfigData,
             directory,
@@ -37,7 +36,6 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
           await phil_mri_logcurrent(directory, System_Logcurrent);
           break;
         case "rmmu_short":
-          break
           const Rmmu_Short_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory.rmmu_short,
@@ -47,7 +45,6 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
           await phil_mri_rmmu_short(directory.rmmu_short, Rmmu_Short_System);
           break;
         case "rmmu_long":
-          break;
           const Rmmu_Long_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory.rmmu_long,
@@ -61,11 +58,10 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
             directory.rmmu_magnet,
             jobId
           );
-          console.log(Rmmu_Magnet_System)
+          console.log(Rmmu_Magnet_System);
           await phil_mri_rmmu_magnet(directory.rmmu_magnet, Rmmu_Magnet_System);
           break;
         case "monitoring":
-          break;
           const System_Monitor = new PHILIPS_MRI_MONITORING(
             jobId,
             sysConfigData
