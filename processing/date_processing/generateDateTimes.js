@@ -1,11 +1,38 @@
 const { log } = require("../../logger");
 const dateTimeTemplate = require("./dateTimeTemplate");
 const { remove__ } = require("./incoming_date_cleaning");
-
+//philips_mri_rmmu_long
 async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
   try {
     let date;
     switch (pgTable) {
+      case "philips_mri_rmmu_magnet":
+        date = await dateTimeTemplate(
+          jobId,
+          sme,
+          `${hostDate}${hostTime + "0"}`,
+          "yyyy-MM-ddHH:mm:ss.SSS",
+          "America/New_York"
+        );
+        break;
+      case "philips_mri_rmmu_short":
+        date = await dateTimeTemplate(
+          jobId,
+          sme,
+          `${hostDate}${hostTime + "0"}`,
+          "yyyy-MM-ddHH:mm:ss.SSS",
+          "America/New_York"
+        );
+        break;
+      case "philips_mri_rmmu_long":
+        date = await dateTimeTemplate(
+          jobId,
+          sme,
+          `${hostDate}${hostTime + "0"}`,
+          "yyyy-MM-ddHH:mm:ss.SSS",
+          "America/New_York"
+        );
+        break;
       case "philips_mri_logcurrent":
         date = await dateTimeTemplate(
           jobId,

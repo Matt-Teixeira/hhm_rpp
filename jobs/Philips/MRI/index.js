@@ -37,18 +37,32 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
           await phil_mri_logcurrent(directory, System_Logcurrent);
           break;
         case "rmmu_short":
-          //await phil_mri_rmmu_short(jobId, sysConfigData, file);
+          break
+          const Rmmu_Short_System = new PHILIPS_MRI_RMMU(
+            sysConfigData,
+            directory.rmmu_short,
+            jobId
+          );
+
+          await phil_mri_rmmu_short(directory.rmmu_short, Rmmu_Short_System);
           break;
         case "rmmu_long":
+          break;
           const Rmmu_Long_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory.rmmu_long,
             jobId
           );
-          await phil_mri_rmmu_long(jobId, sysConfigData, directory, Rmmu_Long_System);
+          await phil_mri_rmmu_long(directory.rmmu_long, Rmmu_Long_System);
           break;
         case "rmmu_magnet":
-          //await phil_mri_rmmu_magnet(jobId, sysConfigData, file);
+          const Rmmu_Magnet_System = new PHILIPS_MRI_RMMU(
+            sysConfigData,
+            directory.rmmu_magnet,
+            jobId
+          );
+          console.log(Rmmu_Magnet_System)
+          await phil_mri_rmmu_magnet(directory.rmmu_magnet, Rmmu_Magnet_System);
           break;
         case "monitoring":
           break;
@@ -75,6 +89,7 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
       }
     }
   } catch (error) {
+    console.log(error);
     await log(
       "error",
       jobId,

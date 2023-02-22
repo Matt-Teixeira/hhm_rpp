@@ -8,34 +8,34 @@ const bulkInsert = require("../../../persist/queryBuilder");
 const { blankLineTest } = require("../../../utils/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
-async function phil_mri_logcurrent(fileToParse, System_Logcurrent) {
+async function phil_mri_logcurrent(fileToParse, System) {
   const parsers = fileToParse.logcurrent.parsers;
   const data = [];
 
   try {
     await log(
       "info",
-      System_Logcurrent.jobId,
-      System_Logcurrent.sme,
+      System.jobId,
+      System.sme,
       "phil_mri_logcurrent",
       "FN CALL"
     );
 
     // ** Start Data Acquisition
 
-    await System_Logcurrent.getRedisFileSize();
+    await System.getRedisFileSize();
 
-    await System_Logcurrent.getCurrentFileSize();
+    await System.getCurrentFileSize();
 
-    await System_Logcurrent.getFileData();
+    await System.getFileData();
 
-    if (System_Logcurrent.file_data === null) return;
+    if (System.file_data === null) return;
 
     // ** End Data Acquisition
 
     // ** Begin Parse
 
-    for await (const line of System_Logcurrent.file_data) {
+    for await (const line of System.file_data) {
       let matches = line.match(philips_re[parsers[0]]);
 
       // Account for lines that are blank (\n)
@@ -46,8 +46,8 @@ async function phil_mri_logcurrent(fileToParse, System_Logcurrent) {
         } else {
           await log(
             "error",
-            System_Logcurrent.jobId,
-            System_Logcurrent.sme,
+            System.jobId,
+            System.sme,
             "Not_New_Line",
             "FN CALL",
             {
@@ -57,11 +57,11 @@ async function phil_mri_logcurrent(fileToParse, System_Logcurrent) {
           );
         }
       } else {
-        matches.groups.system_id = System_Logcurrent.sme;
+        matches.groups.system_id = System.sme;
         const dtObject = await generateDateTime(
-          System_Logcurrent.jobId,
+          System.jobId,
           matches.groups.system_id,
-          System_Logcurrent.fileToParse.logcurrent.pg_table,
+          System.fileToParse.logcurrent.pg_table,
           matches.groups.host_date,
           matches.groups.host_time
         );
@@ -79,8 +79,8 @@ async function phil_mri_logcurrent(fileToParse, System_Logcurrent) {
         if (dtObject === null) {
           await log(
             "warn",
-            System_Logcurrent.jobId,
-            System_Logcurrent.sme,
+            System.jobId,
+            System.sme,
             "date_time",
             "FN CALL",
             {
@@ -107,10 +107,10 @@ async function phil_mri_logcurrent(fileToParse, System_Logcurrent) {
     // ** Begin Persist
 
     const insertSuccess = await bulkInsert(
-      System_Logcurrent.jobId,
+      System.jobId,
       dataToArray,
-      System_Logcurrent.sysConfigData,
-      System_Logcurrent.fileToParse.logcurrent
+      System.sysConfigData,
+      System.fileToParse.logcurrent
     );
 
     // ** End Persist
@@ -118,14 +118,14 @@ async function phil_mri_logcurrent(fileToParse, System_Logcurrent) {
     // Update Redis Cache
 
     if (insertSuccess) {
-      await System_Logcurrent.updateRedisFileSize();
+      await System.updateRedisFileSize();
     }
   } catch (error) {
     console.log(error);
     await log(
       "error",
-      System_Logcurrent.jobId,
-      System_Logcurrent.sme,
+      System.jobId,
+      System.sme,
       "phil_mri_logcurrent",
       "FN CALL",
       {
