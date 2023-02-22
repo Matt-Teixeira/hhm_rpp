@@ -17,12 +17,15 @@ async function philMonitorTableUpdate(jobId, sme, col_name, fileName, data) {
 
     switch (processType) {
       case "max":
+        //return;
         await maxValue(jobId, sme, data, col_name);
         break;
       case "min":
+        //return;
         await minValue(jobId, sme, data, col_name);
         break;
       case "bool":
+        console.log(processType);
         await booleanValue(jobId, sme, data, col_name);
         break;
       default:

@@ -9,6 +9,9 @@ const phil_mri_rmmu_magnet = require("./rmmu_magnet");
 const phil_mri_monitor_jsonb = require("./insert_jsonb_data");
 const phil_mri_monitor_display = require("./insert_display_data");
 const phil_mri_rmmu_history = require("./rmmu_history");
+const PHILIPS_MRI_MONITORING = require("../../../data_acquisition/Philips_MRI_Monitor");
+const PHILIPS_MRI_LOGCURRENT = require("../../../data_acquisition/Philips_MRI_Logcurrent");
+const PHILIPS_MRI_RMMU = require("../../../data_acquisition/Philips_MRI_Rmmu");
 
 const philips_mri_parsers = async (jobId, sysConfigData) => {
   try {
@@ -20,39 +23,68 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
       "FN CALL"
     );
 
-    for await (const file of sysConfigData.hhm_file_config) {
-      switch (file.query) {
+    for await (const directory of sysConfigData.hhm_file_config) {
+      let dir = Object.keys(directory)[0];
+      switch (dir) {
         case "logcurrent":
-          await phil_mri_logcurrent(jobId, sysConfigData, file);
+          const System_Logcurrent = new PHILIPS_MRI_LOGCURRENT(
+            sysConfigData,
+            directory,
+            jobId
+          );
+
+          await phil_mri_logcurrent(directory, System_Logcurrent);
           break;
         case "rmmu_short":
-          await phil_mri_rmmu_short(jobId, sysConfigData, file);
+          const Rmmu_Short_System = new PHILIPS_MRI_RMMU(
+            sysConfigData,
+            directory.rmmu_short,
+            jobId
+          );
+
+          await phil_mri_rmmu_short(directory.rmmu_short, Rmmu_Short_System);
           break;
         case "rmmu_long":
-          await phil_mri_rmmu_long(jobId, sysConfigData, file);
+          const Rmmu_Long_System = new PHILIPS_MRI_RMMU(
+            sysConfigData,
+            directory.rmmu_long,
+            jobId
+          );
+          await phil_mri_rmmu_long(directory.rmmu_long, Rmmu_Long_System);
           break;
         case "rmmu_magnet":
-          await phil_mri_rmmu_magnet(jobId, sysConfigData, file);
+          const Rmmu_Magnet_System = new PHILIPS_MRI_RMMU(
+            sysConfigData,
+            directory.rmmu_magnet,
+            jobId
+          );
+          await phil_mri_rmmu_magnet(directory.rmmu_magnet, Rmmu_Magnet_System);
+          break;
+        case "monitoring":
+          const System_Monitor = new PHILIPS_MRI_MONITORING(
+            jobId,
+            sysConfigData
+          );
+          const json_data = await phil_mri_monitor_jsonb(
+            System_Monitor,
+            directory
+          );
+
+          if (json_data) {
+            await phil_mri_monitor_display(
+              System_Monitor.jobId,
+              System_Monitor.sysConfigData,
+              json_data
+            );
+          }
+
           break;
         default:
           break;
       }
     }
-
-    // Verify that this Phil MRI has a monitoring folder. If so, parse data from it.
-   const monitoring_file_path = `${sysConfigData.hhm_config.file_path}/monitoring`;
-    let files = await fs.readdir(monitoring_file_path);
-
-    if (files.length > 0) {
-      console.log("Has monitoring files");
-      const data = await phil_mri_monitor_jsonb(
-        jobId,
-        monitoring_file_path,
-        sysConfigData
-      );
-      await phil_mri_monitor_display(jobId, sysConfigData, data);
-    }
   } catch (error) {
+    console.log(error);
     await log(
       "error",
       jobId,
