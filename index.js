@@ -8,6 +8,8 @@ const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");
 const { systems } = require("./test_data/systems");
 
+/*
+
 const determineManufacturer = async (jobId, sme) => {
   try {
     let queryString =
@@ -56,10 +58,9 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot([...systems.ge.ct_systems, ...systems.ge.cv_systems, ...systems.ge.mri_systems, ...systems.philips.ct_systems, ...systems.philips.cv_systems]);
+onBoot(["SME01138"]);
+*/ 
 
-
-/* 
 const determineManufacturer = async (jobId, system) => {
   try {
     await log("info", jobId, system.id, "determineManufacturer", "FN CALL", {
@@ -100,6 +101,7 @@ const onBoot = async () => {
       MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1'",
       phil_cv_hr_24:
         "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND manufacturer = 'Philips' AND hhm_config->'run_group' = '2'",
+      all: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL"
     };
 
     let queryString = queries[shell_value];
@@ -123,4 +125,3 @@ const onBoot = async () => {
 };
 
 onBoot();
- */

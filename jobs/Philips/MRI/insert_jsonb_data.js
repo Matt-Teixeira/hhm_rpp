@@ -1,55 +1,118 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
-const fs = require("node:fs").promises;
 const { philips_re } = require("../../../parse/parsers");
-const insertJsonB = require("../../../persist/phil_mri_monitor_data/bulk_jsonb_insert");
-const { getMonitorFiles } = require("../../../utils/regExHelpers");
+const insertJsonB = require("../../../processing/phil_mri_monitor_data/bulk_jsonb_insert");
 
-async function phil_mri_monitor(jobId, filePath, sysConfigData) {
-  const sme = sysConfigData.id;
-  const modality = sysConfigData.hhm_config.modality;
-
+async function phil_mri_monitor(System, directory) {
   try {
-    await log("info", jobId, sme, "phil_mri_monitor", "FN CALL", {
-      sme: sme,
-      modality,
-      file: filePath,
-    });
+    await log("info", System.jobId, System.sme, "phil_mri_monitor", "FN CALL");
 
     const jsonData = {};
 
-    let files = await fs.readdir(filePath);
+    // Loop through monitoring files in monitoring directory
+    for await (const file of directory.monitoring) {
+      //if (file.file_name === "monitor_System_TempTechRoom.dat") {
+      const complete_file_path = `${System.sysConfigData.hhm_config.file_path}/monitoring/${file.file_name}`;
 
-    // Run regex to filter out non-monitor files. Returns array of monitoring files to parse
-    const monitorFiles = await getMonitorFiles(files);
+      let file_data;
 
-    // Seed jsonData with empty arrays named as file names
-    for await (const file of monitorFiles) {
-      const fileName = file.split(".")[0];
-      jsonData[fileName] = [];
-    }
+      // Remove .dat from file. EX: "monitor_magnet_quench.dat"
+      const fileName = file.file_name.split(".")[0];
 
-    for await (const file of monitorFiles) {
-      const fileName = file.split(".")[0];
-      const fileData = (await fs.readFile(`${filePath}/${file}`)).toString();
-      const matchGroups = fileData.matchAll(philips_re.mri.monitor[fileName]);
+      const last_line = await System.get_redis_line(file);
 
-      for await (const group of matchGroups) {
+      // last_line will be null if redis cache non-existent i.e., new system. Pull all data.
+      if (last_line === null) {
+        file_data = await System.get_all_monitor_data(complete_file_path);
+      } else {
+        file_data = await System.get_monitor_delta(
+          complete_file_path,
+          last_line
+        );
 
-        jsonData[fileName].push(group.groups);
+        // consider removing. file_data will be null if no match for last line. Reset redis last line to file's
+        // current last line to prevent a negative feedback loop in which no line is ever matched to stale cache
+        if (file_data === null) {
+          await System.get_last_monitor_line(
+            complete_file_path,
+            file.file_name
+          );
+          continue;
+        }
       }
-    }
-    await insertJsonB(jobId, [sme, jsonData]);
 
+      // Catch and handle when file not present in dir.
+      if (file_data === undefined) {
+        await log(
+          "warn",
+          System.jobId,
+          System.sme,
+          "phil_mri_monitor",
+          "FN CALL",
+          { message: "File not present" }
+        );
+        continue;
+      }
+
+      const matches = file_data.matchAll(
+        philips_re.mri.monitor[file.parsers[0]]
+      );
+
+      if (!matches) {
+        await log(
+          "warn",
+          System.jobId,
+          System.sme,
+          "phil_mri_monitor",
+          "FN CALL",
+          {
+            message: "Matches failed",
+            file: file.file_name,
+          }
+        );
+        continue;
+      }
+
+      jsonData[fileName] = [];
+      for (let match of matches) {
+        jsonData[fileName].push({ ...match.groups });
+      }
+      await System.get_last_monitor_line(complete_file_path, file.file_name);
+      //}
+    }
+
+    // Skip db insert step if no new data was pushed into jsonData{}
+    if (Object.keys(jsonData).length === 0) {
+      await log(
+        "warn",
+        System.jobId,
+        System.sme,
+        "phil_mri_monitor",
+        "FN CALL",
+        {
+          message: "No new monitoring data found.",
+        }
+      );
+      return;
+    }
+
+    await insertJsonB(System.jobId, [System.sme, jsonData]);
+
+    // send data to be aggregated
     return jsonData;
   } catch (error) {
-    await log("error", jobId, sme, "phil_mri_monitor", "FN CALL", {
-      sme: sme,
-      modality,
-      file: filePath,
-      error: error,
-    });
+    console.log(error);
+    await log(
+      "error",
+      System.jobId,
+      System.sme,
+      "phil_mri_monitor",
+      "FN CALL",
+      {
+        error,
+      }
+    );
   }
 }
 

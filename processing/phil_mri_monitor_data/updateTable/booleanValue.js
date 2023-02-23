@@ -5,46 +5,52 @@ const {
   getDateRanges,
   updateTable,
   insertData,
-} = require("../../../utils/phil_mri_monitor_helpers"); //cryo_comp_malf_minutes
+} = require("../../../utils/phil_mri_monitor_helpers"); //cryo_comp_comm_error
+const { convertDT } = require("../../../utils/dates");
 
-async function maxValue(jobId, sme, data, column) {
+async function booleanValue(jobId, sme, data, column) {
   try {
-    await log("info", jobId, sme, "maxValue", "FN CALL", {
+    await log("info", jobId, sme, "booleanValue", "FN CALL", {
       sme: sme,
     });
 
-    console.log("THIS IS COLUMN NAM<E")
-    console.log(column);
+    console.log("\n ***** UPDATE BOOL ****** \n");
+
+    console.log(data);
 
     // Get date ranges for smaller query and loop
     const startDate = data[data.length - 1].host_date;
     const endDate = data[0].host_date;
-    
+
     const values = [sme, startDate, endDate];
     const systemDates = await getDateRanges(jobId, sme, values);
 
     // Aggregation bucket
     let bucket = [];
-    let prevData = data[0].host_date; //Set to first date in file data(file capture groups)
+    let prevData = data[data.length - 1].host_date; //Set to first date in file data(file capture groups)
+
+    console.log("PREVIOUS DATE: " + prevData);
 
     // loop through each observation in the array of match groups. Seperated by column name.
     for await (const obs of data) {
       let currentDate = obs.host_date;
 
-      console.log(currentDate, prevData);
-      console.log(currentDate === prevData);
-
       // If dates are the same, push data to array for future aggregation
       if (currentDate === prevData) {
-        console.log(obs);
         bucket.push(obs[column]);
         prevData = currentDate;
         continue;
       }
       if (currentDate !== prevData) {
         // Not equal means a change in dates and begin aggregation
-        const maxValue = Math.max(...bucket);
-        console.log("This is max value line 43: " + maxValue);
+        let maxValue = Math.max(...bucket);
+
+        // Set value to = 1 or 0 (boolean)
+        if (maxValue > 0) {
+          maxValue = 1;
+        } else {
+          maxValue = 0;
+        }
 
         // If date exists for sme: UPDATE row
         if (systemDates.includes(prevData)) {
@@ -54,9 +60,8 @@ async function maxValue(jobId, sme, data, column) {
           bucket.push(obs[column]); // Begin by pushing new data to our aggregation bucket
         } else {
           // If date dose not exist: INSERT new row
-          console.log("********** column, [sme, prevData, maxValue] **********")
-          console.log(column, [sme, prevData, maxValue]);
-          await insertData(jobId, column, [sme, prevData, maxValue]);
+          let dtObj = await convertDT(prevData);
+          await insertData(jobId, column, [sme, dtObj, prevData, maxValue]);
           bucket = [];
           prevData = obs.host_date;
           bucket.push(obs[column]);
@@ -67,8 +72,14 @@ async function maxValue(jobId, sme, data, column) {
     // Work with last set of dates in array
     if (systemDates.includes(prevData)) {
       // If date exists for sme: UPDATE row
-      const maxValue = Math.max(...bucket);
-      console.log("This is max value line 65: " + maxValue);
+      let maxValue = Math.max(...bucket);
+
+      if (maxValue > 0) {
+        maxValue = 1;
+      } else {
+        maxValue = 0;
+      }
+
       await updateTable(jobId, column, [
         maxValue,
         sme,
@@ -76,17 +87,24 @@ async function maxValue(jobId, sme, data, column) {
       ]);
     } else {
       // If date dose not exist: INSERT new row
-      const maxValue = Math.max(...bucket);
-      console.log("This is max value line 74: " + maxValue);
+      let maxValue = Math.max(...bucket);
+
+      if (maxValue > 0) {
+        maxValue = 1;
+      } else {
+        maxValue = 0;
+      }
+      let dtObj = await convertDT(prevData);
       await insertData(jobId, column, [
         sme,
+        dtObj,
         data[data.length - 1].host_date,
         maxValue,
       ]);
     }
   } catch (error) {
     console.log(error);
-    await log("error", jobId, sme, "maxValue", "FN CALL", {
+    await log("error", jobId, sme, "booleanValue", "FN CALL", {
       sme: sme,
       column: column,
       error: error,
@@ -94,4 +112,4 @@ async function maxValue(jobId, sme, data, column) {
   }
 }
 
-module.exports = maxValue;
+module.exports = booleanValue;

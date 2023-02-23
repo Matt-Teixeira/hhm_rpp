@@ -1,77 +1,128 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
-const fs = require("node:fs").promises;
+const fsp = require("node:fs").promises;
 const { philips_re } = require("../../../parse/parsers");
-const groupsToArrayObj = require("../../../parse/prep-groups-for-array");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { phil_mri_rmmu_long_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
-const {convertDates} = require("../../../utils/dates");
-const constructFilePath = require("../../../utils/constructFilePath");
-const {
-  isFileModified,
-  updateFileModTime,
-} = require("../../../utils/isFileModified");
+const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
-async function phil_mri_rmmu_long(jobId, sysConfigData, fileToParse) {
-  const dateTimeVersion = fileToParse.datetimeVersion;
-  const sme = sysConfigData.id;
-
+async function phil_mri_rmmu_long(fileToParse, System) {
+  const parsers = fileToParse.parsers;
   const data = [];
-
   try {
-    await log("info", jobId, sme, "phil_mri_rmmu_long", "FN CALL");
-
-    const complete_file_path = await constructFilePath(
-      sysConfigData.hhm_config.file_path,
-      fileToParse,
-      fileToParse.regEx
+    await log(
+      "info",
+      System.jobId,
+      System.sme,
+      "phil_mri_rmmu_long",
+      "FN CALL"
     );
 
-    const isUpdatedFile = await isFileModified(
-      jobId,
-      sme,
-      complete_file_path,
-      fileToParse
-    );
+    // ** Start Data Acquisition
 
-    // dont continue if file is not updated
-    if (!isUpdatedFile) return;
-
-    const fileData = (await fs.readFile(complete_file_path)).toString();
-
-    let matches = fileData.matchAll(philips_re.mri.rmmu_long_re);
-    let metaData = fileData.match(philips_re.mri.rmmu_meta_data);
-
-    for await (let match of matches) {
-      convertDates(match.groups, dateTimeVersion);
-      match.groups.system_reference_number =
-        metaData.groups.system_reference_number;
-      match.groups.hospital_name = metaData.groups.hospital_name;
-      match.groups.serial_number_magnet = metaData.groups.serial_number_magnet;
-      match.groups.serial_number_meu = metaData.groups.serial_number_meu;
-      const matchData = groupsToArrayObj(sme, match.groups);
-      data.push(matchData);
+    await System.get_directory_files();
+    console.log(System.files_in_dir);
+    if (System.files_in_dir.length === 0) {
+      await log(
+        "warn",
+        System.jobId,
+        System.sme,
+        "phil_mri_rmmu_long",
+        "FN CALL",
+        {
+          message: "Directory is empty",
+          directory: System.directory_path,
+        }
+      );
+      return;
     }
 
-    const mappedData = mapDataToSchema(data, phil_mri_rmmu_long_schema);
-    const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
+    // ** End Data Acquisition
 
-    const insertSuccess = await bulkInsert(
-      jobId,
-      dataToArray,
-      sysConfigData,
-      fileToParse
-    );
-    if (insertSuccess) {
-      await updateFileModTime(jobId, sme, complete_file_path, fileToParse);
+    // Loops through each file in the dir
+    for await (const file of System.files_in_dir) {
+      const complete_file_path = `${System.directory_path}/${file}`;
+      const fileData = (await fsp.readFile(complete_file_path)).toString();
+
+      // ** Begin Parse
+
+      let matches = fileData.matchAll(philips_re.mri[parsers[0]]);
+      let metaData = fileData.match(philips_re.mri[parsers[1]]);
+
+      // Loops through each match in 1 file in dir
+      for await (const match of matches) {
+        match.groups.system_id = System.sme;
+        match.groups.system_reference_number =
+          metaData.groups.system_reference_number;
+        match.groups.hospital_name = metaData.groups.hospital_name;
+        match.groups.serial_number_magnet =
+          metaData.groups.serial_number_magnet;
+        match.groups.serial_number_meu = metaData.groups.serial_number_meu;
+
+        const date = `${match.groups.year}-${match.groups.mo}-${match.groups.dy}`;
+        const time = `${match.groups.hr}:${match.groups.mn}:${match.groups.ss}.${match.groups.hs}`;
+
+        const dtObject = await generateDateTime(
+          System.jobId,
+          match.groups.system_id,
+          System.fileToParse.pg_table,
+          date,
+          time
+        );
+
+        if (dtObject === null) {
+          await log("warn", System.jobId, System.sme, "date_time", "FN CALL", {
+            message: "date_time object null",
+            date,
+            time,
+          });
+        }
+
+        match.groups.host_datetime = dtObject;
+
+        data.push(match.groups);
+      }
+
+      const mappedData = mapDataToSchema(data, phil_mri_rmmu_long_schema);
+      const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
+
+      // ** End Parse
+
+      // ** Begin Persist
+
+      const insertSuccess = await bulkInsert(
+        System.jobId,
+        dataToArray,
+        System.sysConfigData,
+        System.fileToParse
+      );
+
+      // ** End Persist
+
+      // ** Upon successfull db insert, move file to archive dir
+
+      if (insertSuccess) {
+        await System.archive_file(complete_file_path);
+      }
+
+      data.length = 0;
     }
+
+    return;
   } catch (error) {
-    await log("error", jobId, sme, "phil_mri_rmmu_long", "FN CALL", {
-      sme: sme,
-      error: error.message,
-    });
+    console.log(error);
+    await log(
+      "error",
+      System.jobId,
+      System.sme,
+      "phil_mri_rmmu_long",
+      "FN CALL",
+      {
+        error,
+      }
+    );
   }
 }
 

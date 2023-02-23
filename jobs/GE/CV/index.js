@@ -2,6 +2,7 @@
 require("dotenv").config();
 const { log } = require("../../../logger");
 const ge_cv_sysError = require("./sysError_parser");
+const GE_CV = require("../../../data_acquisition/GE_CV");
 
 const ge_mri_parsers = async (jobId, sysConfigData) => {
   try {
@@ -10,7 +11,8 @@ const ge_mri_parsers = async (jobId, sysConfigData) => {
     for await (const file of sysConfigData.hhm_file_config) {
       switch (file.query) {
         case "sysError":
-          await ge_cv_sysError(jobId, sysConfigData, file);
+          const system = new GE_CV(sysConfigData, file, jobId);
+          await ge_cv_sysError(system);
           break;
         default:
           break;

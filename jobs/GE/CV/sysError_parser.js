@@ -1,129 +1,84 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
-const fs = require("node:fs");
-const readline = require("readline");
 const { ge_re } = require("../../../parse/parsers");
-const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { ge_cv_syserror_schema } = require("../../../persist/pg-schemas");
+const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const bulkInsert = require("../../../persist/queryBuilder");
 const { blankLineTest } = require("../../../utils/regExHelpers");
-const {
-  getCurrentFileSize,
-  getRedisFileSize,
-  updateRedisFileSize,
-} = require("../../../redis/redisHelpers");
-const execTail = require("../../../read/exec-tail");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
 // File to parse is read line by line for regEx to match
-async function ge_cv_sys_error(jobId, sysConfigData, fileToParse) {
-  const sme = sysConfigData.id;
+async function ge_cv_sys_error(system) {
   // an array in each config accossiated with a file
-  const parsers = fileToParse.parsers;
-
-  const updateSizePath = "./read/sh/readFileSize.sh";
-  const fileSizePath = "./read/sh/readFileSize.sh";
-  const tailPath = "./read/sh/tail.sh";
-
+  const parsers = system.fileToParse.parsers;
   const data = [];
 
   try {
-    await log("info", jobId, sme, "ge_cv_sys_error", "FN CALL");
-
-    // Example: /opt/hhm-files/C0137/SHIP008/SME00868/EvtApplication_Today.txt
-    let complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
-
-    if (!fs.existsSync(complete_file_path)) {
-      await log("warn", jobId, sme, "ge_cv_sys_error", "FN CALL", {
-        message: "File not found in directory",
-        file: complete_file_path,
-      });
-      return
-    } 
-
-
-    // File size stored in redis. Size at last pull
-    const prevFileSize = await getRedisFileSize(sme, fileToParse.file_name);
-
-    const currentFileSize = await getCurrentFileSize(
-      sme,
-      fileSizePath,
-      sysConfigData.hhm_config.file_path,
-      fileToParse.file_name
+    await log(
+      "info",
+      system.jobId,
+      system.sysConfigData.id,
+      "ge_cv_sys_error",
+      "FN CALL"
     );
 
-    const delta = currentFileSize - prevFileSize;
+    // ** Start Data Acquisition
 
-    // Conditionaly set rl based on what's stored in redis or delta signed integer.
-    // If prevFileSize is null, system not in redis and likely not ran before.
-    // If prevFileSize is 0, log rotation set redis cache to 0.
-    // If delta is less than 0 (negitive number) file got smaller: i.e. log rotated without redis set to 0. Happens on system end.
-    let rl;
-    if (prevFileSize === null || prevFileSize === 0 || delta < 0) {
-      console.log("This needs to be read from file");
-      rl = readline.createInterface({
-        input: fs.createReadStream(complete_file_path),
-        crlfDelay: Infinity,
-      });
-    }
+    await system.getRedisFileSize();
 
-    if (prevFileSize > 0) {
-      // Break out of function if no file found
-      if (currentFileSize === null) {
-        await log("warn", "NA", sme, "ge_cv_sys_error", "FN CALL", {
-          message: "File not found in dir",
-        });
+    await system.getCurrentFileSize();
 
-        return;
-      }
+    await system.getFileData();
 
-      await log("info", jobId, sme, "delta", "FN CALL", { delta: delta });
-      console.log("DELTA: " + delta);
+    if (system.file_data === null) return;
 
-      if (delta === 0) {
-        await log("warn", jobId, sme, "delta-0", "FN CALL");
-        return;
-      }
+    // ** End Data Acquisition
 
-      let tailDelta = await execTail(tailPath, delta, complete_file_path);
+    // ** Begin Parse
 
-      // Place file data back into a format in which it can be read line by line. In this case, an array
-      rl = tailDelta.toString().split(/(?:\r\n|\r|\n)/g);
-    }
-
-    // Begin parsing file data
-
-    for await (const line of rl) {
+    for await (const line of system.file_data) {
       let matches = line.match(ge_re.cv[parsers[0]]);
       if (matches === null) {
         const isNewLine = blankLineTest(line);
         if (isNewLine) {
           continue;
         } else {
-          await log("error", jobId, sme, "Not_New_Line", "FN CALL", {
-            message: "This is not a blank new line - Bad Match",
-            line: line,
-          });
+          await log(
+            "error",
+            system.jobId,
+            system.sysConfigData.id,
+            "Not_New_Line",
+            "FN CALL",
+            {
+              message: "This is not a blank new line - Bad Match",
+              line: line,
+            }
+          );
         }
       } else {
-        matches.groups.system_id = sme;
+        matches.groups.system_id = system.sysConfigData.id;
 
         // Remove colen ":" from millisecond delimiter and change to period "."
         let splitColens = matches.groups.host_time.split(":");
         matches.groups.host_time = `${splitColens[0]}:${splitColens[1]}:${splitColens[2]}.${splitColens[3]}`;
         const dtObject = await generateDateTime(
-          jobId,
+          system.jobId,
           matches.groups.system_id,
-          fileToParse.pg_table,
+          system.fileToParse.pg_table,
           matches.groups.host_date,
           matches.groups.host_time
         );
 
         if (dtObject === null) {
-          await log("warn", jobId, sme, "date_time", "FN CALL", {
-            message: "date_time object null",
-          });
+          await log(
+            "warn",
+            system.jobId,
+            system.sysConfigData.id,
+            "date_time",
+            "FN CALL",
+            {
+              message: "date_time object null",
+            }
+          );
         }
 
         matches.groups.host_datetime = dtObject;
@@ -138,28 +93,37 @@ async function ge_cv_sys_error(jobId, sysConfigData, fileToParse) {
     const mappedData = mapDataToSchema(data, ge_cv_syserror_schema);
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
+    // ** End Parse
+
+    // ** Begin Persist
+
     const insertSuccess = await bulkInsert(
-      jobId,
+      system.jobId,
       dataToArray,
-      sysConfigData,
-      fileToParse
+      system.sysConfigData,
+      system.fileToParse
     );
+
+    // ** End Persist
+
+    // Update Redis Cache
+
     if (insertSuccess) {
-      // Data insert to db successfull, update new file size on redis
-      await updateRedisFileSize(
-        sme,
-        updateSizePath,
-        sysConfigData.hhm_config.file_path,
-        fileToParse.file_name
-      );
+      await system.updateRedisFileSize();
     }
   } catch (error) {
-    await log("error", jobId, sme, "ge_cv_sys_error", "FN CALL", {
-      error: error,
-    });
+    console.log(error);
+    await log(
+      "error",
+      system.jobId,
+      system.sysConfigData.id,
+      "ge_cv_sys_error",
+      "FN CALL",
+      {
+        error: error,
+      }
+    );
   }
 }
 
 module.exports = ge_cv_sys_error;
-
-// "{\"host_date\":\"12-Jan-23\",\"host_time\":\"01:08\",\"capture_datetime\":\"2023-01-12T08:15:00Z\",\"system_id\":\"SME09782\",\"pg_table\":\"mmb_ge_mm3\"}"

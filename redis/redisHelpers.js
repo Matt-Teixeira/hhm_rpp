@@ -1,5 +1,3 @@
-("use strict");
-require("dotenv").config({ path: "../.env" });
 const { log } = require("../logger");
 const execReadFileSize = require("../read/exec-readFileSize");
 const initRedis = require(".");
@@ -35,7 +33,7 @@ async function getRedisFileSize(sme, file) {
     const redisClient = await initRedis();
 
     const getKey = `${sme}.${file}`;
-    console.log(getKey)
+
     let fileSize = await redisClient.get(getKey);
     // if key does not exitst in redis, null will be returned, otherwise a string will be returned.
     if (typeof fileSize === "string") fileSize = parseInt(fileSize);
@@ -147,7 +145,7 @@ async function getRedisLinePositions(sme, file) {
       });
       return {
         eal: null,
-        events: null
+        events: null,
       };
     }
 
@@ -191,7 +189,7 @@ module.exports = {
   updateRedisLine,
   getRedisLine,
   updateRedisLinePositions,
-  getRedisLinePositions
+  getRedisLinePositions,
 };
 
 ("I       2023-01-26      11:14:43        CT_PRF  4       Free Resources: DB: Local 2827 MB Exchangeboard 758 MB PixelPartition[store]: 86612 MB PixelPartition[scan]: 88745 MB PixelPartition[stamp]: 121064 MB IPT partition: 25675 MB phys MEM: 4095 MB");
