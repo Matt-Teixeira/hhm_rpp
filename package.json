@@ -5,11 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "update": "./configWriter/proj.sh",
-    "ge_config": "node configWriter/ge_imaging/index.js",
-    "phil_mri_config": "node configWriter/phil_mri/index.js",
-    "phil_cv_config": "node configWriter/phil_cv/index.js",
-    "siemens_config": "node configWriter/siemens/index.js",
+    "update": "./proj.sh",
     "read_log": "node logReader/index.js"
   },
   "keywords": [],
