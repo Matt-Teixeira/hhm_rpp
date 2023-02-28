@@ -23,7 +23,7 @@ async function phil_mri_rmmu_long(fileToParse, System) {
     // ** Start Data Acquisition
 
     await System.get_directory_files();
-    console.log(System.files_in_dir);
+    
     if (System.files_in_dir.length === 0) {
       await log(
         "warn",
