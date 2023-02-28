@@ -9,7 +9,6 @@ const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
 async function phil_mri_rmmu_short(fileToParse, System) {
-  console.log(fileToParse)
   const parsers = fileToParse.parsers;
   const data = [];
   try {
@@ -24,7 +23,7 @@ async function phil_mri_rmmu_short(fileToParse, System) {
     // ** Start Data Acquisition
 
     await System.get_directory_files();
-    console.log(System.files_in_dir);
+
     if (System.files_in_dir.length === 0) {
       await log(
         "warn",

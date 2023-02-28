@@ -16,8 +16,6 @@ async function insertDisplayData(jobId, sysConfigData, data) {
 
     const has_prev_data = await getSystemDbData(jobId, sme);
 
-    console.log("has_prev_data: " + has_prev_data.rows[0].count);
-
     if (has_prev_data.rows[0].count === '0') {
       console.log("NEW SYSTEM - NO DATA IN DB")
       // Create entry for new SME
