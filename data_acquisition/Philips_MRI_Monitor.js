@@ -6,6 +6,7 @@ const {
 } = require("../redis/philips_monitoring");
 const exec_tail_last_line = require("../read/exec-tail-last-line");
 const exec_monitor_delta = require("../read/exec-monitor_delta");
+const execLastMod = require("../read/exec-file_last_mod");
 
 class PHILIPS_MRI_MONITORING {
   constructor(jobId, sysConfigData) {
@@ -15,6 +16,7 @@ class PHILIPS_MRI_MONITORING {
 
   exec_tail_path = "./read/sh/tail_late_line.sh";
   exec_monitor_delta_path = "./read/sh/get_monitor_delta.sh";
+  lastModPath = "./read/sh/get_file_last_mod.sh";
 
   async get_all_monitor_data(complete_file_path) {
     try {
@@ -55,16 +57,25 @@ class PHILIPS_MRI_MONITORING {
   }
 
   async get_monitor_delta(complete_file_path, last_line) {
+    // Gets delta based on last line parsed and cached in redis
     const delta = await exec_monitor_delta(
       this.jobId,
       this.exec_monitor_delta_path,
       [last_line, complete_file_path]
     );
 
+    // Will return null if no new lines detected
     if (delta === null) {
+      
+      // Get file's last mod datetime
+      const file_mod_datetime = await execLastMod(this.lastModPath, [
+        complete_file_path,
+      ]);
+      
+     console.log(complete_file_path)
       await log("warn", this.jobId, this.sme, "get_monitor_delta", "FN CALL", {
         message: "File does not have new data",
-        file: complete_file_path,
+        last_mod: file_mod_datetime,
       });
       return null;
     }
@@ -72,7 +83,6 @@ class PHILIPS_MRI_MONITORING {
   }
 
   // Logcurrent.log
-
 }
 
 module.exports = PHILIPS_MRI_MONITORING;

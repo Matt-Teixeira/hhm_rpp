@@ -7,12 +7,14 @@ const {
   updateRedisFileSize,
 } = require("../redis/redisHelpers");
 const execTail = require("../read/exec-tail");
+const execLastMod = require("../read/exec-file_last_mod");
 const { philips_re } = require("../parse/parsers");
 
 class Philips_CT extends System {
   updateSizePath = "./read/sh/readFileSize.sh";
   fileSizePath = "./read/sh/readFileSize.sh";
   tailPath = "./read/sh/tail.sh";
+  lastModPath = "./read/sh/get_file_last_mod.sh";
 
   prev_file_size;
   current_file_size;
@@ -93,6 +95,9 @@ class Philips_CT extends System {
 
   async getFileData() {
     try {
+      // prev_file_size = null: no entry in redis
+      // prev_file_size = 0: rotated cache and file (reset)
+      // delta < 0: File has rotated without prior knowledge and is now smaller than previous
       if (
         this.prev_file_size === null ||
         this.prev_file_size === 0 ||
@@ -102,6 +107,12 @@ class Philips_CT extends System {
         this.file_data = (
           await fs.readFile(this.complete_file_path)
         ).toString();
+        if (this.delta < 0) {
+          await log("error", this.jobId, this.sme, "getFileData", "FN CALL", {
+            message: `Delta was a negative value: ${this.delta}`,
+            file: this.complete_file_path,
+          });
+        }
         return;
       }
 
@@ -111,8 +122,14 @@ class Philips_CT extends System {
         });
 
         if (this.delta === 0) {
+          // Get file's last mod datetime
+          const file_mod_datetime = await execLastMod(
+            this.lastModPath,
+            [this.complete_file_path]
+          );
           await log("warn", this.jobId, this.sme, "getFileData", "FN CALL", {
-            message: "No file data to read. Delta: 0",
+            message: `No file data to read. Delta: ${this.delta}`,
+            last_mod: file_mod_datetime,
           });
           this.file_data = null;
           return;
