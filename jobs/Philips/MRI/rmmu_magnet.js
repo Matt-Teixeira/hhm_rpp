@@ -9,10 +9,13 @@ const {
 } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
+const execLastMod = require("../../../read/exec-file_last_mod");
 
 async function phil_mri_rmmu_magnet(fileToParse, System) {
   const parsers = fileToParse.parsers;
   const data = [];
+
+  lastModPath = "./read/sh/get_dir_last_mod.sh";
   try {
     await log(
       "info",
@@ -25,8 +28,13 @@ async function phil_mri_rmmu_magnet(fileToParse, System) {
     // ** Start Data Acquisition
 
     await System.get_directory_files();
-    
+
     if (System.files_in_dir.length === 0) {
+      const file_mod_datetime = await execLastMod(lastModPath, [
+        System.sysConfigData.hhm_config.file_path,
+        "rmmu_magnet",
+      ]);
+
       await log(
         "warn",
         System.jobId,
@@ -34,8 +42,9 @@ async function phil_mri_rmmu_magnet(fileToParse, System) {
         "phil_mri_rmmu_magnet",
         "FN CALL",
         {
-          message: "Directory is empty",
-          directory: System.directory_path,
+          message: "No new files detected",
+          path: System.directory_path,
+          last_mod: file_mod_datetime,
         }
       );
       return;

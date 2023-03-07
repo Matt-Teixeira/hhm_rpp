@@ -12,7 +12,6 @@ const ge_ct_parsers = async (jobId, sysConfigData) => {
       switch (file.query) {
         case "gesys":
           const system = new GE_CT_MRI(sysConfigData, file, jobId);
-          console.log(system);
           await ge_ct_gesys(system);
           break;
         default:

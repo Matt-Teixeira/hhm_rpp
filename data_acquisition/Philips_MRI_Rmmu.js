@@ -1,6 +1,7 @@
 const fsp = require("node:fs").promises;
 const { log } = require("../logger");
 const exec_move_to_archive = require("../read/exec-move_to_archive");
+const execLastMod = require("../read/exec-file_last_mod");
 
 class PHILIPS_MRI_RMMU {
   constructor(sysConfigData, fileToParse, jobId) {
@@ -18,18 +19,36 @@ class PHILIPS_MRI_RMMU {
 
   async get_directory_files() {
     try {
+      // Ex directory_path: /opt/hhm-files/C0137/SHIP013/SME01138/rmmu_long
       this.files_in_dir = await fsp.readdir(this.directory_path);
     } catch (error) {
-      console.log(error);
+      await log(
+        "error",
+        this.jobId,
+        this.sme,
+        "rmmu_class_get_directory_files",
+        "FN CALL",
+        { error }
+      );
     }
   }
 
   async read_files() {
-    for await (const file of this.files_in_dir) {
-      const complete_file_path = `${this.directory_path}/${file}`;
-      console.log("\n" + complete_file_path);
-      const fileData = (await fsp.readFile(complete_file_path)).toString();
-      console.log(fileData);
+    try {
+      for await (const file of this.files_in_dir) {
+        const complete_file_path = `${this.directory_path}/${file}`;
+        console.log("\n" + complete_file_path);
+        const fileData = (await fsp.readFile(complete_file_path)).toString();
+      }
+    } catch (error) {
+      await log(
+        "error",
+        this.jobId,
+        this.sme,
+        "rmmu_class_read_files",
+        "FN CALL",
+        { error }
+      );
     }
   }
 

@@ -1,6 +1,6 @@
 function remove__(time) {
   let replaced = time.replace(/__\d+/, "");
-  return replaced;
+  return replaced.trim();
 }
 
-module.exports = {remove__}
+module.exports = { remove__ };

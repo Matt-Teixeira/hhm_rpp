@@ -5,16 +5,10 @@ const queries = require("./queries");
 
 async function bulkInsert(jobId, data, sysConfigData, fileConfig) {
   try {
+
     if (data.length === 0) {
       throw new Error("File is empty/no matches");
     }
-    //const fileQuery = fileConfig.query;
-
-   /*  console.log(sysConfigData.manufacturer);
-    console.log(sysConfigData.hhm_config.modality);
-    console.log(fileQuery); */
-
-    
 
     const query =
       queries[`${sysConfigData.manufacturer}`][
