@@ -6,35 +6,33 @@ const pgPool = require("./db/pg-pool");
 const siemens_parser = require("./jobs/Siemens");
 const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");
-const base_file_path = require("./utils/constructFilePath");
-const { systems } = require("./test_data/systems");
+//const { systems } = require("./test_data/systems");
+
+/*
 
 const determineManufacturer = async (jobId, sme) => {
   try {
     let queryString =
-      "SELECT id, manufacturer, site_id, customer_id, hhm_config, hhm_file_config from systems WHERE id = $1";
+      "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE id = $1";
     let value = [sme];
-    let system_config = await pgPool.query(queryString, value);
-
-    system_config = await base_file_path(system_config.rows[0])
+    const sysConfigData = await pgPool.query(queryString, value);
 
     await log("info", jobId, sme, "determineManufacturer", "FN CALL");
 
-    switch (system_config.manufacturer) {
+    switch (sysConfigData.rows[0].manufacturer) {
       case "Siemens":
-        await siemens_parser(jobId, system_config);
+        await siemens_parser(jobId, sysConfigData.rows[0]);
         break;
       case "Philips":
-        await philips_parser(jobId, system_config);
+        await philips_parser(jobId, sysConfigData.rows[0]);
         break;
       case "GE":
-        await ge_parser(jobId, system_config);
+        await ge_parser(jobId, sysConfigData.rows[0]);
         break;
       default:
         break;
     }
   } catch (error) {
-    console.log(error);
     await log("error", "NA", "NA", "determineManufacturer", "FN CATCH", {
       error: error,
     });
@@ -61,8 +59,8 @@ const onBoot = async (systems_list) => {
 };
 
 onBoot(["SME01138"]);
+*/ 
 
-/*
 const determineManufacturer = async (jobId, system) => {
   try {
     await log("info", jobId, system.id, "determineManufacturer", "FN CALL", {
@@ -127,4 +125,3 @@ const onBoot = async () => {
 };
 
 onBoot();
- */

@@ -5,35 +5,35 @@ const { ge_mri_gesys_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
-async function ge_mri_gesys(system) {
+async function ge_mri_gesys(System) {
   // an array in each config accossiated with a file
-  const parsers = system.fileToParse.parsers;
+  const parsers = System.fileToParse.parsers;
   const data = [];
 
   try {
     await log(
       "info",
-      system.jobId,
-      system.sysConfigData.id,
+      System.jobId,
+      System.sysConfigData.id,
       "ge_mri_gesys",
       "FN CALL"
     );
 
     // ** Start Data Acquisition
 
-    await system.getRedisFileSize();
+    await System.getRedisFileSize();
 
-    await system.getCurrentFileSize();
+    await System.getCurrentFileSize();
 
-    await system.getFileData();
+    await System.getFileData();
 
-    if (system.file_data === null) return;
+    if (System.file_data === null) return;
 
     // ** End Data Acquisition
 
     // ** Begin Parse
 
-    let matches = system.file_data.match(ge_re.mri.gesys[parsers[0]]);
+    let matches = System.file_data.match(ge_re.mri.gesys[parsers[0]]);
 
     for await (let match of matches) {
       const matchGroups = match.match(ge_re.mri.gesys[parsers[1]]);
@@ -41,8 +41,8 @@ async function ge_mri_gesys(system) {
       if (!matchGroups) {
         await log(
           "error",
-          system.jobId,
-          system.sysConfigData.id,
+          System.jobId,
+          System.sysConfigData.id,
           "ge_mri_gesys",
           "FN CALL",
           {
@@ -60,12 +60,12 @@ async function ge_mri_gesys(system) {
           : matchGroups.groups.day
       }-${matchGroups.groups.month}-${matchGroups.groups.year}`;
 
-      matchGroups.groups.system_id = system.sysConfigData.id;
+      matchGroups.groups.system_id = System.sysConfigData.id;
 
       const dtObject = await generateDateTime(
-        system.jobId,
+        System.jobId,
         matchGroups.groups.system_id,
-        system.fileToParse.pg_table,
+        System.fileToParse.pg_table,
         matchGroups.groups.host_date,
         matchGroups.groups.host_time
       );
@@ -73,8 +73,8 @@ async function ge_mri_gesys(system) {
       if (dtObject === null) {
         await log(
           "warn",
-          system.jobId,
-          system.sysConfigData.id,
+          System.jobId,
+          System.sysConfigData.id,
           "date_time",
           "FN CALL",
           {
@@ -96,10 +96,10 @@ async function ge_mri_gesys(system) {
     // ** Begin Persist
 
     const insertSuccess = await bulkInsert(
-      system.jobId,
+      System.jobId,
       dataToArray,
-      system.sysConfigData,
-      system.fileToParse
+      System.sysConfigData,
+      System.fileToParse
     );
 
     // ** End Persist
@@ -107,14 +107,14 @@ async function ge_mri_gesys(system) {
     // Update Redis Cache
 
     if (insertSuccess) {
-      await system.updateRedisFileSize();
+      await System.updateRedisFileSize();
     }
   } catch (error) {
     console.log(error);
     await log(
       "error",
-      system.jobId,
-      system.sysConfigData.id,
+      System.jobId,
+      System.sysConfigData.id,
       "ge_mri_gesys",
       "FN CALL",
       {

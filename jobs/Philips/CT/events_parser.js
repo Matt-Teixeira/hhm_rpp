@@ -14,7 +14,7 @@ async function phil_ct_events(system) {
       "info",
       system.jobId,
       system.sysConfigData.id,
-      "phil_ct_eal",
+      "phil_ct_events",
       "FN CALL"
     );
 
@@ -25,7 +25,7 @@ async function phil_ct_events(system) {
 
     // Break out of function if no file found
     if (system.current_file_size === null) {
-      await log("warn", system.jobId, system.sme, "phil_ct_eal", "FN CALL", {
+      await log("warn", system.jobId, system.sme, "phil_ct_events", "FN CALL", {
         message: "File not found in dir",
       });
       return;
@@ -76,7 +76,7 @@ async function phil_ct_events(system) {
       "error",
       system.jobId,
       system.sysConfigData.id,
-      "phil_ct_eal",
+      "phil_ct_events",
       "FN CALL",
       {
         error,

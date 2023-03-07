@@ -8,6 +8,7 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_cv_eventlog_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const { blankLineTest } = require("../../../utils/regExHelpers");
+const execLastMod = require("../../../read/exec-file_last_mod");
 const {
   getCurrentFileSize,
   getRedisFileSize,
@@ -26,6 +27,7 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
   const updateSizePath = "./read/sh/readFileSize.sh";
   const fileSizePath = "./read/sh/readFileSize.sh";
   const headPath = "./read/sh/head.sh";
+  const lastModPath = "./read/sh/get_dir_last_mod.sh";
 
   const data = [];
 
@@ -33,12 +35,18 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
     const complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
 
     if (!fs.existsSync(complete_file_path)) {
+      const file_mod_datetime = await execLastMod(lastModPath, [
+        sysConfigData.hhm_config.file_path,
+        "archive",
+      ]);
+
       await log("warn", jobId, sme, "phil_cv_eventlog", "FN CALL", {
         message: "File not found in directory",
         file: complete_file_path,
+        last_updated: file_mod_datetime,
       });
-      return
-    } 
+      return;
+    }
 
     await log("info", jobId, sme, "phil_cv_eventlog", "FN CALL", {
       file: complete_file_path,

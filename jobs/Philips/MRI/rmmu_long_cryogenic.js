@@ -7,10 +7,12 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { phil_mri_rmmu_long_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
+const execLastMod = require("../../../read/exec-file_last_mod");
 
 async function phil_mri_rmmu_long(fileToParse, System) {
   const parsers = fileToParse.parsers;
   const data = [];
+  const lastModPath = "./read/sh/get_dir_last_mod.sh";
   try {
     await log(
       "info",
@@ -23,8 +25,14 @@ async function phil_mri_rmmu_long(fileToParse, System) {
     // ** Start Data Acquisition
 
     await System.get_directory_files();
-    
+
+    // No files in rmmu_long dir
     if (System.files_in_dir.length === 0) {
+      const file_mod_datetime = await execLastMod(lastModPath, [
+        System.sysConfigData.hhm_config.file_path,
+        "rmmu_long",
+      ]);
+
       await log(
         "warn",
         System.jobId,
@@ -32,8 +40,9 @@ async function phil_mri_rmmu_long(fileToParse, System) {
         "phil_mri_rmmu_long",
         "FN CALL",
         {
-          message: "Directory is empty",
-          directory: System.directory_path,
+          message: "No new files detected",
+          path: System.directory_path,
+          last_mod: file_mod_datetime,
         }
       );
       return;

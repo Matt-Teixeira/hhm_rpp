@@ -2,4 +2,4 @@
 
 var1="CV"
 
-node index.js $var1
+cd ../ && node index.js $var1
