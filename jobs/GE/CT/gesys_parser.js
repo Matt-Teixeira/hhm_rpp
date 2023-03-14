@@ -4,20 +4,18 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { ge_ct_gesys_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
+const extract = require("../../../processing/date_processing/ge_ct/extract_metadata");
 
 async function ge_ct_gesys(system) {
   // an array in each parser accossiated with a file
   const parsers = system.fileToParse.parsers;
   const data = [];
+  const extraction_data = [];
+
+  const tube_test_re = /tube usage data reports/;
 
   try {
-    await log(
-      "info",
-      system.jobId,
-      system.sysConfigData.id,
-      "ge_ct_gesys",
-      "FN CALL"
-    );
+    await log("info", system.jobId, system.sme, "ge_ct_gesys", "FN CALL");
 
     // ** Start Data Acquisition
 
@@ -40,7 +38,7 @@ async function ge_ct_gesys(system) {
 
       // matchGroups will be null if no match
       if (!matchGroups) {
-        await log("error", sme, "ge_ct_gesys", "FN CALL", {
+        await log("error", system.sme, "ge_ct_gesys", "FN CALL", {
           message: "Failed match",
           prev_epoch: data[data.length - 1].epoch,
           sr_group: data[data.length - 1].sr,
@@ -64,21 +62,24 @@ async function ge_ct_gesys(system) {
       );
 
       if (dtObject === null) {
-        await log(
-          "warn",
-          system.jobId,
-          system.sysConfigData.id,
-          "date_time",
-          "FN CALL",
-          {
-            message: "date_time object null",
-          }
-        );
+        await log("warn", system.jobId, system.sme, "date_time", "FN CALL", {
+          message: "date_time object null",
+        });
       }
 
       matchGroups.groups.host_datetime = dtObject;
 
       data.push(matchGroups.groups);
+
+      // Testing here because every group has a value in message property.
+      const is_tube_data = tube_test_re.test(matchGroups.groups.message);
+      if (is_tube_data) {
+        extraction_data.push({
+          system_id: matchGroups.groups.system_id,
+          message: matchGroups.groups.message,
+          host_datetime: matchGroups.groups.host_datetime,
+        });
+      }
     }
 
     const mappedData = mapDataToSchema(data, ge_ct_gesys_schema);
@@ -101,9 +102,10 @@ async function ge_ct_gesys(system) {
 
     if (insertSuccess) {
       await system.updateRedisFileSize();
+      await extract(system.jobId, extraction_data);
     }
   } catch (error) {
-    await log("error", system.jobId, sme, "ge_ct_gesys", "FN CALL", {
+    await log("error", system.jobId, system.sme, "ge_ct_gesys", "FN CALL", {
       error: error.message,
     });
   }

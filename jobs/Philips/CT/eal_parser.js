@@ -5,6 +5,7 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_ct_eal_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
+const { remove_dub_quotes } = require("../../../utils/regExHelpers");
 
 async function phil_ct_eal(system) {
   const data = [];
@@ -52,6 +53,14 @@ async function phil_ct_eal(system) {
       );
 
       match.groups.host_datetime = dtObject;
+
+      // Remove double quotes from strings
+      if (match.groups.file !== "" || match.groups.err_number) {
+        remove_dub_quotes(match, "file");
+      }
+      if (match.groups.err_number !== "") {
+        remove_dub_quotes(match, "err_number");
+      }
 
       data.push(match.groups);
     }

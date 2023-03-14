@@ -1,9 +1,10 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
-const fs = require("node:fs").promises;
+const fsp = require("node:fs").promises;
+const fs = require("node:fs");
 
 const readLog = async (logPath) => {
-  const fileData = (await fs.readFile(logPath)).toString();
+  const fileData = (await fsp.readFile(logPath)).toString();
   return fileData;
 };
 
@@ -18,44 +19,71 @@ const extractWarnings = async (fileData) => {
 };
 
 const appendLogData = async (logPath) => {
-  const now = new Date().toISOString();
-  const fileData = await readLog(logPath);
-  const error_groups = await extractErrors(fileData);
-  for await (let error of error_groups) {
-    await fs.writeFile(
-      `/home/matt-teixeira/hep3/hhm_parsers/Parsers/logReader/error_logs/error_log_${now}.txt`,
-      error,
-      {
-        encoding: "utf8",
-        flag: "a+",
+  try {
+    const now = new Date().toISOString();
+    const fileData = await readLog(logPath);
+    const error_groups = await extractErrors(fileData);
+    if (error_groups) {
+      const target_directory =
+        "/home/matt-teixeira/hep3/hhm_rpp/logReader/error_logs";
+      if (!fs.existsSync(target_directory)) {
+        fs.mkdir(target_directory, (error) =>
+          error
+            ? console.log(error)
+            : console.log("You have created the target_directory")
+        );
       }
-    );
-  }
-  const warning_groups = await extractWarnings(fileData);
+      for await (let error of error_groups) {
+        await fsp.writeFile(
+          `/home/matt-teixeira/hep3/hhm_rpp/logReader/error_logs/error_log_${now}.txt`,
+          error,
+          {
+            encoding: "utf8",
+            flag: "a+",
+          }
+        );
+      }
+    }
 
-  for await (let warning of warning_groups) {
-    await fs.writeFile(
-      `/home/matt-teixeira/hep3/hhm_parsers/Parsers/logReader/warning_logs/warning_log_${now}.txt`,
-      warning,
-      {
-        encoding: "utf8",
-        flag: "a+",
+    const warning_groups = await extractWarnings(fileData);
+
+    if (warning_groups) {
+      const target_directory =
+        "/home/matt-teixeira/hep3/hhm_rpp/logReader/warning_logs";
+      if (!fs.existsSync(target_directory)) {
+        fs.mkdir(target_directory, (error) =>
+          error
+            ? console.log(error)
+            : console.log("You have created the target_directory")
+        );
       }
-    );
+      for await (let warning of warning_groups) {
+        await fsp.writeFile(
+          `/home/matt-teixeira/hep3/hhm_rpp/logReader/warning_logs/warning_log_${now}.txt`,
+          warning,
+          {
+            encoding: "utf8",
+            flag: "a+",
+          }
+        );
+      }
+    }
+  } catch (error) {
+    console.log(error);
   }
 };
 
-appendLogData("/home/matt-teixeira/hep3/hhm_parsers/Parsers/adp.prod.log");
+appendLogData("/home/matt-teixeira/hep3/hhm_rpp/adp.prod.log");
 
-
+// STAGING SETUP
 /* 
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
-const fs = require("node:fs").promises;
-const fs1 = require("node:fs"); 
+const fsp = require("node:fs").promises;
+const fs = require("node:fs");
 
 const readLog = async (logPath) => {
-  const fileData = (await fs.readFile(logPath)).toString();
+  const fileData = (await fsp.readFile(logPath)).toString();
   return fileData;
 };
 
@@ -69,57 +97,60 @@ const extractWarnings = async (fileData) => {
   return warning_groups;
 };
 
-const checkForDir = async (dir1, dir2) => {
-   
-  if (fs1.existsSync(dir1)) {
-    console.log("Directory exists.")
-  } else {
-    fs.mkdir(dir1);
-    console.log("Directory created")
-  }
-
-  if (fs1.existsSync(dir2)) {
-    console.log("Directory exists.")
-  } else {
-    fs.mkdir(dir2);
-    console.log("Directory created")
-  }
-};
-
 const appendLogData = async (logPath) => {
-  const now = new Date().toISOString();
-  const fileData = await readLog(logPath);
-  const error_groups = await extractErrors(fileData);
-  // Check to see if dir exist, make if not. 
-  await checkForDir(
-    "/home/staging/hhm_rpp/logReader/error_logs",
-    "/home/staging/hhm_rpp/logReader/warning_logs"
-  );
-
-  for await (let error of error_groups) {
-    await fs.writeFile(
-      `/home/staging/hhm_rpp/logReader/error_logs/error_log_${now}.txt`,
-      error,
-      {
-        encoding: "utf8",
-        flag: "a+",
+  try {
+    const now = new Date().toISOString();
+    const fileData = await readLog(logPath);
+    const error_groups = await extractErrors(fileData);
+    if (error_groups) {
+      const target_directory =
+        "/home/staging/hhm_rpp/logReader/error_logs";
+      if (!fs.existsSync(target_directory)) {
+        fs.mkdir(target_directory, (error) =>
+          error
+            ? console.log(error)
+            : console.log("You have created the target_directory")
+        );
       }
-    );
-  }
-  const warning_groups = await extractWarnings(fileData);
-
-  for await (let warning of warning_groups) {
-    await fs.writeFile(
-      `/home/staging/hhm_rpp/logReader/warning_logs/warning_log_${now}.txt`,
-      warning,
-      {
-        encoding: "utf8",
-        flag: "a+",
+      for await (let error of error_groups) {
+        await fsp.writeFile(
+          `/home/staging/hhm_rpp/logReader/error_logs/error_log_${now}.txt`,
+          error,
+          {
+            encoding: "utf8",
+            flag: "a+",
+          }
+        );
       }
-    );
+    }
+
+    const warning_groups = await extractWarnings(fileData);
+
+    if (warning_groups) {
+      const target_directory =
+        "/home/staging/hhm_rpp/logReader/warning_logs";
+      if (!fs.existsSync(target_directory)) {
+        fs.mkdir(target_directory, (error) =>
+          error
+            ? console.log(error)
+            : console.log("You have created the target_directory")
+        );
+      }
+      for await (let warning of warning_groups) {
+        await fsp.writeFile(
+          `/home/staging/hhm_rpp/logReader/warning_logs/warning_log_${now}.txt`,
+          warning,
+          {
+            encoding: "utf8",
+            flag: "a+",
+          }
+        );
+      }
+    }
+  } catch (error) {
+    console.log(error);
   }
 };
 
 appendLogData("/home/staging/hhm_rpp/adp.prod.log");
-
 */
