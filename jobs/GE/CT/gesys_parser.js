@@ -102,7 +102,7 @@ async function ge_ct_gesys(system) {
 
     if (insertSuccess) {
       await system.updateRedisFileSize();
-      await extract(system.jobId, extraction_data);
+      if (extraction_data.length > 0) await extract(system.jobId, extraction_data);
     }
   } catch (error) {
     await log("error", system.jobId, system.sme, "ge_ct_gesys", "FN CALL", {

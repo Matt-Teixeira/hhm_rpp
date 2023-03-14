@@ -157,7 +157,7 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
         fileToParse.file_name
       );
       // insert metadata
-      await extract(jobId, memo_data);
+      if(memo_data.length > 0) await extract(jobId, memo_data);
     }
   } catch (error) {
     await log("error", jobId, sme, "phil_cv_eventlog", "FN CALL", {
