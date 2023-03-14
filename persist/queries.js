@@ -367,4 +367,17 @@ module.exports = queries = {
       `,
     },
   },
+  extracted_metadata:{
+    logfile_event_history_metadata: `
+    INSERT INTO logfile_event_history_metadata(
+      system_id,
+      name,
+      value,
+      host_datetime
+    )
+  SELECT * FROM UNNEST (
+    $1::text[], $2::text[], $3::text[], $4::timestamptz[]
+  )
+    `,
+  }
 };

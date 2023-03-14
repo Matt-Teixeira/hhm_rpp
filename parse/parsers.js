@@ -12,6 +12,10 @@ const win_10_re = {
     /(?<host_time>\d{2}:\d{2}:\d{2})\t(?<host_state>\w+)\t(?<host_date>\d{4}-\d{1,2}-\d{1,2})\t(?<source_group>(.*?(\d+)?)(\.\d\.\d)?)\t?\s?(?<type_group>(\d{1,5}))\t(?<text_group>.*)/,
 };
 
+const siemens = {
+  cv_1: /(?<start>[A-Z]?)\s+(?<day>\d{2})-(?<month>[A-Z][a-z]+)-(?<year>\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2}).*?\)">(?<id>\d+)<\/\w+>\s(?<source>.+?)\s+(?<sequence>\d+|n\/a)?\s+(<\w+>)?(?<message>.+?)(<\/\w>)?\n/g
+}
+
 const ge_re = {
   test: {
     for_box: /|/,

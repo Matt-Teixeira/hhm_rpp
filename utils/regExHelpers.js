@@ -47,6 +47,14 @@ async function getMonitorFiles(files) {
   return monitorFiles;
 }
 
+function remove_dub_quotes(match, property_name) {
+  let new_str = match.groups[property_name].match(/^"(?<text>.*)"$/);
+  if (new_str) {
+    match.groups[property_name] = new_str.groups.text;
+  }
+  return;
+}
+
 // SR\s(\d+).*?EN\s\1
 
 module.exports = {
@@ -54,5 +62,6 @@ module.exports = {
   get_sme_modality,
   get_sme,
   blankLineTest,
-  getMonitorFiles
+  getMonitorFiles,
+  remove_dub_quotes,
 };

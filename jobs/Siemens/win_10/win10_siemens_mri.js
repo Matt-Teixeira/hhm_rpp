@@ -1,89 +1,96 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
-const fs = require("fs");
-const readline = require("readline");
 const { win_10_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { siemens_ct_mri } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const { blankLineTest } = require("../../../utils/regExHelpers");
-const {
-  updateRedisLine,
-  getRedisLine,
-} = require("../../../redis/redisHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
+const execLastMod = require("../../../read/exec-file_last_mod");
 
-const win10_siemens_mri = async (jobId, sysConfigData, fileConfig) => {
-  const sme = sysConfigData.id;
-  const dirPath = sysConfigData.hhm_config.file_path;
-  // an array in each config accossiated with a file
-  const parsers = fileConfig.parsers;
+/* NOTE ON EvtApplication_Today.txt
+  This file turns over on a 24 hour intervolve; however, it also accumulates data throughout the day.
+  New data is added to file head. 
+*/
 
+const win10_siemens_mri = async (System) => {
   const data = [];
+
+  lastModPath = "./read/sh/get_file_last_mod.sh";
 
   let line_num = 1;
   // first_line will be the most recent line data
   let first_line;
+
+  console.log(System);
   try {
-    await log("info", jobId, sme, "win10_siemens_mri", "FN CALL");
+    await log(
+      "info",
+      System.jobId,
+      System.sme,
+      "win10_siemens_mri",
+      "FN CALL"
+    );
 
-    let redis_line = await getRedisLine(sme, fileConfig.file_name);
+    await System.get_redis_line();
 
-    const complete_file_path = `${dirPath}/${fileConfig.file_name}`;
+    // Returns true if file in dir.
+    if (!System.is_file_present()) return;
 
-    if (!fs.existsSync(complete_file_path)) {
-      await log("warn", jobId, sme, "win10_siemens_mri", "FN CALL", {
-        message: "File not found in directory",
-        file: complete_file_path,
-      });
-      return;
-    }
+    System.get_file_data();
 
-    rl = readline.createInterface({
-      input: fs.createReadStream(complete_file_path),
-      crlfDelay: Infinity,
-    });
-
-    for await (const line of rl) {
-      // Save first line (most up to date data entry) to redis
+    for await (const line of System.file_data) {
+      // Save first line (most resent parsed line) to redis
       // This process of delimiting new and old data only works because new data is appended to top of
       if (line_num === 1) first_line = line;
 
       // If line (in file) === redis_line, we break because we have reached point of last rpp.
-      if (line == redis_line) {
-        console.log("FOUND END OF LINE" + "\n");
-        console.log(line + "\n");
-        console.log(redis_line + "\n");
+      if (line == System.redis_line) {
+        // Log file's last mod datetime
+        const file_mod_datetime = await execLastMod(lastModPath, [
+          System.complete_file_path,
+        ]);
+        await log("warn", System.jobId, System.sme, "getFileData", "FN CALL", {
+          message: `No delta measured`,
+          last_mod: file_mod_datetime,
+        });
         break;
       }
 
-      let matches = line.match(win_10_re[parsers[0]]);
+      let matches = line.match(win_10_re[System.parsers[0]]);
 
       if (matches === null) {
         const isNewLine = blankLineTest(line);
         if (isNewLine) {
           continue;
         } else {
-          await log("error", jobId, sme, "Not_New_Line", "FN CALL", {
-            message: "This is not a blank new line - Bad Match",
-            line: line,
-          });
+          await log(
+            "error",
+            System.jobId,
+            System.sme,
+            "Not_New_Line",
+            "FN CALL",
+            {
+              message: "This is not a blank new line - Bad Match",
+              line: line,
+            }
+          );
         }
       }
 
-      matches.groups.system_id = sme;
+      matches.groups.system_id = System.sme;
 
       const dtObject = await generateDateTime(
-        jobId,
+        System.jobId,
         matches.groups.system_id,
-        fileConfig.pg_table,
+        System.fileToParse.pg_table,
         matches.groups.host_date,
         matches.groups.host_time
       );
 
       if (dtObject === null) {
-        await log("warn", jobId, sme, "date_time", "FN CALL", {
+        await log("warn", System.jobId, System.sme, "date_time", "FN CALL", {
           message: "date_time object null",
         });
       }
@@ -95,34 +102,36 @@ const win10_siemens_mri = async (jobId, sysConfigData, fileConfig) => {
     }
 
     // No data in array if most recently parsed line in redis === first line in file. Indication of no change in file.
-    if (data.length === 0) {
-      await log("warn", jobId, sme, "win10_siemens_mri", "FN CALL", {
-        message: "No new data in file",
-        file: fileConfig.file_name,
-      });
-      return;
-    }
+    // Logged above
+    if (data.length === 0) return;
 
     const mappedData = mapDataToSchema(data, siemens_ct_mri);
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
     const insertSuccess = await bulkInsert(
-      jobId,
+      System.jobId,
       dataToArray,
-      sysConfigData,
-      fileConfig
+      System.sysConfigData,
+      System.fileToParse
     );
     if (insertSuccess) {
-      await updateRedisLine(sme, fileConfig.file_name, first_line);
+      await System.update_redis_line(first_line);
     }
 
     return true;
   } catch (error) {
-    await log("error", jobId, sme, "win10_siemens_mri", "FN CATCH", {
-      line: line_num,
-      error: error,
-      file: fileConfig,
-    });
+    console.log(error);
+    await log(
+      "error",
+      System.jobId,
+      System.sme,
+      "win10_siemens_mri",
+      "FN CATCH",
+      {
+        line: line_num,
+        error: error,
+      }
+    );
   }
 };
 

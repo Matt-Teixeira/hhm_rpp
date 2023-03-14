@@ -5,6 +5,7 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const bulkInsert = require("../../../persist/queryBuilder");
 const { blankLineTest } = require("../../../utils/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
+const { remove_dub_quotes } = require("../../../utils/regExHelpers");
 
 // File to parse is read line by line for regEx to match
 async function ge_cv_sys_error(System) {
@@ -82,6 +83,11 @@ async function ge_cv_sys_error(System) {
         }
 
         matches.groups.host_datetime = dtObject;
+
+        // Remove double quotes from str
+        if (matches.groups.subsystem !== "") {
+          remove_dub_quotes(matches, "subsystem");
+        }
 
         data.push(matches.groups);
       }
