@@ -1,6 +1,9 @@
 const extracted_insert = require("../../../persist/extracted_query_builder");
+const { log } = require("../../../logger");
 
 async function extract(jobId, extraction_data) {
+  
+ try {
   const data = [];
   const scan_seconds_re =
     /The current tube usage data reports a total of\s?(?<scan_seconds>\d+\.\d+)/;
@@ -22,11 +25,18 @@ async function extract(jobId, extraction_data) {
   const insertSuccess = await extracted_insert(
     jobId,
     dataToArray,
-    'logfile_event_history_metadata',
+    "logfile_event_history_metadata",
     data[0].system_id
   );
 
-  if(!insertSuccess) throw new Error("logfile_event_history_metadata failed")
+  console.log(data)
+
+  if (!insertSuccess) throw new Error("logfile_event_history_metadata failed");
+ } catch (error) {
+  await log("error", jobId, data[0].system_id, "onBoot", "FN CATCH", {
+    error: error,
+  });
+ }
 }
 
 module.exports = extract;
