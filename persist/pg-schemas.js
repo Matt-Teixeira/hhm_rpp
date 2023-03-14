@@ -274,6 +274,13 @@ const philips_cv_eventlog_schema = {
   host_datetime: null,
 };
 
+const logfile_event_history_metadata = {
+  system_id: null,
+  power_on: null,
+  software_version: null,
+  host_datetime: null,
+};
+
 module.exports = {
   ge_mri_gesys_schema,
   siemens_ct_mri,
@@ -287,4 +294,5 @@ module.exports = {
   ge_ct_gesys_schema,
   ge_cv_syserror_schema,
   philips_cv_eventlog_schema,
+  logfile_event_history_metadata,
 };

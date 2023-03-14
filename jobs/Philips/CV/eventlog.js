@@ -16,6 +16,7 @@ const {
 } = require("../../../redis/redisHelpers");
 const execHead = require("../../../read/exec-head");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
+const extract = require("../../../processing/date_processing/phil_cv/extract_memo_data");
 
 // EventLog.txt runs 1 per day
 
@@ -30,6 +31,8 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
   const lastModPath = "./read/sh/get_dir_last_mod.sh";
 
   const data = [];
+  // Extract 'Power-On hours' and 'Commercial Version'
+  const memo_data = [];
 
   try {
     const complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
@@ -42,8 +45,9 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
 
       await log("warn", jobId, sme, "phil_cv_eventlog", "FN CALL", {
         message: "File not found in directory",
-        file: complete_file_path,
-        last_updated: file_mod_datetime,
+        file: sysConfigData.hhm_config.file_path + "/archive",
+        last_mod:
+          file_mod_datetime + sysConfigData.hhm_config.file_path + "/archive",
       });
       return;
     }
@@ -125,6 +129,13 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
         matches.groups.host_datetime = dtObject;
 
         data.push(matches.groups);
+        if (matches.groups.memo !== "") {
+          memo_data.push({
+            system_id: matches.groups.system_id,
+            memo: matches.groups.memo,
+            host_datetime: matches.groups.host_datetime,
+          });
+        }
       }
     }
 
@@ -137,7 +148,7 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
       dataToArray,
       sysConfigData,
       fileToParse
-    );
+    ); 
     if (insertSuccess) {
       await updateRedisFileSize(
         sme,
@@ -145,6 +156,8 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
         sysConfigData.hhm_config.file_path,
         fileToParse.file_name
       );
+      // insert metadata
+      if(memo_data.length > 0) await extract(jobId, memo_data);
     }
   } catch (error) {
     await log("error", jobId, sme, "phil_cv_eventlog", "FN CALL", {
