@@ -106,7 +106,7 @@ module.exports = queries = {
   },
   Siemens: {
     CT: {
-      EvtApplication_Today: `
+      Application: `
       INSERT INTO log.siemens_ct (
           system_id,
           host_state,

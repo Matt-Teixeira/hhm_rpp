@@ -8,6 +8,7 @@ const bulkInsert = require("../../../persist/queryBuilder");
 const { blankLineTest } = require("../../../utils/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
+const extract = require("../../../processing/date_processing/siemens_ct/extract_metadata");
 
 /* NOTE ON EvtApplication_Today.txt
   This file turns over on a 24 hour intervolve; however, it also accumulates data throughout the day.
@@ -16,13 +17,14 @@ const execLastMod = require("../../../read/exec-file_last_mod");
 
 const win10_siemens_ct = async (System) => {
   const data = [];
+  const extracted_metadata = [];
 
   lastModPath = "./read/sh/get_file_last_mod.sh";
 
   let line_num = 1;
   // first_line will be the most recent line data
   let first_line;
-  console.log(System);
+
   try {
     await log("info", System.jobId, System.sme, "win10_siemens_ct", "FN CALL");
 
@@ -45,7 +47,8 @@ const win10_siemens_ct = async (System) => {
           System.complete_file_path,
         ]);
         await log("warn", System.jobId, System.sme, "getFileData", "FN CALL", {
-          message: `No delta measured`,
+          message: `End of new data`,
+          lines: line_num - 1,
           last_mod: file_mod_datetime,
         });
         break;
@@ -91,6 +94,16 @@ const win10_siemens_ct = async (System) => {
       matches.groups.host_datetime = dtObject;
 
       data.push(matches.groups);
+
+      const scan_sec_test_re = /scan\sseconds/;
+      if (scan_sec_test_re.test(matches.groups.text_group)) {
+        extracted_metadata.push({
+          system_id: matches.groups.system_id,
+          text_group: matches.groups.text_group,
+          host_datetime: matches.groups.host_datetime,
+        });
+      }
+
       line_num++;
     }
 
@@ -109,6 +122,7 @@ const win10_siemens_ct = async (System) => {
     );
     if (insertSuccess) {
       await System.update_redis_line(first_line);
+      if(extracted_metadata.length > 0) await extract(System.jobId, extracted_metadata);
     }
 
     return true;
