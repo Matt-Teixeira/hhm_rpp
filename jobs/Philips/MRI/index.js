@@ -84,7 +84,6 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
       }
     }
   } catch (error) {
-    console.log(error);
     await log(
       "error",
       jobId,

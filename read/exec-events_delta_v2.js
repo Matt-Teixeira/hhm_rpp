@@ -11,9 +11,6 @@ async function exec_events_delta_v2(jobId, sme, exec_path, args) {
   try {
     const { stdout: newData } = await execFile(exec_path, args, execOptions);
     if (newData == "") {
-      console.log(
-        "In search for the last parsed line, empty string was returned"
-      );
       throw new Error(
         "In search for the last parsed line, empty string was returned"
       );
@@ -36,7 +33,6 @@ async function exec_events_delta_v2(jobId, sme, exec_path, args) {
     return data;
   } catch (error) {
     await log("error", jobId, sme, "exec_events_delta_v2", "FN CALL", { error });
-    console.log(error);
     return null;
   }
 }

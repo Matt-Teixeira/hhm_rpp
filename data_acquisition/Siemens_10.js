@@ -33,9 +33,9 @@ class Siemens_10 extends System {
 
   async is_file_present() {
     if (!fs.existsSync(this.complete_file_path)) {
-      await log("error", jobId, sme, "win10_siemens_mri", "FN CALL", {
+      await log("error", this.jobId, this.sme, "win10_siemens_mri", "FN CALL", {
         message: "File not found in directory",
-        file: complete_file_path,
+        file: this.complete_file_path,
       });
       return false;
     }

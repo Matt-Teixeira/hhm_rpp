@@ -25,13 +25,7 @@ const win10_siemens_mri = async (System) => {
 
   console.log(System);
   try {
-    await log(
-      "info",
-      System.jobId,
-      System.sme,
-      "win10_siemens_mri",
-      "FN CALL"
-    );
+    await log("info", System.jobId, System.sme, "win10_siemens_mri", "FN CALL");
 
     await System.get_redis_line();
 
@@ -120,7 +114,6 @@ const win10_siemens_mri = async (System) => {
 
     return true;
   } catch (error) {
-    console.log(error);
     await log(
       "error",
       System.jobId,

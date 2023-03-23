@@ -16,7 +16,6 @@ async function initialUpdate(jobId, sme, fileName, data) {
     });
     let processType = process_file_config[fileName].type;
 
-    console.log(processType)
     switch (processType) {
       case "max":
         await maxValue(jobId, sme, data, process_file_config[fileName].col);

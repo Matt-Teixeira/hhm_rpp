@@ -14,10 +14,6 @@ async function booleanValue(jobId, sme, data, column) {
       sme: sme,
     });
 
-    console.log("\n ***** UPDATE BOOL ****** \n");
-
-    console.log(data);
-
     // Get date ranges for smaller query and loop
     const startDate = data[data.length - 1].host_date;
     const endDate = data[0].host_date;
@@ -28,8 +24,6 @@ async function booleanValue(jobId, sme, data, column) {
     // Aggregation bucket
     let bucket = [];
     let prevData = data[data.length - 1].host_date; //Set to first date in file data(file capture groups)
-
-    console.log("PREVIOUS DATE: " + prevData);
 
     // loop through each observation in the array of match groups. Seperated by column name.
     for await (const obs of data) {
@@ -103,7 +97,6 @@ async function booleanValue(jobId, sme, data, column) {
       ]);
     }
   } catch (error) {
-    console.log(error);
     await log("error", jobId, sme, "booleanValue", "FN CALL", {
       sme: sme,
       column: column,

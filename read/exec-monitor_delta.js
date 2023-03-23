@@ -16,7 +16,7 @@ async function exec_monitor_delta(jobId, exec_path, args) {
     
     return newData;
   } catch (error) {
-    console.log(error);
+   
     return null;
   }
 }

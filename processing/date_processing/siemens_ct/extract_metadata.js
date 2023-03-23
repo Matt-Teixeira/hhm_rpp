@@ -4,7 +4,7 @@ const { log } = require("../../../logger");
 async function extract(jobId, extraction_data) {
   const data = [];
   const tube_data_re =
-    /scan\sseconds\s=\s(?<scan_secconds>\d+)?.*tubeSerialNo:\s(?<tube_serial_no>\d+).*TubeType:\s(?<tube_type>\w+)/;
+    /scan\sseconds.*=\s(?<scan_seconds>\d+)?.*tubeSerialNo:\s(?<tube_serial_no>\d+).*TubeType:\s(?<tube_type>\w+)/;
 
   try {
     for (const group of extraction_data) {
@@ -30,7 +30,7 @@ async function extract(jobId, extraction_data) {
       jobId,
       dataToArray,
       "logfile_event_history_metadata",
-      data[0].system_id
+      extraction_data[0].system_id
     );
 
     if (!insertSuccess)
@@ -39,7 +39,7 @@ async function extract(jobId, extraction_data) {
     await log(
       "error",
       jobId,
-      data[0].system_id,
+      extraction_data[0].system_id,
       "siemens_ct_metadata",
       "FN CATCH",
       {

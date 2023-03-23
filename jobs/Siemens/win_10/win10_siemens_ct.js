@@ -122,12 +122,12 @@ const win10_siemens_ct = async (System) => {
     );
     if (insertSuccess) {
       await System.update_redis_line(first_line);
-      if(extracted_metadata.length > 0) await extract(System.jobId, extracted_metadata);
+      if (extracted_metadata.length > 0)
+        await extract(System.jobId, extracted_metadata);
     }
 
     return true;
   } catch (error) {
-    console.log(error);
     await log(
       "error",
       System.jobId,

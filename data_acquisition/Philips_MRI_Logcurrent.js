@@ -35,8 +35,6 @@ class PHILIPS_MRI_LOGCURRENT {
         this.sme,
         this.fileToParse.logcurrent.file_name
       );
-      console.log(this.fileToParse.logcurrent.file_name);
-      console.log(this.prev_file_size);
     } catch (error) {
       await log(
         "error",
@@ -77,7 +75,6 @@ class PHILIPS_MRI_LOGCURRENT {
 
   checkFileExists() {
     if (this.current_file_size === null) {
-      console.log("FILE DOES NOT EXIST!!!");
       throw new Error(
         "File not found in directory: " + this.complete_file_path
       );
@@ -117,7 +114,6 @@ class PHILIPS_MRI_LOGCURRENT {
         this.prev_file_size === 0 ||
         this.delta < 0
       ) {
-        console.log("This needs to be read from file");
         this.file_data = readline.createInterface({
           input: fs.createReadStream(this.complete_file_path),
           crlfDelay: Infinity,
@@ -138,10 +134,9 @@ class PHILIPS_MRI_LOGCURRENT {
 
         if (this.delta === 0) {
           // Get file's last mod datetime
-          const file_mod_datetime = await execLastMod(
-            this.lastModPath,
-            [this.complete_file_path]
-          );
+          const file_mod_datetime = await execLastMod(this.lastModPath, [
+            this.complete_file_path,
+          ]);
           await log("warn", this.jobId, this.sme, "getFileData", "FN CALL", {
             message: `No file data to read. Delta: ${this.delta}`,
             last_mod: file_mod_datetime,

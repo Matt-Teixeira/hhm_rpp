@@ -17,7 +17,7 @@ async function insertDisplayData(jobId, sysConfigData, data) {
     const has_prev_data = await getSystemDbData(jobId, sme);
 
     if (has_prev_data.rows[0].count === '0') {
-      console.log("NEW SYSTEM - NO DATA IN DB")
+
       // Create entry for new SME
       for (const prop in data) {
         const fileName = prop;
@@ -25,14 +25,14 @@ async function insertDisplayData(jobId, sysConfigData, data) {
       }
     } else {
       // find most recent date in database and start process on that data for data[prop]
-      console.log("SYSTEM HAS OLD DATA. BUILD OFF IT")
+  
       for (const prop in data) {
         const fileName = prop;
         await updatePhilMriTable(jobId, sme, fileName, data[prop]);
       }
     }
   } catch (error) {
-    console.log(error);
+  
     await log("error", jobId, sme, "insertDisplayData", "FN CALL", {
       sme: sme,
       modality,

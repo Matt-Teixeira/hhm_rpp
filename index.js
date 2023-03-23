@@ -6,7 +6,6 @@ const pgPool = require("./db/pg-pool");
 const siemens_parser = require("./jobs/Siemens");
 const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");
-//const { systems } = require("./test_data/systems");
 
 const determineManufacturer = async (jobId, sme) => {
   try {
@@ -56,15 +55,23 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot(["SME00885"]);
+onBoot([
+  "SME00885",
+  "SME00894",
+  "SME01092",
+  "SME01129",
+  "SME00868",
+  "SME01112",
+  "SME00855",
+  "SME00871",
+]);
 
-/*
+/* 
 const determineManufacturer = async (jobId, system) => {
   try {
     await log("info", jobId, system.id, "determineManufacturer", "FN CALL", {
       mod: process.argv[2],
     });
-    console.log(system.id);
 
     switch (system.manufacturer) {
       case "Siemens":
@@ -99,14 +106,12 @@ const onBoot = async () => {
       MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1'",
       phil_cv_hr_24:
         "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND manufacturer = 'Philips' AND hhm_config->'run_group' = '2'",
-      all: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL"
+      all: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL",
     };
 
     let queryString = queries[shell_value];
 
     const system_array = await pgPool.query(queryString);
-
-    console.log(system_array.rows)
 
     for await (const system of system_array.rows) {
       let jobId = crypto.randomUUID();
@@ -123,4 +128,4 @@ const onBoot = async () => {
 };
 
 onBoot();
-*/
+ */

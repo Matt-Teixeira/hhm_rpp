@@ -10,7 +10,7 @@ async function exec_tail_last_line(exec_path, file_path) {
     const { stdout: newData } = await execFile(exec_path, [file_path], execOptions);
     return newData.trim();
   } catch (error) {
-    console.log(error);
+  
     return null;
   }
 }

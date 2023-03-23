@@ -12,7 +12,6 @@ async function updateRedisFileSize(sme, exec_path, file_path, file) {
       `${file_path}/${file}`
     );
     const setKey = `${sme}.${file}`;
-    console.log(setKey);
 
     const setValue = newFileSize.trim();
     await redisClient.set(setKey, setValue);

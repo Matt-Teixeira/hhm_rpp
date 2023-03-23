@@ -12,7 +12,6 @@ async function execLastEventsLine(jobId, sme, exec_path, args) {
   try {
     const { stdout: newData } = await execFile(exec_path, args, execOptions);
 
-    console.log("EVENTS LAST PARSED LINE: " + newData);
     // Example match ,63810836376,"2023/02/01 08:19:35.864"
     let last_line = newData.match(
       /,\d+,"\d{4}\/\d{2}\/\d{2}\s\d{2}:\d{2}:\d{2}\.\d{3}"|".*"\d{2}\/\d{2}\/\d{2}\s\d{2}:\d{2}:\d{2}"|"\d{4}\/\d{2}\/\d{2}\s\d{2}:\d{2}:\d{2}\.\d{3}(.+\d)"/
@@ -28,7 +27,6 @@ async function execLastEventsLine(jobId, sme, exec_path, args) {
 
     return last_line[0];
   } catch (error) {
-    console.log(error);
     return null;
   }
 }

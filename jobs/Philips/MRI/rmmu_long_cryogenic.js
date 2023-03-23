@@ -121,7 +121,7 @@ async function phil_mri_rmmu_long(fileToParse, System) {
 
     return;
   } catch (error) {
-    console.log(error);
+    
     await log(
       "error",
       System.jobId,

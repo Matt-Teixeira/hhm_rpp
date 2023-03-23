@@ -118,7 +118,6 @@ async function ge_cv_sys_error(System) {
       await System.updateRedisFileSize();
     }
   } catch (error) {
-    console.log(error);
     await log(
       "error",
       System.jobId,

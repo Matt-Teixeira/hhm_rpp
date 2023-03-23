@@ -86,7 +86,6 @@ async function booleanValue(jobId, sme, data, column) {
       ]);
     }
   } catch (error) {
-    console.log(error);
     await log("error", jobId, sme, "booleanValue", "FN CALL", {
       sme: sme,
       column: column,

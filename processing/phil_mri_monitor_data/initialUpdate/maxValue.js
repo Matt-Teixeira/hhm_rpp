@@ -66,7 +66,7 @@ async function maxValue(jobId, sme, data, column) {
       ]);
     }
   } catch (error) {
-    console.log(error);
+   
     await log("error", jobId, sme, "maxValue", "FN CALL", {
       sme: sme,
       column: column,

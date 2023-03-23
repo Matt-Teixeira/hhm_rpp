@@ -37,8 +37,6 @@ async function phil_ct_eal(jobId, sysConfigData, fileToParse) {
       fileToParse.query
     );
 
-    console.log("EALInfo - LINE FROM REDIS: " + last_parsed_line);
-
     // Current line number of end of EALInfo block
     const eal_delta = await exec_eal_delta(
       jobId,
@@ -77,9 +75,12 @@ async function phil_ct_eal(jobId, sysConfigData, fileToParse) {
     const mappedData = mapDataToSchema(data, philips_ct_eal_schema);
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
-    const last_line = await exec_last_parsed_line(jobId, sme, eal_info_parsed_line_path, [
-      complete_file_path,
-    ]);
+    const last_line = await exec_last_parsed_line(
+      jobId,
+      sme,
+      eal_info_parsed_line_path,
+      [complete_file_path]
+    );
 
     // last_line will be false if not captured. Do not insert into db until last line saved in redis
     if (last_line) {
@@ -95,7 +96,6 @@ async function phil_ct_eal(jobId, sysConfigData, fileToParse) {
       }
     }
   } catch (error) {
-    console.log(error);
     await log("error", jobId, sme, "phil_ct_eal", "FN CALL", {
       error,
     });

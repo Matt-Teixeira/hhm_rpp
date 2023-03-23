@@ -7,27 +7,19 @@ const { philips_ct_events_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
-const exec_events_delta = require("../../../read/exec-events_delta");
 const exec_events_delta_v2 = require("../../../read/exec-events_delta_v2");
 const {
-  getRedisLine,
-  updateRedisLine,
   updateRedisLinePositions,
   getRedisLinePositions,
 } = require("../../../redis/redisHelpers");
-const execLastEventsLine = require("../../../read/exec-events_last_parsed_line");
 
 async function phil_ct_events(jobId, sysConfigData, fileToParse) {
   const parsers = fileToParse.parsers;
   const sme = sysConfigData.id;
   const data = [];
 
-  const events_delta_path =
-    "/home/matt-teixeira/hep3/hhm_rpp/read/sh/events_delta.sh";
   const events_delta_v2_path =
     "/home/matt-teixeira/hep3/hhm_rpp/read/sh/events_delta_v2.sh";
-  const events_info_parsed_line_path =
-    "/home/matt-teixeira/hep3/hhm_rpp/read/sh/get_last_parsed_events_line.sh";
 
   try {
     await log("info", jobId, sme, "phil_ct_events", "FN CALL");
@@ -40,20 +32,12 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
       fileToParse.query
     );
 
-
-    console.log(prev_line_positions)
-
-    // {eal: 4934, events: 11639}
-
     const events_delta = await exec_events_delta_v2(
       jobId,
       sysConfigData.id,
       events_delta_v2_path,
       [complete_file_path, prev_line_positions.eal, prev_line_positions.events]
     );
-
-    console.log(events_delta.new_events_line_count);
-    console.log(events_delta.new_eal_end_line_num);
 
     if (events_delta === false) {
       await log("warn", jobId, sme, "phil_ct_events", "FN CALL", {
@@ -74,8 +58,6 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
         if (na_reduced) {
           match.groups.na = na_reduced.groups.na;
         }
-
-        // console.log(match.groups);
         let blob_reduced = match.groups.blob.match(/(?<blob>\w+)/);
         if (blob_reduced) {
           match.groups.blob = blob_reduced.groups.blob;
@@ -115,7 +97,6 @@ async function phil_ct_events(jobId, sysConfigData, fileToParse) {
       );
     }
   } catch (error) {
-    console.log(error);
     await log("error", jobId, sme, "phil_ct_events", "FN CALL", {
       error,
     });

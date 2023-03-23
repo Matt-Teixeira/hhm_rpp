@@ -37,7 +37,7 @@ class PHILIPS_MRI_RMMU {
     try {
       for await (const file of this.files_in_dir) {
         const complete_file_path = `${this.directory_path}/${file}`;
-        console.log("\n" + complete_file_path);
+
         const fileData = (await fsp.readFile(complete_file_path)).toString();
       }
     } catch (error) {
