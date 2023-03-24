@@ -25,7 +25,6 @@ async function bulkInsert(jobId, data, sysConfigData, fileConfig) {
     });
     return true;
   } catch (error) {
-    console.log(error);
     await log("error", jobId, sysConfigData.id, "bulkInsert", `FN CALL`, {
       error: error.message,
     });

@@ -102,7 +102,7 @@ async function phil_mri_monitor(System, directory) {
     // send data to be aggregated
     return jsonData;
   } catch (error) {
-    console.log(error);
+   
     await log(
       "error",
       System.jobId,

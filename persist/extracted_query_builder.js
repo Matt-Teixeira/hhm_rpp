@@ -5,8 +5,6 @@ const queries = require("./queries");
 
 async function extracted_insert(jobId, data, pg_table, system_id) {
   try {
-    console.log(data);
-
     if (data.length === 0) {
       throw new Error("File is empty/no matches");
     }
@@ -23,7 +21,6 @@ async function extracted_insert(jobId, data, pg_table, system_id) {
     });
     return true;
   } catch (error) {
-    console.log(error);
     await log("error", jobId, system_id, "extracted_insert", `FN CALL`, {
       error: error.message,
     });

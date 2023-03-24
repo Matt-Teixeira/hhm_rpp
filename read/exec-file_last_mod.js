@@ -11,7 +11,6 @@ async function execLastMod(exec_path, args) {
 
     return newData;
   } catch (error) {
-    console.log(error);
     return null;
   }
 }

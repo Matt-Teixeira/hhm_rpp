@@ -42,9 +42,3 @@ const determineOsVersion = async (jobId, sysConfigData) => {
 };
 
 module.exports = determineOsVersion;
-
-/* const parsed_data = await parse_win_10(filePath);
-    console.log(parsed_data);
-    if (parsed_data === undefined) {
-      await parse_win_7(filePath);
-    } */

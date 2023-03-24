@@ -7,7 +7,7 @@ const { Philips_CT } = require("../../../data_acquisition/Philips_CT");
 
 const philips_ct_parsers = async (jobId, sysConfigData) => {
   try {
-    await log("info", jobId, "NA", "philips_ct_parsers", "FN CALL", {
+    await log("info", jobId, sysConfigData.id, "philips_ct_parsers", "FN CALL", {
       sysConfigData,
     });
 
@@ -18,7 +18,6 @@ const philips_ct_parsers = async (jobId, sysConfigData) => {
           await phil_ct_eal(eal_system);
           break;
         case "events":
-          break;
           const events_system = new Philips_CT(sysConfigData, file, jobId);
           await phil_ct_events(events_system);
           break;
@@ -27,7 +26,7 @@ const philips_ct_parsers = async (jobId, sysConfigData) => {
       }
     }
   } catch (error) {
-    await log("error", jobId, "NA", "philips_ct_parsers", "FN CATCH", {
+    await log("error", jobId, sysConfigData.id, "philips_ct_parsers", "FN CATCH", {
       error: error,
     });
   }

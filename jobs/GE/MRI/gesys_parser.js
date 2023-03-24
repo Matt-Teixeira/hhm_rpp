@@ -110,7 +110,6 @@ async function ge_mri_gesys(System) {
       await System.updateRedisFileSize();
     }
   } catch (error) {
-    console.log(error);
     await log(
       "error",
       System.jobId,

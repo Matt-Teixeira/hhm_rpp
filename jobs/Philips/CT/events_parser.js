@@ -67,11 +67,9 @@ async function phil_ct_events(system) {
     );
 
     if (insertSuccess) {
-      console.log("SUCCESSFUL INSERT");
       await system.updateRedisFileSize();
     }
   } catch (error) {
-    console.log(error);
     await log(
       "error",
       system.jobId,

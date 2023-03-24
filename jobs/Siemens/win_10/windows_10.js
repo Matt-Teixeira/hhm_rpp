@@ -33,12 +33,9 @@ const parse_win_10 = async (jobId, sysConfigData, fileConfig) => {
     const complete_file_path = `${dirPath}/${fileConfig.file_name}`;
 
     const prevFileSize = await getRedisFileSize(sme, fileConfig.file_name);
-    console.log(sme);
-    console.log("Redis File Size: " + prevFileSize);
 
     let rl;
     if (prevFileSize === null) {
-      console.log("This needs to be read from file");
       rl = readline.createInterface({
         input: fs.createReadStream(complete_file_path),
         crlfDelay: Infinity,
@@ -46,19 +43,15 @@ const parse_win_10 = async (jobId, sysConfigData, fileConfig) => {
     }
 
     if (prevFileSize > 0 && prevFileSize !== null) {
-      console.log("File Size prev saved in Redis");
-
       const currentFileSize = await getCurrentFileSize(
         sme,
         fileSizePath,
         sysConfigData.hhm_config.file_path,
         fileConfig.file_name
       );
-      console.log("CURRENT FILE SIZE: " + currentFileSize);
 
       const delta = currentFileSize - prevFileSize;
       await log("info", jobId, sme, "delta", "FN CALL", { delta: delta });
-      console.log("DELTA: " + delta);
 
       if (delta === 0) {
         await log("warn", jobId, sme, "delta-0", "FN CALL");

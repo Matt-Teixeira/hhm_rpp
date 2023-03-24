@@ -121,7 +121,7 @@ async function phil_mri_logcurrent(fileToParse, System) {
       await System.updateRedisFileSize();
     }
   } catch (error) {
-    console.log(error);
+    
     await log(
       "error",
       System.jobId,

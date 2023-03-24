@@ -58,12 +58,10 @@ const win_7_siemens_ct = async (jobId, sysConfigData, fileConfig, file) => {
     );
     if (insertSuccess) {
       await fs.rename(complete_file_path, `${fileConfig.move_path}/${file}`);
-      console.log("SUCCESS!!!");
     }
 
     return true;
   } catch (error) {
-    console.log(error);
     await log("error", jobId, sme, "win_7_siemens_ct", "FN CATCH", {
       error: error,
     });

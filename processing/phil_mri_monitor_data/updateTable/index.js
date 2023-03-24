@@ -25,7 +25,7 @@ async function philMonitorTableUpdate(jobId, sme, col_name, fileName, data) {
         await minValue(jobId, sme, data, col_name);
         break;
       case "bool":
-        console.log(processType);
+       
         await booleanValue(jobId, sme, data, col_name);
         break;
       default:

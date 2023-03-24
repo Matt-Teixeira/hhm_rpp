@@ -64,7 +64,6 @@ async function getExistingNotNullDates(jobId, sme, col_name) {
     for await (const date of systemDates.rows) {
       systemDatesToArray.push(date.date);
     }
-    console.log("System Date in ARRAY: ", systemDatesToArray);
     return systemDatesToArray;
   } catch (error) {
     await log("error", jobId, sme, "getExistingNotNullDates", "FN CALL", {

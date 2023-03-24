@@ -57,7 +57,6 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
     });
 
     const prevFileSize = await getRedisFileSize(sme, fileToParse.file_name);
-    console.log("Redis File Size: " + prevFileSize);
 
     // rl is set conditionaly. Holds file data
     let rl;
@@ -65,7 +64,6 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
     // prevFileSize will be 0 if log has rotated.
     // In both scenarios, read and parse entire file.
     if (prevFileSize === null || prevFileSize === 0) {
-      console.log("This needs to be read from file");
       rl = readline.createInterface({
         input: fs.createReadStream(complete_file_path),
         crlfDelay: Infinity,
@@ -73,19 +71,15 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
     }
 
     if (prevFileSize > 0 && prevFileSize !== null) {
-      console.log("File Size prev saved in Redis");
-
       const currentFileSize = await getCurrentFileSize(
         sme,
         fileSizePath,
         sysConfigData.hhm_config.file_path,
         fileToParse.file_name
       );
-      console.log("CURRENT FILE SIZE: " + currentFileSize);
 
       const delta = currentFileSize - prevFileSize;
       await log("info", jobId, sme, "delta", "FN CALL", { delta: delta });
-      console.log("DELTA: " + delta);
 
       if (delta === 0) {
         await log("warn", jobId, sme, "delta-0", "FN CALL");
@@ -148,7 +142,7 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
       dataToArray,
       sysConfigData,
       fileToParse
-    ); 
+    );
     if (insertSuccess) {
       await updateRedisFileSize(
         sme,
@@ -157,7 +151,7 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
         fileToParse.file_name
       );
       // insert metadata
-      if(memo_data.length > 0) await extract(jobId, memo_data);
+      if (memo_data.length > 0) await extract(jobId, memo_data);
     }
   } catch (error) {
     await log("error", jobId, sme, "phil_cv_eventlog", "FN CALL", {
