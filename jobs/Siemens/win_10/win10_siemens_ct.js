@@ -10,9 +10,10 @@ const generateDateTime = require("../../../processing/date_processing/generateDa
 const execLastMod = require("../../../read/exec-file_last_mod");
 const extract = require("../../../processing/date_processing/siemens_ct/extract_metadata");
 
-/* NOTE ON EvtApplication_Today.txt
-  This file turns over on a 24 hour intervolve; however, it also accumulates data throughout the day.
-  New data is added to file head. 
+/*
+NOTE ON EvtApplication_Today.txt
+This file turns over on a 24 hour intervolve; however, it also accumulates data throughout the day.
+New data is added to file head. 
 */
 
 const win10_siemens_ct = async (System) => {

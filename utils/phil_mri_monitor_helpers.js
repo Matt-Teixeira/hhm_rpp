@@ -75,11 +75,12 @@ async function getExistingNotNullDates(jobId, sme, col_name) {
 
 async function updateTable(jobId, col_name, arr) {
   try {
+
     const queryStr = `UPDATE log.philips_mri_monitoring_data SET ${col_name} = $1 WHERE system_id = $2 AND date = $3`;
     await pgPool.query(queryStr, arr);
   } catch (error) {
-    await log("error", jobId, arr[1], "updateTable", "FN CALL", {
-      sme: arr[1],
+    await log("error", jobId, arr[1], "updateTable", "FN CALL", { 
+      values: arr,
       error: error,
     });
   }
@@ -91,13 +92,17 @@ async function insertData(jobId, col_name, arr) {
     await pgPool.query(queryStr, arr);
   } catch (error) {
     await log("error", jobId, arr[0], "insertData", "FN CALL", {
-      sme: arr[0],
+      values: arr,
       error: error,
     });
   }
 }
 
 const process_file_config = {
+  monitor_System_HumExamRoom: {
+    type: "max",
+    col: "tech_room_humidity_value",
+  },
   monitor_System_HumTechRoom: {
     type: "max",
     col: "tech_room_humidity_value",
