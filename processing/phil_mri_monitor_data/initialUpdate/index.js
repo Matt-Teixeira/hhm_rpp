@@ -1,38 +1,41 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
-const {
-  process_file_config,
-} = require("../../../utils/phil_mri_monitor_helpers");
 const maxValue = require("./maxValue");
 const booleanValue = require("./booleanValue");
 const minValue = require("./minValue");
 
-async function initialUpdate(jobId, sme, fileName, data) {
+async function initialUpdate(jobId, sme, file_config, data) {
   try {
     await log("info", jobId, sme, "initialUpdate", "FN CALL", {
       sme: sme,
-      file: fileName,
+      file: file_config.file_name,
     });
-    let processType = process_file_config[fileName].type;
+    let process_type = file_config.aggregation
 
-    switch (processType) {
+    console.log("file_config");
+    console.log(file_config);
+    console.log("process_type")
+    console.log(process_type)
+    
+    switch (process_type) {
       case "max":
-        await maxValue(jobId, sme, data, process_file_config[fileName].col);
+        await maxValue(jobId, sme, data, file_config.column);
         break;
       case "min":
-        await minValue(jobId, sme, data, process_file_config[fileName].col);
+        await minValue(jobId, sme, data, file_config.column);
         break;
       case "bool":
-        await booleanValue(jobId, sme, data, process_file_config[fileName].col);
+        await booleanValue(jobId, sme, data, file_config.column);
         break;
       default:
         break;
     }
   } catch (error) {
+    console.log(error);
     await log("error", jobId, sme, "initialUpdate", "FN CALL", {
       sme: sme,
-      file: fileName,
+      file: file_config.file_name,
       error: error,
     });
   }

@@ -41,6 +41,7 @@ async function minValue(jobId, sme, data, column) {
 
         // If date exists for sme: UPDATE row
         if (systemDates.includes(prevData)) {
+          
           await updateTable(jobId, column, [minValue, sme, prevData]);
           bucket = []; // Empty bucket
           prevData = obs.host_date; // Set to new date in iteration
@@ -48,6 +49,7 @@ async function minValue(jobId, sme, data, column) {
         } else {
           // If date dose not exist: INSERT new row
           let dtObj = await convertDT(prevData);
+          
           await insertData(jobId, column, [sme, dtObj, prevData, minValue]);
           bucket = [];
           prevData = obs.host_date;
@@ -60,6 +62,7 @@ async function minValue(jobId, sme, data, column) {
     if (systemDates.includes(prevData)) {
       // If date exists for sme: UPDATE row
       const minValue = Math.min(...bucket);
+      
       await updateTable(jobId, column, [
         minValue,
         sme,
@@ -69,6 +72,7 @@ async function minValue(jobId, sme, data, column) {
       // If date dose not exist: INSERT new row
       const minValue = Math.min(...bucket);
       let dtObj = await convertDT(prevData);
+      
       await insertData(jobId, column, [
         sme,
         dtObj,

@@ -18,6 +18,7 @@ async function insertJsonB(jobId, value) {
     console.log(error);
     await log("error", jobId, sme, "insertJsonB", "FN CALL", {
       sme: sme,
+      error
     });
   }
 }

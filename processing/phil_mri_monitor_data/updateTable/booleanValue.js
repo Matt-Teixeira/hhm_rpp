@@ -48,6 +48,7 @@ async function booleanValue(jobId, sme, data, column) {
 
         // If date exists for sme: UPDATE row
         if (systemDates.includes(prevData)) {
+          
           await updateTable(jobId, column, [maxValue, sme, prevData]);
           bucket = []; // Empty bucket
           prevData = obs.host_date; // Set to new date in iteration
@@ -55,6 +56,7 @@ async function booleanValue(jobId, sme, data, column) {
         } else {
           // If date dose not exist: INSERT new row
           let dtObj = await convertDT(prevData);
+          
           await insertData(jobId, column, [sme, dtObj, prevData, maxValue]);
           bucket = [];
           prevData = obs.host_date;
@@ -73,7 +75,7 @@ async function booleanValue(jobId, sme, data, column) {
       } else {
         maxValue = 0;
       }
-
+      
       await updateTable(jobId, column, [
         maxValue,
         sme,
@@ -89,6 +91,7 @@ async function booleanValue(jobId, sme, data, column) {
         maxValue = 0;
       }
       let dtObj = await convertDT(prevData);
+      
       await insertData(jobId, column, [
         sme,
         dtObj,
