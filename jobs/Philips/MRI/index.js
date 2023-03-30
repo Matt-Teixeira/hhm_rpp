@@ -70,11 +70,13 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
           );
 
           if (json_data) {
+            console.log("sysConfigData.hhm_file_config");
+            console.log(sysConfigData.hhm_file_config[4]);
             await phil_mri_monitor_display(
               System_Monitor.jobId,
               System_Monitor.sysConfigData.id,
               sysConfigData.hhm_config.modality,
-              sysConfigData.hhm_file_config[3].monitoring,
+              sysConfigData.hhm_file_config[4].monitoring,
               json_data
             );
           }

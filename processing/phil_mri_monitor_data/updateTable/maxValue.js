@@ -42,7 +42,6 @@ async function maxValue(jobId, sme, data, column) {
 
         // If date exists for sme: UPDATE row
         if (systemDates.includes(prevData)) {
-
           await updateTable(jobId, column, [maxValue, sme, prevData]);
           bucket = []; // Empty bucket
           prevData = obs.host_date; // Set to new date in iteration
@@ -63,7 +62,7 @@ async function maxValue(jobId, sme, data, column) {
     if (systemDates.includes(prevData)) {
       // If date exists for sme: UPDATE row
       const maxValue = Math.max(...bucket);
-      
+
       await updateTable(jobId, column, [
         maxValue,
         sme,
@@ -73,7 +72,7 @@ async function maxValue(jobId, sme, data, column) {
       // If date dose not exist: INSERT new row
       const maxValue = Math.max(...bucket);
       let dtObj = await convertDT(prevData);
-      
+
       await insertData(jobId, column, [
         sme,
         dtObj,

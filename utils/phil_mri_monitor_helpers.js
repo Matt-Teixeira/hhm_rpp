@@ -75,11 +75,11 @@ async function getExistingNotNullDates(jobId, sme, col_name) {
 
 async function updateTable(jobId, col_name, arr) {
   try {
-
+    if (arr[0] === -Infinity) return;
     const queryStr = `UPDATE log.philips_mri_monitoring_data SET ${col_name} = $1 WHERE system_id = $2 AND date = $3`;
     await pgPool.query(queryStr, arr);
   } catch (error) {
-    await log("error", jobId, arr[1], "updateTable", "FN CALL", { 
+    await log("error", jobId, arr[1], "updateTable", "FN CALL", {
       values: arr,
       error: error,
     });
@@ -88,6 +88,7 @@ async function updateTable(jobId, col_name, arr) {
 
 async function insertData(jobId, col_name, arr) {
   try {
+    if (arr[3] === -Infinity) return;
     const queryStr = `INSERT INTO log.philips_mri_monitoring_data(system_id, host_datetime, date, ${col_name}) VALUES($1, $2, $3, $4)`;
     await pgPool.query(queryStr, arr);
   } catch (error) {
