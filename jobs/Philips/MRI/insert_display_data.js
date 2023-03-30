@@ -12,12 +12,10 @@ async function insertDisplayData(
   monitoring_configs,
   data
 ) {
+  //console.log("monitoring_configs");
   //console.log(monitoring_configs);
   try {
-    await log("info", jobId, sme, "insertDisplayData", "FN CALL", {
-      sme: sme,
-      modality,
-    });
+    await log("info", jobId, sme, "insertDisplayData", "FN CALL");
 
     const has_prev_data = await getSystemDbData(jobId, sme);
 
