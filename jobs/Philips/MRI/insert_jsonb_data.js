@@ -97,7 +97,7 @@ async function phil_mri_monitor(System, directory) {
       return;
     }
 
-    await insertJsonB(System.jobId, [System.sme, jsonData]);
+    const date = await insertJsonB(System.jobId, [System.sme, jsonData]);
 
     // send data to be aggregated
     return jsonData;

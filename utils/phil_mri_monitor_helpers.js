@@ -99,6 +99,21 @@ async function insertData(jobId, col_name, arr) {
   }
 }
 
+async function update_process_state(jobId, sme, values) {
+try {
+  await log("info", jobId, sme, "update_process_state", "FN CALL", {
+    values,
+  });
+  const queryStr = `UPDATE log.philips_mri_json SET process_success = true WHERE capture_time = $1`
+  await pgPool.query(queryStr, values);
+} catch (error) {
+  await log("error", jobId, sme, "update_process_state", "FN CALL", {
+    values,
+    error: error,
+  });
+}
+}
+
 const process_file_config = {
   monitor_System_HumExamRoom: {
     type: "max",
@@ -153,5 +168,6 @@ module.exports = {
   getExistingNotNullDates,
   updateTable,
   insertData,
+  update_process_state,
   process_file_config,
 };

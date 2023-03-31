@@ -3,17 +3,19 @@ require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
 const initialUpdate = require("../../../processing/phil_mri_monitor_data/initialUpdate");
 const updatePhilMriTable = require("../../../processing/phil_mri_monitor_data/updateTable/updatePhilMriTable");
-const { getSystemDbData } = require("../../../utils/phil_mri_monitor_helpers");
+const {
+  getSystemDbData,
+  update_process_state,
+} = require("../../../utils/phil_mri_monitor_helpers");
 
 async function insertDisplayData(
   jobId,
   sme,
   modality,
   monitoring_configs,
-  data
+  data,
+  date
 ) {
-  //console.log("monitoring_configs");
-  //console.log(monitoring_configs);
   try {
     await log("info", jobId, sme, "insertDisplayData", "FN CALL");
 
@@ -27,6 +29,7 @@ async function insertDisplayData(
           (monitor_object) => monitor_object.file_name.split(".")[0] === prop
         );
         await initialUpdate(jobId, sme, file_config, data[prop]);
+        //await update_process_state(jobId, sme, [date]);
       }
     } else {
       // Find most recent date in database and start process on that data for data[prop]
@@ -39,11 +42,11 @@ async function insertDisplayData(
       }
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     await log("error", jobId, sme, "insertDisplayData", "FN CALL", {
       sme: sme,
       modality,
-      error
+      error,
     });
   }
 }
