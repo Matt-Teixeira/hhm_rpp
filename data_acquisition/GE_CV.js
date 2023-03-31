@@ -71,7 +71,6 @@ class GE_CV extends System {
 
   checkFileExists() {
     if (this.current_file_size === null) {
-      console.log("FILE DOES NOT EXIST!!!");
       throw new Error(
         "File not found in directory: " + this.complete_file_path
       );
@@ -92,7 +91,6 @@ class GE_CV extends System {
         this.prev_file_size === 0 ||
         this.delta < 0
       ) {
-        console.log("This needs to be read from file");
         this.file_data = readline.createInterface({
           input: fs.createReadStream(this.complete_file_path),
           crlfDelay: Infinity,
@@ -113,10 +111,9 @@ class GE_CV extends System {
 
         if (this.delta === 0) {
           // Get file's last mod datetime
-          const file_mod_datetime = await execLastMod(
-            this.lastModPath,
-            [this.complete_file_path]
-          );
+          const file_mod_datetime = await execLastMod(this.lastModPath, [
+            this.complete_file_path,
+          ]);
           await log("warn", this.jobId, this.sme, "getFileData", "FN CALL", {
             message: `No file data to read. Delta: ${this.delta}`,
             last_mod: file_mod_datetime,

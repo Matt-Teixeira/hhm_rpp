@@ -7,7 +7,6 @@ async function testTabs(matches, SME, count) {
     tabRe.test(matches.groups.host_col_2) ||
     tabRe.test(matches.groups.host_info)
   ) {
-    console.log("Tab issue at line # " + count);
     log("info", "55", `${SME}`, "runJob", "Failed Regex", {
       group: matches[0],
     });
@@ -54,8 +53,6 @@ function remove_dub_quotes(match, property_name) {
   }
   return;
 }
-
-// SR\s(\d+).*?EN\s\1
 
 module.exports = {
   testTabs,

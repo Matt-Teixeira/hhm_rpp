@@ -14,7 +14,7 @@ async function exec_move_to_archive(jobId, sme, exec_path, args) {
     await log("error", jobId, sme, "exec_move_to_archive", "FN CALL", {
       error,
     });
-    console.log(error);
+    
     return null;
   }
 }

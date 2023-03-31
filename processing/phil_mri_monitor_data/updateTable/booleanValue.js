@@ -14,10 +14,6 @@ async function booleanValue(jobId, sme, data, column) {
       sme: sme,
     });
 
-    console.log("\n ***** UPDATE BOOL ****** \n");
-
-    console.log(data);
-
     // Get date ranges for smaller query and loop
     const startDate = data[data.length - 1].host_date;
     const endDate = data[0].host_date;
@@ -28,8 +24,6 @@ async function booleanValue(jobId, sme, data, column) {
     // Aggregation bucket
     let bucket = [];
     let prevData = data[data.length - 1].host_date; //Set to first date in file data(file capture groups)
-
-    console.log("PREVIOUS DATE: " + prevData);
 
     // loop through each observation in the array of match groups. Seperated by column name.
     for await (const obs of data) {
@@ -54,6 +48,7 @@ async function booleanValue(jobId, sme, data, column) {
 
         // If date exists for sme: UPDATE row
         if (systemDates.includes(prevData)) {
+          
           await updateTable(jobId, column, [maxValue, sme, prevData]);
           bucket = []; // Empty bucket
           prevData = obs.host_date; // Set to new date in iteration
@@ -61,6 +56,7 @@ async function booleanValue(jobId, sme, data, column) {
         } else {
           // If date dose not exist: INSERT new row
           let dtObj = await convertDT(prevData);
+          
           await insertData(jobId, column, [sme, dtObj, prevData, maxValue]);
           bucket = [];
           prevData = obs.host_date;
@@ -79,7 +75,7 @@ async function booleanValue(jobId, sme, data, column) {
       } else {
         maxValue = 0;
       }
-
+      
       await updateTable(jobId, column, [
         maxValue,
         sme,
@@ -95,6 +91,7 @@ async function booleanValue(jobId, sme, data, column) {
         maxValue = 0;
       }
       let dtObj = await convertDT(prevData);
+      
       await insertData(jobId, column, [
         sme,
         dtObj,
@@ -103,7 +100,6 @@ async function booleanValue(jobId, sme, data, column) {
       ]);
     }
   } catch (error) {
-    console.log(error);
     await log("error", jobId, sme, "booleanValue", "FN CALL", {
       sme: sme,
       column: column,

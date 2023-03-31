@@ -6,16 +6,13 @@
   "scripts": {
     "start": "node index.js",
     "update": "./proj.sh",
-    "read_log": "node logReader/index.js",
-    "server": "nodemon server.js"
+    "read_log": "node logReader/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.5",
     "dotenv": "^16.0.3",
-    "express": "^4.18.2",
     "luxon": "^3.0.4",
     "pg": "^8.8.0",
     "redis": "^4.5.1",

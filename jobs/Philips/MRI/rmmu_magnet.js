@@ -123,7 +123,7 @@ async function phil_mri_rmmu_magnet(fileToParse, System) {
 
     return;
   } catch (error) {
-    console.log(error);
+    
     await log(
       "error",
       System.jobId,

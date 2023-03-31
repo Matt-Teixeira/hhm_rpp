@@ -8,7 +8,6 @@ const phil_mri_rmmu_long = require("./rmmu_long_cryogenic");
 const phil_mri_rmmu_magnet = require("./rmmu_magnet");
 const phil_mri_monitor_jsonb = require("./insert_jsonb_data");
 const phil_mri_monitor_display = require("./insert_display_data");
-const phil_mri_rmmu_history = require("./rmmu_history");
 const PHILIPS_MRI_MONITORING = require("../../../data_acquisition/Philips_MRI_Monitor");
 const PHILIPS_MRI_LOGCURRENT = require("../../../data_acquisition/Philips_MRI_Logcurrent");
 const PHILIPS_MRI_RMMU = require("../../../data_acquisition/Philips_MRI_Rmmu");
@@ -71,9 +70,18 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
           );
 
           if (json_data) {
+            let monitoring_index;
+            for (let i = 0; i < sysConfigData.hhm_file_config.length; i++) {
+              let key = Object.keys(sysConfigData.hhm_file_config[i]);
+              console.log(key[0]);
+              if (key[0] === "monitoring") monitoring_index = i;
+            }
+
             await phil_mri_monitor_display(
               System_Monitor.jobId,
-              System_Monitor.sysConfigData,
+              System_Monitor.sysConfigData.id,
+              sysConfigData.hhm_config.modality,
+              sysConfigData.hhm_file_config[monitoring_index].monitoring,
               json_data
             );
           }

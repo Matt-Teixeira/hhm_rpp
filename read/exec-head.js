@@ -10,7 +10,7 @@ async function execHead(exec_path, delta, file_path) {
     const { stdout: newData } = await execFile(exec_path, [delta, file_path], execOptions);
     return newData;
   } catch (error) {
-    console.log(error);
+ 
     return null;
   }
 }

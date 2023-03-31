@@ -64,7 +64,6 @@ async function getExistingNotNullDates(jobId, sme, col_name) {
     for await (const date of systemDates.rows) {
       systemDatesToArray.push(date.date);
     }
-    console.log("System Date in ARRAY: ", systemDatesToArray);
     return systemDatesToArray;
   } catch (error) {
     await log("error", jobId, sme, "getExistingNotNullDates", "FN CALL", {
@@ -76,11 +75,12 @@ async function getExistingNotNullDates(jobId, sme, col_name) {
 
 async function updateTable(jobId, col_name, arr) {
   try {
+    if (arr[0] === -Infinity) return;
     const queryStr = `UPDATE log.philips_mri_monitoring_data SET ${col_name} = $1 WHERE system_id = $2 AND date = $3`;
     await pgPool.query(queryStr, arr);
   } catch (error) {
     await log("error", jobId, arr[1], "updateTable", "FN CALL", {
-      sme: arr[1],
+      values: arr,
       error: error,
     });
   }
@@ -88,17 +88,37 @@ async function updateTable(jobId, col_name, arr) {
 
 async function insertData(jobId, col_name, arr) {
   try {
+    if (arr[3] === -Infinity) return;
     const queryStr = `INSERT INTO log.philips_mri_monitoring_data(system_id, host_datetime, date, ${col_name}) VALUES($1, $2, $3, $4)`;
     await pgPool.query(queryStr, arr);
   } catch (error) {
     await log("error", jobId, arr[0], "insertData", "FN CALL", {
-      sme: arr[0],
+      values: arr,
       error: error,
     });
   }
 }
 
+async function update_process_state(jobId, sme, values) {
+try {
+  await log("info", jobId, sme, "update_process_state", "FN CALL", {
+    values,
+  });
+  const queryStr = `UPDATE log.philips_mri_json SET process_success = true WHERE capture_time = $1`
+  await pgPool.query(queryStr, values);
+} catch (error) {
+  await log("error", jobId, sme, "update_process_state", "FN CALL", {
+    values,
+    error: error,
+  });
+}
+}
+
 const process_file_config = {
+  monitor_System_HumExamRoom: {
+    type: "max",
+    col: "tech_room_humidity_value",
+  },
   monitor_System_HumTechRoom: {
     type: "max",
     col: "tech_room_humidity_value",
@@ -148,5 +168,6 @@ module.exports = {
   getExistingNotNullDates,
   updateTable,
   insertData,
+  update_process_state,
   process_file_config,
 };

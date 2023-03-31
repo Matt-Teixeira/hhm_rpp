@@ -6,7 +6,7 @@ async function extract(jobId, memo_data) {
   const power_on_test_re = /Power-On Hours:/;
 
   const software_version_re =
-    /COMMERCIAL_VERSION:\s?(?<software_version>\d+\.\d+\.\d+\.\d+)/;
+    /COMMERCIAL_VERSION:\s?(?<software_version>\d+(\.\d+)?(\.\d+)?(\.\d+)?)/;
   const power_on_re = /Power-On Hours:\s?(?<power_on>\d+)/;
 
   // Loop though memo data extracted from eventlog.js parser

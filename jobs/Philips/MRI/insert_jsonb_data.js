@@ -97,12 +97,12 @@ async function phil_mri_monitor(System, directory) {
       return;
     }
 
-    await insertJsonB(System.jobId, [System.sme, jsonData]);
+    const date = await insertJsonB(System.jobId, [System.sme, jsonData]);
 
     // send data to be aggregated
     return jsonData;
   } catch (error) {
-    console.log(error);
+   
     await log(
       "error",
       System.jobId,

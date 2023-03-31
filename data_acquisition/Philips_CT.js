@@ -103,7 +103,6 @@ class Philips_CT extends System {
         this.prev_file_size === 0 ||
         this.delta < 0
       ) {
-        console.log("This needs to be read from file");
         this.file_data = (
           await fs.readFile(this.complete_file_path)
         ).toString();
@@ -123,10 +122,9 @@ class Philips_CT extends System {
 
         if (this.delta === 0) {
           // Get file's last mod datetime
-          const file_mod_datetime = await execLastMod(
-            this.lastModPath,
-            [this.complete_file_path]
-          );
+          const file_mod_datetime = await execLastMod(this.lastModPath, [
+            this.complete_file_path,
+          ]);
           await log("warn", this.jobId, this.sme, "getFileData", "FN CALL", {
             message: `No file data to read. Delta: ${this.delta}`,
             last_mod: file_mod_datetime,

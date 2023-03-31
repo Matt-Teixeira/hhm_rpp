@@ -14,7 +14,7 @@ async function execReadFileSize(exec_path, file_path) {
     );
     return newData;
   } catch (error) {
-    console.log(error);
+    
     return null;
   }
 }

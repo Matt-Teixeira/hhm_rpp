@@ -137,7 +137,7 @@ const philips_re = {
       monitor_Spikes_SpikeNoiseFraction:
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<est_spike_noise_fraction>(-)?\d+(\.\d+)?)/g,
       monitor_System_HumExamRoom:
-        /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<exam_room_humidity>(-)?\d+(\.\d+)?)/g,
+        /(?<host_date>\d{4}-\d{2}-\d{2})\s+(?<host_time>\d{2}:\d{2}:\d{2})\s+(?<exam_room_humidity>(-)?\d+(\.\d+)?)/g,
       monitor_System_HumTechRoom:
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<tech_room_humidity_value>(-)?\d+(\.\d+)?)/g,
       monitor_System_TempExamRoom:

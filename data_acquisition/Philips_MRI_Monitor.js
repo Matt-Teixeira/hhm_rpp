@@ -66,13 +66,11 @@ class PHILIPS_MRI_MONITORING {
 
     // Will return null if no new lines detected
     if (delta === null) {
-      
       // Get file's last mod datetime
       const file_mod_datetime = await execLastMod(this.lastModPath, [
         complete_file_path,
       ]);
-      
-     console.log(complete_file_path)
+
       await log("warn", this.jobId, this.sme, "get_monitor_delta", "FN CALL", {
         message: "File does not have new data",
         last_mod: file_mod_datetime,
@@ -89,19 +87,3 @@ module.exports = PHILIPS_MRI_MONITORING;
 
 // grep -P -na "2023-01-03\t15:38:35\t0\t00000\t " monitor_magnet_quench.dat | cut -d : -f 1
 
-/* 
-magnet_quench
-2022-12-30	15:05:31	0	00000	 
-2022-12-31	15:19:03	0	00000	 
-2023-01-01	15:20:50	0	00000	 
-2023-01-02	15:32:12	0	00000	 
-2023-01-03	15:38:35	0	00000	 
-
-magnet_pressure
-2022-12-30	15:05:29	0
-2022-12-31	15:19:02	0
-2023-01-01	15:20:49	0
-2023-01-02	15:32:11	0
-2023-01-03	15:38:33	0
-
-*/

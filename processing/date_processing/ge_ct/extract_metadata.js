@@ -29,11 +29,9 @@ async function extract(jobId, extraction_data) {
     data[0].system_id
   );
 
-  console.log(data)
-
   if (!insertSuccess) throw new Error("logfile_event_history_metadata failed");
  } catch (error) {
-  await log("error", jobId, data[0].system_id, "onBoot", "FN CATCH", {
+  await log("error", jobId, data[0].system_id, "ge_ct_metadata", "FN CATCH", {
     error: error,
   });
  }

@@ -6,9 +6,10 @@ const {
   updateTable,
   insertData,
 } = require("../../../utils/phil_mri_monitor_helpers"); //cryo_comp_malf_minutes
-const {convertDT} = require("../../../utils/dates");
+const { convertDT } = require("../../../utils/dates");
 
 async function maxValue(jobId, sme, data, column) {
+  console.log(data);
   try {
     await log("info", jobId, sme, "maxValue", "FN CALL", {
       sme: sme,
@@ -17,7 +18,7 @@ async function maxValue(jobId, sme, data, column) {
     // Get date ranges for smaller query and loop
     const startDate = data[data.length - 1].host_date;
     const endDate = data[0].host_date;
-    
+
     const values = [sme, startDate, endDate];
     const systemDates = await getDateRanges(jobId, sme, values);
 
@@ -48,6 +49,7 @@ async function maxValue(jobId, sme, data, column) {
         } else {
           // If date dose not exist: INSERT new row
           let dtObj = await convertDT(prevData);
+
           await insertData(jobId, column, [sme, dtObj, prevData, maxValue]);
           bucket = [];
           prevData = obs.host_date;
@@ -60,6 +62,7 @@ async function maxValue(jobId, sme, data, column) {
     if (systemDates.includes(prevData)) {
       // If date exists for sme: UPDATE row
       const maxValue = Math.max(...bucket);
+
       await updateTable(jobId, column, [
         maxValue,
         sme,
@@ -69,6 +72,7 @@ async function maxValue(jobId, sme, data, column) {
       // If date dose not exist: INSERT new row
       const maxValue = Math.max(...bucket);
       let dtObj = await convertDT(prevData);
+
       await insertData(jobId, column, [
         sme,
         dtObj,
@@ -77,7 +81,6 @@ async function maxValue(jobId, sme, data, column) {
       ]);
     }
   } catch (error) {
-    console.log(error);
     await log("error", jobId, sme, "maxValue", "FN CALL", {
       sme: sme,
       column: column,

@@ -74,7 +74,7 @@ class GE_CT_MRI extends System {
 
   checkFileExists() {
     if (this.current_file_size === null) {
-      console.log("FILE DOES NOT EXIST!!!");
+      
       throw new Error(
         "File not found in directory: " + this.complete_file_path
       );
@@ -113,7 +113,7 @@ class GE_CT_MRI extends System {
         this.prev_file_size === 0 ||
         this.delta < 0
       ) {
-        console.log("This needs to be read from file");
+        
         this.file_data = (
           await fs.readFile(this.complete_file_path)
         ).toString();
