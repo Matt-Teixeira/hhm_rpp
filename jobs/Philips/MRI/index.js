@@ -70,13 +70,18 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
           );
 
           if (json_data) {
-            console.log("sysConfigData.hhm_file_config");
-            console.log(sysConfigData.hhm_file_config[4]);
+            let monitoring_index;
+            for (let i = 0; i < sysConfigData.hhm_file_config.length; i++) {
+              let key = Object.keys(sysConfigData.hhm_file_config[i]);
+              console.log(key[0]);
+              if (key[0] === "monitoring") monitoring_index = i;
+            }
+
             await phil_mri_monitor_display(
               System_Monitor.jobId,
               System_Monitor.sysConfigData.id,
               sysConfigData.hhm_config.modality,
-              sysConfigData.hhm_file_config[4].monitoring,
+              sysConfigData.hhm_file_config[monitoring_index].monitoring,
               json_data
             );
           }
@@ -87,6 +92,7 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
       }
     }
   } catch (error) {
+    console.log(error);
     await log(
       "error",
       jobId,
