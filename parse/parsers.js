@@ -13,8 +13,8 @@ const win_10_re = {
 };
 
 const siemens = {
-  cv_1: /(?<start>[A-Z]?)\s+(?<day>\d{2})-(?<month>[A-Z][a-z]+)-(?<year>\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2}).*?\)">(?<id>\d+)<\/\w+>\s(?<source>.+?)\s+(?<sequence>\d+|n\/a)?\s+(<\w+>)?(?<message>.+?)(<\/\w>)?\n/g
-}
+  cv_1: /(?<start>[A-Z]?)\s+(?<day>\d{2})-(?<month>[A-Z][a-z]+)-(?<year>\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2}).*?\)">(?<id>\d+)<\/\w+>\s(?<source>.+?)\s+(?<sequence>\d+|n\/a)?\s+(<\w+>)?(?<message>.+?)(<\/\w>)?\n/g,
+};
 
 const ge_re = {
   test: {
@@ -170,6 +170,8 @@ const philips_re = {
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<quenched_state>\d+)/g,
       monitor_magnet_under_pressure:
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<mag_dps_status_days>(-)?\d+(\.\d+)?)/g,
+      HELIUM_LEVEL:
+        /(?<host_date>\d{2}-\w+-\d{4})\s+?(?<helium_level_value>(-)?\d+(\.\d+)?)/g,
     },
   },
 };
