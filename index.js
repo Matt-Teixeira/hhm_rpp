@@ -55,7 +55,7 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot(["SME15816"]); // SME01138 SME01139 SME15809 SME15811 SME15816
+onBoot(["SME01138", "SME01139", "SME15809", "SME15811", "SME15816"]); // SME01138 SME01139 SME15809 SME15811 SME15816
 
 /* 
 const determineManufacturer = async (jobId, system) => {

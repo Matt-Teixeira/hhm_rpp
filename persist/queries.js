@@ -241,7 +241,7 @@ module.exports = queries = {
     )
       `,
       rmmu_short: `
-    INSERT INTO log.philips_mri_rmmu_short(
+    INSERT INTO mag.philips_mri_rmmu_short(
       system_id,
       system_reference_number,
       hospital_name,
@@ -278,7 +278,7 @@ module.exports = queries = {
   )
     `,
       rmmu_long: `
-    INSERT INTO log.philips_mri_rmmu_long(
+    INSERT INTO mag.philips_mri_rmmu_long(
       system_id,
       system_reference_number,
       hospital_name,
@@ -316,7 +316,7 @@ module.exports = queries = {
   )
     `,
       rmmu_magnet: `
-    INSERT INTO log.philips_mri_rmmu_magnet(
+    INSERT INTO mag.philips_mri_rmmu_magnet(
       system_id,
       system_reference_number,
       hospital_name,
