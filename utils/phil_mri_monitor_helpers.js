@@ -6,7 +6,7 @@ const pgPool = require("../db/pg-pool");
 async function getSystemDbData(jobId, sme) {
   try {
     const queryStr =
-      "SELECT COUNT(*) FROM log.philips_mri_monitoring_data WHERE system_id = ($1)";
+      "SELECT COUNT(*) FROM mag.philips_mri_monitoring_data WHERE system_id = ($1)";
     return await pgPool.query(queryStr, [sme]);
   } catch (error) {
     await log("error", jobId, sme, "getSystemDbData", "FN CALL", {
@@ -19,7 +19,7 @@ async function getSystemDbData(jobId, sme) {
 async function getExistingDates(jobId, sme) {
   try {
     const text =
-      "SELECT date FROM log.philips_mri_monitoring_data WHERE system_id = ($1)";
+      "SELECT date FROM mag.philips_mri_monitoring_data WHERE system_id = ($1)";
     const v = [sme];
     const systemDates = await pgPool.query(text, v);
     const systemDatesToArray = [];
@@ -37,7 +37,7 @@ async function getExistingDates(jobId, sme) {
 
 async function getDateRanges(jobId, sme, values) {
   try {
-    let queryStr = `SELECT date FROM log.philips_mri_monitoring_data WHERE system_id = $1 AND date BETWEEN $2 AND $3`;
+    let queryStr = `SELECT date FROM mag.philips_mri_monitoring_data WHERE system_id = $1 AND date BETWEEN $2 AND $3`;
 
     const systemDates = await pgPool.query(queryStr, values);
     const systemDatesToArray = [];
@@ -57,7 +57,7 @@ async function getDateRanges(jobId, sme, values) {
 
 async function getExistingNotNullDates(jobId, sme, col_name) {
   try {
-    const queryStr = `SELECT date FROM log.philips_mri_monitoring_data WHERE system_id = ($1) AND ${col_name} IS NOT NULL ORDER BY date DESC LIMIT 1`;
+    const queryStr = `SELECT date FROM mag.philips_mri_monitoring_data WHERE system_id = ($1) AND ${col_name} IS NOT NULL ORDER BY date DESC LIMIT 1`;
     const v = [sme];
     const systemDates = await pgPool.query(queryStr, v);
     const systemDatesToArray = [];
@@ -76,7 +76,7 @@ async function getExistingNotNullDates(jobId, sme, col_name) {
 async function updateTable(jobId, col_name, arr) {
   try {
     if (arr[0] === -Infinity) return;
-    const queryStr = `UPDATE log.philips_mri_monitoring_data SET ${col_name} = $1 WHERE system_id = $2 AND date = $3`;
+    const queryStr = `UPDATE mag.philips_mri_monitoring_data SET ${col_name} = $1 WHERE system_id = $2 AND date = $3`;
     await pgPool.query(queryStr, arr);
   } catch (error) {
     await log("error", jobId, arr[1], "updateTable", "FN CALL", {
@@ -89,7 +89,7 @@ async function updateTable(jobId, col_name, arr) {
 async function insertData(jobId, col_name, arr) {
   try {
     if (arr[3] === -Infinity) return;
-    const queryStr = `INSERT INTO log.philips_mri_monitoring_data(system_id, host_datetime, date, ${col_name}) VALUES($1, $2, $3, $4)`;
+    const queryStr = `INSERT INTO mag.philips_mri_monitoring_data(system_id, host_datetime, date, ${col_name}) VALUES($1, $2, $3, $4)`;
     await pgPool.query(queryStr, arr);
   } catch (error) {
     await log("error", jobId, arr[0], "insertData", "FN CALL", {
@@ -104,7 +104,7 @@ try {
   await log("info", jobId, sme, "update_process_state", "FN CALL", {
     values,
   });
-  const queryStr = `UPDATE log.philips_mri_json SET process_success = true WHERE capture_time = $1`
+  const queryStr = `UPDATE mag.philips_mri_json SET process_success = true WHERE capture_time = $1`
   await pgPool.query(queryStr, values);
 } catch (error) {
   await log("error", jobId, sme, "update_process_state", "FN CALL", {
