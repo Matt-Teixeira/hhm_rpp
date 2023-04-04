@@ -76,6 +76,7 @@ async function phil_mri_monitor(System, directory) {
 
       jsonData[fileName] = [];
       for (let match of matches) {
+        if (!match.groups.host_time) match.groups.host_time = "00:00:01";
         jsonData[fileName].push({ ...match.groups });
       }
       await System.get_last_monitor_line(complete_file_path, file.file_name);
@@ -102,7 +103,6 @@ async function phil_mri_monitor(System, directory) {
     // send data to be aggregated
     return jsonData;
   } catch (error) {
-   
     await log(
       "error",
       System.jobId,
