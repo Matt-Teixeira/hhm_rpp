@@ -6,6 +6,7 @@ const phil_mri_logcurrent = require("./logcurrent");
 const phil_mri_rmmu_short = require("./rmmu_short_cryogenic");
 const phil_mri_rmmu_long = require("./rmmu_long_cryogenic");
 const phil_mri_rmmu_magnet = require("./rmmu_magnet");
+const phil_rmmu_history = require("./rmmu_history");
 const { type_1 } = require("./monitoring");
 const PHILIPS_MRI_MONITORING = require("../../../data_acquisition/Philips_MRI_Monitor");
 const PHILIPS_MRI_LOGCURRENT = require("../../../data_acquisition/Philips_MRI_Logcurrent");
@@ -32,6 +33,15 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
           );
 
           await phil_mri_logcurrent(directory, System_Logcurrent);
+          break;
+        case "rmmu":
+          const Rmmu_System = new PHILIPS_MRI_RMMU(
+            sysConfigData,
+            directory.rmmu,
+            jobId
+          );
+
+          await phil_rmmu_history(directory.rmmu, Rmmu_System);
           break;
         case "rmmu_short":
           const Rmmu_Short_System = new PHILIPS_MRI_RMMU(
@@ -63,7 +73,7 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
             jobId,
             sysConfigData
           );
-      
+
           await type_1(sysConfigData, System_Monitor, directory);
 
           break;

@@ -67,6 +67,7 @@ const philips_re = {
   mri: {
     rmmu_meta_data:
       /System.*:(?<system_reference_number>\d+)\s+Hospital.*:(?<hospital_name>.*)\s+Serial.*:(?<serial_number_magnet>.*)\s+Serial.*:(?<serial_number_meu>.*)/,
+    rmmu_meta_data_history: /System.*:(?<system_reference_number>\d+)\s+Hospital.*:(?<hospital_name>.*)/,
     rmmu_long_re:
       /(?<LineNo>\d+),(?<year>\d+),(?<mo>\d+),(?<dy>\d+),(?<hr>\d+),(?<mn>\d+),(?<ss>\d+),(?<hs>\d+),(?<dow_value>\d+),(?<AvgPwr_value>\d+),(?<MinPwr_value>\d+),(?<MaxPwr_value>\d+),(?<AvgAbs_value>\d+),(?<AvgPrMbars_value>\d+),(?<MinPrMbars_value>\d+),(?<MaxPrMbars_value>\d+),(?<LHePct_value>\d+),(?<LHe2_value>\d+),(?<DiffPressureSwitch_state>[YN]+?),(?<TempAlarm_state>[YN]+?),(?<PressureAlarm_state>[YN]+?),(?<Cerr_state>[YN]+?),(?<CompressorReset_state>[YN]+?),(?<Chd_value>\d+),(?<Cpr_value>\d+)/g,
     rmmu_short_re:
@@ -75,6 +76,8 @@ const philips_re = {
       /(?<LineNo>\d+?),(?<year>\d+?),(?<mo>\d+?),(?<dy>\d+?),(?<hr>\d+?),(?<mn>\d+?),(?<ss>\d+?),(?<hs>\d+?),(?<Event>\d+?),(?<Data>\d+?),(?<Descr>.*)/g,
     rmmu_history:
       /(?<Time>\d+?),(?<Stat>\d+?),(?<AvgPwr>\d+?),(?<MinPwr>\d+?),(?<MaxPwr>\d+?),(?<MinPr>\d+?),(?<MaxPr>\d+?),(?<LHe1>\d+?),(?<LHe2>\d+?),(?<DPS>\d+?),(?<TALM>\d+?),(?<PALM>\d+?),(?<CRes>\d+?)/g,
+    rmmu: /(?<Line>\d+?),(?<Time>\d+?),(?<Stat>\d+?),(?<AvgPwr>\d+?),(?<MinPwr>\d+?),(?<MaxPwr>\d+?),(?<MinPr>\d+?),(?<MaxPr>\d+?),(?<LHe1>\d+?),(?<LHe2>\d+?),(?<DPS>\d+?),(?<TALM>\d+?),(?<PALM>\d+?),(?<CRes>\d+?)/g,
+    rmmu_file_date: /rmmu(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})/,
     monitor: {
       monitor_1HRFAmp1_AvgPower:
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<avg_power>(-)?\d+(\.\d+)?)/g,
