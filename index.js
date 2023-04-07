@@ -6,7 +6,7 @@ const pgPool = require("./db/pg-pool");
 const siemens_parser = require("./jobs/Siemens");
 const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");
-
+/* 
 const determineManufacturer = async (jobId, sme) => {
   try {
     let queryString =
@@ -55,9 +55,9 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot(["SME01138", "SME01139", "SME15809", "SME15811", "SME15816"]); // SME01138 SME01139 SME15809 SME15811 SME15816
+onBoot(["SME15802"]); // SME01138 SME01139 SME15805 SME15809 SME15811 SME15816 SME15802
+ */
 
-/* 
 const determineManufacturer = async (jobId, system) => {
   try {
     await log("info", jobId, system.id, "determineManufacturer", "FN CALL", {
@@ -119,4 +119,3 @@ const onBoot = async () => {
 };
 
 onBoot();
-  */

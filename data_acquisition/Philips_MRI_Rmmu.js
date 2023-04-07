@@ -1,6 +1,10 @@
 const fsp = require("node:fs").promises;
 const { log } = require("../logger");
 const exec_move_to_archive = require("../read/exec-move_to_archive");
+const {
+  update_redis_last_file,
+  get_last_cached_file,
+} = require("../redis/philips_monitoring");
 const execLastMod = require("../read/exec-file_last_mod");
 
 class PHILIPS_MRI_RMMU {
@@ -14,6 +18,8 @@ class PHILIPS_MRI_RMMU {
   }
 
   files_in_dir = [];
+  last_file_parsed;
+  last_file_in_dir;
 
   exec_archive_path = "./read/sh/move_to_archive.sh";
 
@@ -59,6 +65,22 @@ class PHILIPS_MRI_RMMU {
       complete_file_path,
       archive_file_path,
     ]);
+  }
+  // RMMU FILE DIRECTORY PROCESS
+
+  // Set last file in rmmu directory
+  update_files_to_process() {
+    const index = this.files_in_dir.indexOf(this.last_file_parsed);
+    this.files_in_dir = this.files_in_dir.slice(index + 1);
+    this.last_file_in_dir = this.files_in_dir[this.files_in_dir.length - 1];
+  }
+
+  async cache_last_file_name(file) {
+    await update_redis_last_file(this.sme, file);
+  }
+
+  async get_last_file_parsed() {
+    this.last_file_parsed = await get_last_cached_file(this.sme);
   }
 }
 
