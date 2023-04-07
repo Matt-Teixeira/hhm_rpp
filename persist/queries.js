@@ -339,6 +339,31 @@ module.exports = queries = {
     $1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::numeric[], $7::numeric[], $8::numeric[], $9::numeric[], $10::numeric[], $11::numeric[], $12::numeric[], $13::numeric[], $14::text[], $15::text[], $16::text[], $17::timestamptz[]
   )
     `,
+      rmmu: `
+    INSERT INTO mag.philips_mri_rmmu_history(
+      system_id,
+      Line,
+      Time,
+      Stat,
+      AvgPwr,
+      MinPwr,
+      MaxPwr,
+      MinPr,
+      MaxPr,
+      LHe1,
+      LHe2,
+      DPS,
+      TALM,
+      PALM,
+      CRes,
+      system_reference_number,
+      hospital_name,
+      host_datetime
+  )
+  SELECT * FROM UNNEST (
+    $1::text[], $2::numeric[], $3::numeric[], $4::numeric[], $5::numeric[], $6::numeric[], $7::numeric[], $8::numeric[], $9::numeric[], $10::numeric[], $11::numeric[], $12::numeric[], $13::numeric[], $14::numeric[], $15::numeric[], $16::numeric[], $17::text[], $18::timestamptz[]
+  )
+    `,
     },
     CV: {
       EventLog: `
@@ -367,7 +392,7 @@ module.exports = queries = {
       `,
     },
   },
-  extracted_metadata:{
+  extracted_metadata: {
     logfile_event_history_metadata: `
     INSERT INTO logfile_event_history_metadata(
       system_id,
@@ -379,5 +404,5 @@ module.exports = queries = {
     $1::text[], $2::text[], $3::text[], $4::timestamptz[]
   )
     `,
-  }
+  },
 };

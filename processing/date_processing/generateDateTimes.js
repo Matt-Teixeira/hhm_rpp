@@ -1,13 +1,26 @@
 const { log } = require("../../logger");
-const dateTimeTemplate = require("./dateTimeTemplate");
+const {
+  dateTimeTemplate,
+  date_minus_one_template,
+} = require("./dateTimeTemplate");
 const { remove__ } = require("./incoming_date_cleaning");
-//philips_mri_rmmu_long
+
 async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
   try {
     let date;
     switch (pgTable) {
+      case "philips_mri_rmmu_history":
+        date = await date_minus_one_template(
+          jobId,
+          sme,
+          `${hostDate}${hostTime}`,
+          "yyyy-MM-ddHH:mm:ss",
+          "America/New_York"
+        );
+        
+        break;
       case "philips_mri_rmmu_magnet":
-        date = await dateTimeTemplate(
+        date = await date_minus_one_template(
           jobId,
           sme,
           `${hostDate}${hostTime + "0"}`,
@@ -16,7 +29,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         );
         break;
       case "philips_mri_rmmu_short":
-        date = await dateTimeTemplate(
+        date = await date_minus_one_template(
           jobId,
           sme,
           `${hostDate}${hostTime + "0"}`,
@@ -25,7 +38,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         );
         break;
       case "philips_mri_rmmu_long":
-        date = await dateTimeTemplate(
+        date = await date_minus_one_template(
           jobId,
           sme,
           `${hostDate}${hostTime + "0"}`,

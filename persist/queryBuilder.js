@@ -5,7 +5,6 @@ const queries = require("./queries");
 
 async function bulkInsert(jobId, data, sysConfigData, fileConfig) {
   try {
-
     if (data.length === 0) {
       throw new Error("File is empty/no matches");
     }
@@ -25,6 +24,7 @@ async function bulkInsert(jobId, data, sysConfigData, fileConfig) {
     });
     return true;
   } catch (error) {
+    console.log(error);
     await log("error", jobId, sysConfigData.id, "bulkInsert", `FN CALL`, {
       error: error.message,
     });
