@@ -152,9 +152,9 @@ const philips_re = {
       monitor_cryocompressor_cerr:
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<cryo_comp_comm_error_state>(-)?\d+(\.\d+)?)/g,
       monitor_cryocompressor_palm:
-        /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<cryo_comp_press_alarm_value>(-)?\d+(\.\d+)?)/g,
+        /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<cryo_comp_press_alarm_state>(-)?\d+(\.\d+)?)/g, // cryo_comp_press_alarm_value
       monitor_cryocompressor_talm:
-        /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<cryo_comp_temp_alarm_value>(-)?\d+(\.\d+)?)/g,
+        /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<cryo_comp_temp_alarm_state>(-)?\d+(\.\d+)?)/g, // cryo_comp_temp_alarm_value
       monitor_cryocompressor_time_status:
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<cryo_comp_malf_value>(-)?\d+(\.\d+)?)/g,
       monitor_magnet_b0_heater_on:
