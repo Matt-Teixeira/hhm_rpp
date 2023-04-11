@@ -80,7 +80,7 @@ async function phil_mri_monitor(System, directory) {
         jsonData[fileName].push({ ...match.groups });
       }
       // Cache last line in monitoring file
-      await System.get_last_monitor_line(complete_file_path, file.file_name);
+      // await System.get_last_monitor_line(complete_file_path, file.file_name);
       //}
     }
 

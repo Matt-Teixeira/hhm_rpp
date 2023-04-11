@@ -2,9 +2,6 @@
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
 const {
-  getDateRanges,
-  updateTable,
-  insertData,
   get_captured_datetime_entry,
   insert_into_secondary_table,
   update_secondary_table,
@@ -22,18 +19,24 @@ async function minValue(jobId, sme, data, column, capture_datetime) {
       capture_datetime,
     ]);
 
-    // max_value will be 
+    // max_value will be
     let min_value;
 
     let current_smallest_value = 9999;
     for (const data_entry of data) {
-      if (data_entry[column] < current_smallest_value) min_value = data_entry;
+      if (parseInt(data_entry[column]) < current_smallest_value) {
+        min_value = data_entry;
+        current_smallest_value = parseInt(data_entry[column]);
+      }
     }
 
     if (previous_entries.length < 1) {
+      const host_datetime = await convertDT(max_value.host_date);
       await insert_into_secondary_table(jobId, sme, column, [
         sme,
         capture_datetime,
+        host_datetime,
+        max_value.host_date,
         min_value[column],
       ]);
     } else {

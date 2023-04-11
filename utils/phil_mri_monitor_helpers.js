@@ -6,7 +6,7 @@ const pgPool = require("../db/pg-pool");
 async function getSystemDbData(jobId, sme) {
   try {
     const queryStr =
-      "SELECT COUNT(*) FROM mag.philips_mri_monitoring_data WHERE system_id = ($1)";
+      "SELECT system_id, host_datetime FROM mag.philips_mri_monitoring_data WHERE system_id = ($1) ORDER BY host_datetime DESC LIMIT 1";
     return await pgPool.query(queryStr, [sme]);
   } catch (error) {
     await log("error", jobId, sme, "getSystemDbData", "FN CALL", {
@@ -28,7 +28,7 @@ async function getExistingDates(jobId, sme) {
     }
     return systemDatesToArray;
   } catch (error) {
-    await log("error", jobId, sme, "getSystemDbData", "FN CALL", {
+    await log("error", jobId, sme, "getExistingDates", "FN CALL", {
       sme: sme,
       error: error,
     });
@@ -119,7 +119,7 @@ async function get_captured_datetime_entry(jobId, sme, values) {
     await log("info", jobId, sme, "get_captured_datetime_entry", "FN CALL", {
       values,
     });
-    const queryStr = `SELECT * FROM mag.philips_mri_monitoring_data_sec WHERE capture_datetime = $1`;
+    const queryStr = `SELECT * FROM mag.philips_mri_monitoring_data_agg WHERE capture_datetime = $1`;
     const entry = await pgPool.query(queryStr, values);
     return entry.rows;
   } catch (error) {
@@ -135,7 +135,7 @@ async function insert_into_secondary_table(jobId, sme, col_name, values) {
     await log("info", jobId, sme, "insert_into_secondary_table", "FN CALL", {
       values,
     });
-    const queryStr = `INSERT INTO mag.philips_mri_monitoring_data_sec(system_id, capture_datetime, ${col_name}) VALUES($1, $2, $3)`;
+    const queryStr = `INSERT INTO mag.philips_mri_monitoring_data_agg(system_id, capture_datetime, host_datetime, date, ${col_name}) VALUES($1, $2, $3, $4, $5)`;
     const entry = await pgPool.query(queryStr, values);
     return entry.rows;
   } catch (error) {
@@ -151,7 +151,7 @@ async function update_secondary_table(jobId, sme, col_name, values) {
     await log("info", jobId, sme, "update_secondary_table", "FN CALL", {
       values,
     });
-    const queryStr = `UPDATE mag.philips_mri_monitoring_data_sec SET ${col_name} = $1 WHERE system_id = $2 AND capture_datetime = $3`;
+    const queryStr = `UPDATE mag.philips_mri_monitoring_data_agg SET ${col_name} = $1 WHERE system_id = $2 AND capture_datetime = $3`;
     const entry = await pgPool.query(queryStr, values);
     return entry.rows;
   } catch (error) {
