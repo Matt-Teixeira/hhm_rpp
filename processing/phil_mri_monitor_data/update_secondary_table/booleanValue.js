@@ -60,11 +60,4 @@ async function boolValue(jobId, sme, data, column, capture_datetime) {
   }
 }
 
-/* // Set value to = 1 or 0 (boolean)
-if (maxValue > 0) {
-  maxValue = 1;
-} else {
-  maxValue = 0;
-} */
-
 module.exports = boolValue;
