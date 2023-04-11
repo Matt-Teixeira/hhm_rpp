@@ -100,21 +100,69 @@ async function insertData(jobId, col_name, arr) {
 }
 
 async function update_process_state(jobId, sme, values) {
-try {
-  await log("info", jobId, sme, "update_process_state", "FN CALL", {
-    values,
-  });
-  const queryStr = `UPDATE mag.philips_mri_json SET process_success = true WHERE capture_time = $1`
-  await pgPool.query(queryStr, values);
-} catch (error) {
-  await log("error", jobId, sme, "update_process_state", "FN CALL", {
-    values,
-    error: error,
-  });
-}
+  try {
+    await log("info", jobId, sme, "update_process_state", "FN CALL", {
+      values,
+    });
+    const queryStr = `UPDATE mag.philips_mri_json SET process_success = true WHERE capture_time = $1`;
+    await pgPool.query(queryStr, values);
+  } catch (error) {
+    await log("error", jobId, sme, "update_process_state", "FN CALL", {
+      values,
+      error: error,
+    });
+  }
 }
 
-const process_file_config = {
+async function get_captured_datetime_entry(jobId, sme, values) {
+  try {
+    await log("info", jobId, sme, "get_captured_datetime_entry", "FN CALL", {
+      values,
+    });
+    const queryStr = `SELECT * FROM mag.philips_mri_monitoring_data_sec WHERE capture_datetime = $1`;
+    const entry = await pgPool.query(queryStr, values);
+    return entry.rows;
+  } catch (error) {
+    await log("error", jobId, sme, "get_captured_datetime_entry", "FN CALL", {
+      values,
+      error: error,
+    });
+  }
+}
+
+async function insert_into_secondary_table(jobId, sme, col_name, values) {
+  try {
+    await log("info", jobId, sme, "insert_into_secondary_table", "FN CALL", {
+      values,
+    });
+    const queryStr = `INSERT INTO mag.philips_mri_monitoring_data_sec(system_id, capture_datetime, ${col_name}) VALUES($1, $2, $3)`;
+    const entry = await pgPool.query(queryStr, values);
+    return entry.rows;
+  } catch (error) {
+    await log("error", jobId, sme, "insert_into_secondary_table", "FN CALL", {
+      values,
+      error: error,
+    });
+  }
+}
+
+async function update_secondary_table(jobId, sme, col_name, values) {
+  try {
+    await log("info", jobId, sme, "update_secondary_table", "FN CALL", {
+      values,
+    });
+    const queryStr = `UPDATE mag.philips_mri_monitoring_data_sec SET ${col_name} = $1 WHERE system_id = $2 AND capture_datetime = $3`;
+    const entry = await pgPool.query(queryStr, values);
+    return entry.rows;
+  } catch (error) {
+    await log("error", jobId, sme, "update_secondary_table", "FN CALL", {
+      values,
+      error: error,
+    });
+  }
+}
+
+/* const process_file_config = {
   monitor_System_HumExamRoom: {
     type: "max",
     col: "tech_room_humidity_value",
@@ -159,7 +207,7 @@ const process_file_config = {
     type: "min",
     col: "helium_level_value",
   },
-};
+}; */
 
 module.exports = {
   getSystemDbData,
@@ -169,5 +217,7 @@ module.exports = {
   updateTable,
   insertData,
   update_process_state,
-  process_file_config,
+  get_captured_datetime_entry,
+  insert_into_secondary_table,
+  update_secondary_table
 };
