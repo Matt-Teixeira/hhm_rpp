@@ -4,7 +4,6 @@ node_modules/
 *.txt
 *.txe
 *.output
-monitoring
 
 node_modules/
 .env
