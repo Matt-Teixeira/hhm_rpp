@@ -24,7 +24,6 @@ async function updatePhilMriTable(jobId, sme, file_config, data, date) {
       return;
   
   } catch (error) {
-    console.log(error);
     await log("error", jobId, sme, "updatePhilMriTable", "FN CALL", {
       sme: sme,
       file: file_config,

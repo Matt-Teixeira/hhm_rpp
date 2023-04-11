@@ -19,4 +19,20 @@ async function convertDT(date) {
   return newDate;
 }
 
-module.exports = { convertDT };
+async function compare_dates(date) {
+  const now = new Date();
+
+  console.log(now), console.log(date);
+
+  const diffTime = Math.abs(now - date);
+
+  // Calculate diff in hours
+  const diffDays = parseFloat((diffTime / (60 * 60 * 1000)).toFixed(1));
+
+  console.log("diffDays");
+  console.log(diffDays);
+
+  return diffDays;
+}
+
+module.exports = { convertDT, compare_dates };
