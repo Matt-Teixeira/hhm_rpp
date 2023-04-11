@@ -2,6 +2,7 @@
 require("dotenv").config({ path: "../.env" });
 const { log } = require("../../logger");
 const pgPool = require("../../db/pg-pool");
+const { DateTime } = require("luxon");
 
 async function insertJsonB(jobId, value) {
   const sme = value[0];
@@ -9,7 +10,7 @@ async function insertJsonB(jobId, value) {
     await log("info", jobId, sme, "insertJsonB", "FN CALL", {
       sme: sme,
     });
-    const date = new Date();
+    const date = DateTime.local().toISO();
     value.unshift(date);
     const queryString =
       "INSERT INTO mag.philips_mri_json(capture_time, system_id, monitoring_data) VALUES($1, $2, $3)";
@@ -17,7 +18,6 @@ async function insertJsonB(jobId, value) {
     await pgPool.query(queryString, value);
     return date;
   } catch (error) {
-    console.log(error);
     await log("error", jobId, sme, "insertJsonB", "FN CALL", {
       sme: sme,
       error,

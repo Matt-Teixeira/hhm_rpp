@@ -2,11 +2,12 @@
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
 const initialUpdate = require("../../../processing/phil_mri_monitor_data/initialUpdate");
-const updatePhilMriTable = require("../../../processing/phil_mri_monitor_data/updateTable/updatePhilMriTable");
+const updatePhilMriTable = require("../../../processing/phil_mri_monitor_data/update_secondary_table/updatePhilMriTable");
 const {
   getSystemDbData,
   update_process_state,
 } = require("../../../utils/phil_mri_monitor_helpers");
+const { compare_dates } = require("../../../utils/dates");
 
 async function insertDisplayData(
   jobId,
@@ -21,8 +22,12 @@ async function insertDisplayData(
 
     const has_prev_data = await getSystemDbData(jobId, sme);
 
+    let hours_diff = await compare_dates(has_prev_data.rows[0].host_datetime);
+
+    console.log(hours_diff);
+
     // Check to see if this system has data in db. If not, do an initial data insert.
-    if (has_prev_data.rows[0].count === "0") {
+    if (has_prev_data.rowCount === 0 || hours_diff >= 48) {
       // Create entry for new SME
       for (const prop in data) {
         const file_config = monitoring_configs.find(
@@ -38,7 +43,7 @@ async function insertDisplayData(
           (monitor_object) => monitor_object.file_name.split(".")[0] === prop
         );
 
-        await updatePhilMriTable(jobId, sme, file_config, data[prop]);
+        await updatePhilMriTable(jobId, sme, file_config, data[prop], date);
       }
     }
   } catch (error) {
