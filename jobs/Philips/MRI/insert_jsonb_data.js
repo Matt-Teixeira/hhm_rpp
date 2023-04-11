@@ -79,6 +79,7 @@ async function phil_mri_monitor(System, directory) {
         if (!match.groups.host_time) match.groups.host_time = "00:00:01";
         jsonData[fileName].push({ ...match.groups });
       }
+      // Cache last line in monitoring file
       await System.get_last_monitor_line(complete_file_path, file.file_name);
       //}
     }
@@ -95,13 +96,13 @@ async function phil_mri_monitor(System, directory) {
           message: "No new monitoring data found.",
         }
       );
-      return;
+      return [null, null];
     }
 
     const date = await insertJsonB(System.jobId, [System.sme, jsonData]);
 
     // send data to be aggregated
-    return jsonData;
+    return [jsonData, date];
   } catch (error) {
     await log(
       "error",
