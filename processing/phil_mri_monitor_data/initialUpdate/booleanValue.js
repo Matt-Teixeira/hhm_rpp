@@ -85,12 +85,14 @@ async function booleanValue(jobId, sme, data, column) {
         maxValue,
       ]);
     }
+    return true;
   } catch (error) {
     await log("error", jobId, sme, "booleanValue", "FN CALL", {
       sme: sme,
       column: column,
       error: error,
     });
+    return false;
   }
 }
 

@@ -51,20 +51,15 @@ async function boolValue(jobId, sme, data, column, capture_datetime) {
         capture_datetime,
       ]);
     }
+    return true;
   } catch (error) {
     await log("error", jobId, sme, "boolValue", "FN CALL", {
       sme: sme,
       column: column,
       error: error,
     });
+    return false;
   }
 }
-
-/* // Set value to = 1 or 0 (boolean)
-if (maxValue > 0) {
-  maxValue = 1;
-} else {
-  maxValue = 0;
-} */
 
 module.exports = boolValue;

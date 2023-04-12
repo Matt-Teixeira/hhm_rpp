@@ -1,11 +1,8 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
 const initialUpdate = require("../../../processing/phil_mri_monitor_data/initialUpdate");
 const updatePhilMriTable = require("../../../processing/phil_mri_monitor_data/update_secondary_table/updatePhilMriTable");
 const {
   getSystemDbData,
-  update_process_state,
 } = require("../../../utils/phil_mri_monitor_helpers");
 const { compare_dates } = require("../../../utils/dates");
 
@@ -21,10 +18,12 @@ async function insertDisplayData(
     await log("info", jobId, sme, "insertDisplayData", "FN CALL");
 
     const has_prev_data = await getSystemDbData(jobId, sme);
+    let hours_diff = 0;
 
-    let hours_diff = await compare_dates(has_prev_data.rows[0].host_datetime);
+    if (has_prev_data.rowCount > 0)
+      hours_diff = await compare_dates(has_prev_data.rows[0].host_datetime);
 
-    console.log(hours_diff);
+    let successful_agg = false;
 
     // Check to see if this system has data in db. If not, do an initial data insert.
     if (has_prev_data.rowCount === 0 || hours_diff >= 48) {
@@ -33,9 +32,17 @@ async function insertDisplayData(
         const file_config = monitoring_configs.find(
           (monitor_object) => monitor_object.file_name.split(".")[0] === prop
         );
-        await initialUpdate(jobId, sme, file_config, data[prop]);
-        //await update_process_state(jobId, sme, [date]);
+        successful_agg = await initialUpdate(
+          jobId,
+          sme,
+          file_config,
+          data[prop]
+        );
+        console.log("successful_agg");
+        console.log(successful_agg);
+        if (successful_agg === false) break;
       }
+
     } else {
       // Find most recent date in database and start process on that data for data[prop]
       for (const prop in data) {
@@ -43,9 +50,11 @@ async function insertDisplayData(
           (monitor_object) => monitor_object.file_name.split(".")[0] === prop
         );
 
-        await updatePhilMriTable(jobId, sme, file_config, data[prop], date);
+        successful_agg = await updatePhilMriTable(jobId, sme, file_config, data[prop], date);
+        if (successful_agg === false) break;
       }
     }
+    return successful_agg;
   } catch (error) {
     console.log(error);
     await log("error", jobId, sme, "insertDisplayData", "FN CALL", {

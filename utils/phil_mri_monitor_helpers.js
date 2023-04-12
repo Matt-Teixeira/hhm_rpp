@@ -1,5 +1,3 @@
-("use strict");
-require("dotenv").config({ path: "../.env" });
 const { log } = require("../logger");
 const pgPool = require("../db/pg-pool");
 
@@ -99,15 +97,15 @@ async function insertData(jobId, col_name, arr) {
   }
 }
 
-async function update_process_state(jobId, sme, values) {
+async function update_jsonb_state(jobId, sme, values) {
   try {
-    await log("info", jobId, sme, "update_process_state", "FN CALL", {
+    await log("info", jobId, sme, "update_jsonb_state", "FN CALL", {
       values,
     });
     const queryStr = `UPDATE mag.philips_mri_json SET process_success = true WHERE capture_time = $1`;
     await pgPool.query(queryStr, values);
   } catch (error) {
-    await log("error", jobId, sme, "update_process_state", "FN CALL", {
+    await log("error", jobId, sme, "update_jsonb_state", "FN CALL", {
       values,
       error: error,
     });
@@ -216,7 +214,7 @@ module.exports = {
   getExistingNotNullDates,
   updateTable,
   insertData,
-  update_process_state,
+  update_jsonb_state,
   get_captured_datetime_entry,
   insert_into_secondary_table,
   update_secondary_table
