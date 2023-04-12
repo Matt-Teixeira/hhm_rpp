@@ -9,6 +9,7 @@ async function phil_mri_monitor(System, directory) {
     await log("info", System.jobId, System.sme, "phil_mri_monitor", "FN CALL");
 
     const jsonData = {};
+    let redis_cache = [];
 
     // Loop through monitoring files in monitoring directory
     for await (const file of directory.monitoring) {
@@ -80,7 +81,8 @@ async function phil_mri_monitor(System, directory) {
         jsonData[fileName].push({ ...match.groups });
       }
       // Cache last line in monitoring file
-      // await System.get_last_monitor_line(complete_file_path, file.file_name);
+      redis_cache.push({ path: complete_file_path, file_name: file.file_name });
+      //await System.get_last_monitor_line(complete_file_path, file.file_name);
       //}
     }
 
@@ -96,13 +98,13 @@ async function phil_mri_monitor(System, directory) {
           message: "No new monitoring data found.",
         }
       );
-      return [null, null];
+      return [null, null, null];
     }
 
     const date = await insertJsonB(System.jobId, [System.sme, jsonData]);
 
     // send data to be aggregated
-    return [jsonData, date];
+    return [jsonData, date, redis_cache];
   } catch (error) {
     await log(
       "error",

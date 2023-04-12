@@ -8,27 +8,35 @@ async function initialUpdate(jobId, sme, file_config, data) {
     await log("info", jobId, sme, "initialUpdate", "FN CALL", {
       file: file_config.file_name,
     });
-    let process_type = file_config.aggregation
-    
+    let process_type = file_config.aggregation;
+    let successful_agg = false;
+
     switch (process_type) {
       case "max":
-        await maxValue(jobId, sme, data, file_config.column);
+        successful_agg = await maxValue(jobId, sme, data, file_config.column);
         break;
       case "min":
-        await minValue(jobId, sme, data, file_config.column);
+        successful_agg = await minValue(jobId, sme, data, file_config.column);
         break;
       case "bool":
-        await booleanValue(jobId, sme, data, file_config.column);
+        successful_agg = await booleanValue(
+          jobId,
+          sme,
+          data,
+          file_config.column
+        );
         break;
       default:
         break;
     }
+    return successful_agg;
   } catch (error) {
     console.log(error);
     await log("error", jobId, sme, "initialUpdate", "FN CALL", {
       file: file_config.file_name,
       error: error,
     });
+    return false;
   }
 }
 
