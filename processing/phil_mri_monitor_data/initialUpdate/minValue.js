@@ -65,12 +65,14 @@ async function minValue(jobId, sme, data, column) {
         minValue,
       ]);
     }
+    return true;
   } catch (error) {
     await log("error", jobId, sme, "minValue", "FN CALL", {
       sme: sme,
       column: column,
       error: error,
     });
+    return false;
   }
 }
 

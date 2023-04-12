@@ -22,17 +22,12 @@ async function convertDT(date) {
 async function compare_dates(date) {
   const now = new Date();
 
-  console.log(now), console.log(date);
-
-  const diffTime = Math.abs(now - date);
+  const time_delta = Math.abs(now - date);
 
   // Calculate diff in hours
-  const diffDays = parseFloat((diffTime / (60 * 60 * 1000)).toFixed(1));
+  const hours_delta = parseFloat((time_delta / (60 * 60 * 1000)).toFixed(1));
 
-  console.log("diffDays");
-  console.log(diffDays);
-
-  return diffDays;
+  return hours_delta;
 }
 
 module.exports = { convertDT, compare_dates };
