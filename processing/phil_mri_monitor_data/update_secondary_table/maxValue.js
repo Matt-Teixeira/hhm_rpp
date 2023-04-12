@@ -50,12 +50,14 @@ async function maxValue(jobId, sme, data, column, capture_datetime) {
         capture_datetime,
       ]);
     }
+    return true;
   } catch (error) {
     await log("error", jobId, sme, "maxValue", "FN CALL", {
       sme: sme,
       column: column,
       error: error,
     });
+    return false;
   }
 }
 
