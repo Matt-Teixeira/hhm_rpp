@@ -19,7 +19,7 @@ async function minValue(jobId, sme, data, column, capture_datetime) {
       capture_datetime,
     ]);
 
-    // max_value will be
+    // min_value will be object whoes colunm property has lowest value
     let min_value;
 
     let current_smallest_value = 9999;
@@ -31,12 +31,12 @@ async function minValue(jobId, sme, data, column, capture_datetime) {
     }
 
     if (previous_entries.length < 1) {
-      const host_datetime = await convertDT(max_value.host_date);
+      const host_datetime = await convertDT(min_value.host_date);
       await insert_into_secondary_table(jobId, sme, column, [
         sme,
         capture_datetime,
         host_datetime,
-        max_value.host_date,
+        min_value.host_date,
         min_value[column],
       ]);
     } else {
