@@ -39,8 +39,18 @@ class PHILIPS_MRI_MONITORING {
 
     if (last_line === null || last_line === "") return null;
 
-    last_line = last_line.match(/\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}/)[0];
-    return last_line;
+    const matched_last_line = last_line.match(/\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+/)[0]; // \d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2} 4/21/2023 change
+
+    if (!matched_last_line) {
+      await log("error", this.jobId, this.sme, "get_redis_line", "FN CALL", {
+        message: "last_line is null. Need to mod regex",
+        re: /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+/,
+        last_line,
+        matched_last_line,
+      });
+    }
+
+    return matched_last_line;
   }
 
   async get_last_monitor_line(complete_file_path, file_name) {
@@ -86,4 +96,3 @@ class PHILIPS_MRI_MONITORING {
 module.exports = PHILIPS_MRI_MONITORING;
 
 // grep -P -na "2023-01-03\t15:38:35\t0\t00000\t " monitor_magnet_quench.dat | cut -d : -f 1
-
