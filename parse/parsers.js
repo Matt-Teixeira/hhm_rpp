@@ -67,7 +67,8 @@ const philips_re = {
   mri: {
     rmmu_meta_data:
       /System.*:(?<system_reference_number>\d+)\s+Hospital.*:(?<hospital_name>.*)\s+Serial.*:(?<serial_number_magnet>.*)\s+Serial.*:(?<serial_number_meu>.*)/,
-    rmmu_meta_data_history: /System.*:(?<system_reference_number>\d+)\s+Hospital.*:(?<hospital_name>.*)/,
+    rmmu_meta_data_history:
+      /System.*:(?<system_reference_number>\d+)\s+Hospital.*:(?<hospital_name>.*)/,
     rmmu_long_re:
       /(?<LineNo>\d+),(?<year>\d+),(?<mo>\d+),(?<dy>\d+),(?<hr>\d+),(?<mn>\d+),(?<ss>\d+),(?<hs>\d+),(?<dow_value>\d+),(?<AvgPwr_value>\d+),(?<MinPwr_value>\d+),(?<MaxPwr_value>\d+),(?<AvgAbs_value>\d+),(?<AvgPrMbars_value>\d+),(?<MinPrMbars_value>\d+),(?<MaxPrMbars_value>\d+),(?<LHePct_value>\d+),(?<LHe2_value>\d+),(?<DiffPressureSwitch_state>[YN]+?),(?<TempAlarm_state>[YN]+?),(?<PressureAlarm_state>[YN]+?),(?<Cerr_state>[YN]+?),(?<CompressorReset_state>[YN]+?),(?<Chd_value>\d+),(?<Cpr_value>\d+)/g,
     rmmu_short_re:
@@ -175,6 +176,8 @@ const philips_re = {
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<mag_dps_status_days>(-)?\d+(\.\d+)?)/g,
       HELIUM_LEVEL:
         /(?<host_date>\d{2}-\w+-\d{4})\s+?(?<helium_level_value>(-)?\d+(\.\d+)?)/g,
+      monitor_magnet_pressure:
+        /(?<host_date>\d{4}-\d{2}-\d{2})\s+(?<host_time>\d{2}:\d{2}:\d{2})\s+(?<monitor_magnet_pressure_value>(-)?\d+(\.\d+)?)/g,
     },
   },
 };
