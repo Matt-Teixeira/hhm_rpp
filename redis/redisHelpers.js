@@ -34,6 +34,8 @@ async function getRedisFileSize(sme, file) {
     const getKey = `${sme}.${file}`;
 
     let fileSize = await redisClient.get(getKey);
+
+    if (fileSize === "") return null;
     // if key does not exitst in redis, null will be returned, otherwise a string will be returned.
     if (typeof fileSize === "string") fileSize = parseInt(fileSize);
     redisClient.quit();

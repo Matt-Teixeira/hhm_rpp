@@ -113,13 +113,18 @@ async function phil_mri_logcurrent(fileToParse, System) {
       System.fileToParse.logcurrent
     );
 
+    console.log("insertSuccess");
+    console.log(insertSuccess);
+
     // ** End Persist
 
     // Update Redis Cache
 
     if (insertSuccess) {
+      console.log("INSIDE INSERT SUCCESS");
       await System.updateRedisFileSize();
     }
+
   } catch (error) {
     
     await log(

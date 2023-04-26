@@ -6,7 +6,7 @@ const pgPool = require("./db/pg-pool");
 const siemens_parser = require("./jobs/Siemens");
 const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");
-
+/* 
 const determineManufacturer = async (jobId, sme) => {
   try {
     let queryString =
@@ -47,7 +47,7 @@ const onBoot = async (systems_list) => {
     }
     console.log("*************** END ***************");
     console.timeEnd();
-    return;
+    process.exit();
   } catch (error) {
     await log("error", "NA", "NA", "onBoot", "FN CATCH", {
       error: error,
@@ -55,9 +55,10 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot(['SME15816']); // SME15816 SME01138
+onBoot(["SME15802"]); // SME15816 SME01138
 
-/* 
+ */
+
 const determineManufacturer = async (jobId, system) => {
   try {
     await log("info", jobId, system.id, "determineManufacturer", "FN CALL", {
@@ -110,7 +111,7 @@ const onBoot = async () => {
     }
     console.log("*************** END ***************");
     console.timeEnd();
-    return;
+    process.exit();
   } catch (error) {
     await log("error", "NA", "NA", "onBoot", "FN CATCH", {
       error: error,
@@ -119,4 +120,3 @@ const onBoot = async () => {
 };
 
 onBoot();
- */

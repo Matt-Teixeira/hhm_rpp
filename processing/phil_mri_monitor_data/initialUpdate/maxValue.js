@@ -9,6 +9,9 @@ const {
 const { convertDT } = require("../../../utils/dates");
 
 async function maxValue(jobId, sme, data, column) {
+
+    console.log(column);
+    console.log(data);
   try {
     // Get all rows/dates for this sme
     const systemDates = await getExistingDates(jobId, sme);
@@ -69,13 +72,13 @@ async function maxValue(jobId, sme, data, column) {
 
     return true;
   } catch (error) {
-    console.log(error)
+    console.log(error);
     await log("error", jobId, sme, "maxValue", "FN CALL", {
       sme: sme,
       column: column,
       error: error,
     });
-    return false
+    return false;
   }
 }
 
