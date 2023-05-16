@@ -39,6 +39,9 @@ class PHILIPS_MRI_MONITORING {
 
     if (last_line === null || last_line === "") return null;
 
+    console.log(file)
+    console.log(last_line)
+
     const matched_last_line = last_line.match(/\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+/)[0]; // \d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2} 4/21/2023 change
 
     if (!matched_last_line) {

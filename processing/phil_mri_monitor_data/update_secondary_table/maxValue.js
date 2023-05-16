@@ -24,15 +24,12 @@ async function maxValue(jobId, sme, data, column, capture_datetime) {
 
     let current_largest_value = -9999;
     for (const data_entry of data) {
-      console.log(data_entry);
+
       if (parseInt(data_entry[column]) > current_largest_value) {
         max_value = data_entry;
         current_largest_value = parseInt(data_entry[column]);
       }
     }
-
-    console.log("max_value");
-    console.log(max_value);
 
     if (previous_entries.length < 1) {
       const host_datetime = await convertDT(max_value.host_date);

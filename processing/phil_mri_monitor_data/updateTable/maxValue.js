@@ -9,7 +9,6 @@ const {
 const { convertDT } = require("../../../utils/dates");
 
 async function maxValue(jobId, sme, data, column) {
-  console.log(data);
   try {
     await log("info", jobId, sme, "maxValue", "FN CALL", {
       sme: sme,

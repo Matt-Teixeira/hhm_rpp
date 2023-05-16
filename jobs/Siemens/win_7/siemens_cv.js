@@ -12,6 +12,9 @@ const win_7_siemens_ct = async (jobId, sysConfigData, fileConfig, file) => {
   const sme = sysConfigData.id;
   const dirPath = sysConfigData.hhm_config.file_path;
 
+  console.log(sme);
+  console.log(dirPath);
+
   const data = [];
 
   try {
@@ -56,6 +59,7 @@ const win_7_siemens_ct = async (jobId, sysConfigData, fileConfig, file) => {
       sysConfigData,
       fileConfig
     );
+    // If rpp successful, append datetime to file name and move to archive. Move on to next file within EvtLog dir.
     if (insertSuccess) {
       await fs.rename(complete_file_path, `${fileConfig.move_path}/${file}`);
     }

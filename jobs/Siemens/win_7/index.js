@@ -18,6 +18,7 @@ const win_7_parsers = async (jobId, sysConfigData, fileConfig) => {
         });
         return;
       }
+      // Loops through Evtlog directory and process all files there. Then moves to archive after successful rpp
       for await (let file of files) {
         await win_7_siemens_ct(jobId, sysConfigData, fileConfig, file);
       }

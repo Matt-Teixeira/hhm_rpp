@@ -77,19 +77,12 @@ async function phil_mri_logcurrent(fileToParse, System) {
         }
 
         if (dtObject === null) {
-          await log(
-            "warn",
-            System.jobId,
-            System.sme,
-            "date_time",
-            "FN CALL",
-            {
-              message: "date_time object null",
-              date: matches.groups.host_date,
-              time: matches.groups.host_time,
-              line
-            }
-          );
+          await log("warn", System.jobId, System.sme, "date_time", "FN CALL", {
+            message: "date_time object null",
+            date: matches.groups.host_date,
+            time: matches.groups.host_time,
+            line,
+          });
         }
 
         matches.groups.host_datetime = dtObject;
@@ -113,20 +106,15 @@ async function phil_mri_logcurrent(fileToParse, System) {
       System.fileToParse.logcurrent
     );
 
-    console.log("insertSuccess");
-    console.log(insertSuccess);
-
     // ** End Persist
 
     // Update Redis Cache
 
     if (insertSuccess) {
-      console.log("INSIDE INSERT SUCCESS");
       await System.updateRedisFileSize();
     }
-
   } catch (error) {
-    
+    console.log(error);
     await log(
       "error",
       System.jobId,

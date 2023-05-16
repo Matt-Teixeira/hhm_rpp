@@ -33,7 +33,6 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
           );
 
           await phil_mri_logcurrent(directory, System_Logcurrent);
-          console.log("Completed logcurrent.log");
           break;
         case "rmmu":
           const Rmmu_System = new PHILIPS_MRI_RMMU(
@@ -71,7 +70,6 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
           await phil_mri_rmmu_magnet(directory.rmmu_magnet, Rmmu_Magnet_System);
           break;
         case "monitoring":
-          console.log("inside MONITORING SWITCH");
           const System_Monitor = new PHILIPS_MRI_MONITORING(
             jobId,
             sysConfigData
@@ -83,9 +81,7 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
         default:
           break;
       }
-      console.log("INDISE 4 LOOP");
     }
-    console.log("Completed 4 loop");
   } catch (error) {
     console.log(error);
     await log(

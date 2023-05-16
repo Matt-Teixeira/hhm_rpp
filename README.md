@@ -53,3 +53,15 @@ On boot, the app gets system data from the database. The app consumes hhm_config
     4. Run bulkInsert()
         * Is fed query parameterized query schema from the file's config query property
             * Bulk query determined by manufacturer, modality, and value of query property
+
+
+### Phil MRI Onboarding New Mag Data
+* Steps to bring new Phil MRI Mag Data column online
+    1. In the 'insert_display_data' file, set condition on line 29 to true
+        * FROM: if (has_prev_data.rowCount === 0 || hours_diff >= 48) {...}
+        * TO: if (true || hours_diff >= 48) {...}
+        * This will run entire file and aggregate by day
+    2. Delete Redis reference to file cache is exists.
+        * EX: del SME15802.monitor_magnet_pressure.dat
+    3. Alter hhm_file_config to only contain the new file and update config.
+    4. After running app manually for that system, bring hhm_file_config to original state plus new file
