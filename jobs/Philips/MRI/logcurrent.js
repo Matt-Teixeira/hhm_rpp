@@ -35,6 +35,7 @@ async function phil_mri_logcurrent(fileToParse, System) {
 
     // ** Begin Parse
 
+    let line_number = 1;
     for await (const line of System.file_data) {
       let matches = line.match(philips_re[parsers[0]]);
 
@@ -42,6 +43,7 @@ async function phil_mri_logcurrent(fileToParse, System) {
       if (matches === null) {
         const isNewLine = blankLineTest(line);
         if (isNewLine) {
+          line_number++;
           continue;
         } else {
           await log(
@@ -53,10 +55,13 @@ async function phil_mri_logcurrent(fileToParse, System) {
             {
               message: "This is not a blank or new line - Bad Match",
               line,
+              line_number,
             }
           );
+          line_number++;
         }
       } else {
+        line_number++;
         matches.groups.system_id = System.sme;
         const dtObject = await generateDateTime(
           System.jobId,

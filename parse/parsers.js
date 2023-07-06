@@ -144,6 +144,8 @@ const philips_re = {
         /(?<host_date>\d{4}-\d{2}-\d{2})\s+(?<host_time>\d{2}:\d{2}:\d{2})\s+(?<exam_room_humidity>(-)?\d+(\.\d+)?)/g,
       monitor_System_HumTechRoom:
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<tech_room_humidity_value>(-)?\d+(\.\d+)?)/g,
+      monitor_magnet_pressure_avg:
+        /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<he_psi_avg_value>(-)?\d+(\.\d+)?)/g,
       monitor_System_TempExamRoom:
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<exam_room_temp>(-)?\d+(\.\d+)?)/g,
       monitor_System_TempTechRoom:

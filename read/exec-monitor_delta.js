@@ -6,7 +6,7 @@ const execFile = util.promisify(require("node:child_process").execFile);
 
 async function exec_monitor_delta(jobId, exec_path, args) {
   const execOptions = {
-    maxBuffer: 1024 * 1024 * 10,
+    maxBuffer: 1024 * 1024 * 500,
   };
 
   try {
