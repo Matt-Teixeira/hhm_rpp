@@ -36,10 +36,10 @@ async function updateRedisLine(sme, file, first_line) {
   }
 }
 
-async function update_redis_last_file(sme, file) {
+async function update_redis_last_file(sme, file, rmmu_file_type) {
   const redisClient = await initRedis();
   try {
-    const setKey = `${sme}.last_rmmu_file`;
+    const setKey = `${sme}.${rmmu_file_type}`;
     await redisClient.set(setKey, file);
     await redisClient.quit();
     return;
@@ -51,10 +51,10 @@ async function update_redis_last_file(sme, file) {
   }
 }
 
-async function get_last_cached_file(sme) {
+async function get_last_cached_file(sme, rmmu_file_type) {
   const redisClient = await initRedis();
   try {
-    const key = `${sme}.last_rmmu_file`;
+    const key = `${sme}.${rmmu_file_type}`;
     let line = await redisClient.get(key);
     await redisClient.quit();
     return line;
