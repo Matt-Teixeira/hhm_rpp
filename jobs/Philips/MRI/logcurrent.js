@@ -81,12 +81,14 @@ async function phil_mri_logcurrent(fileToParse, System) {
           continue;
         }
 
-        if (dtObject === null) {
+        // magnet_meu group does not have datetime. Ex: '0114,2022,04,01,00,06,08,17,14,00000,'
+        if (dtObject === null && matches.groups.magnet_meu === undefined) {
           await log("warn", System.jobId, System.sme, "date_time", "FN CALL", {
             message: "date_time object null",
             date: matches.groups.host_date,
             time: matches.groups.host_time,
             line,
+            line_number
           });
         }
 
