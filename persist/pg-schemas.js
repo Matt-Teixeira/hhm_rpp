@@ -164,6 +164,7 @@ const phil_mri_logcurrent_schema = {
   size_copy_value: null,
   data_8: null,
   reconstructor: null,
+  magnet_meu: null,
   host_datetime: null,
 };
 
