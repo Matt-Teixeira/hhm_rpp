@@ -120,7 +120,7 @@ async function phil_rmmu_history(fileToParse, System) {
     }
 
     // Cache name of last file parsed
-    await System.cache_last_file_name(System.last_file_in_dir, last_rmmu_file);
+    await System.cache_last_file_name(System.last_file_in_dir, "last_rmmu_file");
 
     return;
   } catch (error) {
