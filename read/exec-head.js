@@ -3,7 +3,7 @@ const execFile = util.promisify(require("node:child_process").execFile);
 
 async function execHead(exec_path, delta, file_path) {
   const execOptions = {
-    maxBuffer: 1024 * 1024 * 500,
+    maxBuffer: 1024 * 1024 * 700,
   };
 
   try {
