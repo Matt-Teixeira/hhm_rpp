@@ -58,19 +58,41 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
 
     const prevFileSize = await getRedisFileSize(sme, fileToParse.file_name);
 
+    // START: Check Redis delta. Delta === 0 if file not rotated (previously parsed data)
+    const currentFileSize = await getCurrentFileSize(
+      sme,
+      fileSizePath,
+      sysConfigData.hhm_config.file_path,
+      fileToParse.file_name
+    );
+
+    const delta = currentFileSize - prevFileSize;
+
+    if (delta === 0) {
+      console.log("Same file size. Do not parse");
+      await log("info", jobId, sme, "phil_cv_eventlog", "FN CALL", {
+        delta: delta,
+        message: "Same file size. Do not parse",
+      });
+      return;
+    }
+
+    // END: Check Redis delta
+
     // rl is set conditionaly. Holds file data
     let rl;
     // prevFileSize will be null if it is new system (first time running rpp).
     // prevFileSize will be 0 if log has rotated.
     // In both scenarios, read and parse entire file.
-    if (prevFileSize === null || prevFileSize === 0) {
+    if (prevFileSize === null || prevFileSize === 0 || delta !== 0) {
       rl = readline.createInterface({
         input: fs.createReadStream(complete_file_path),
         crlfDelay: Infinity,
       });
     }
 
-    if (prevFileSize > 0 && prevFileSize !== null) {
+    /*     Old condition prior to node data acquisition app
+if (prevFileSize > 0 && prevFileSize !== null) {
       const currentFileSize = await getCurrentFileSize(
         sme,
         fileSizePath,
@@ -89,7 +111,8 @@ async function phil_cv_eventlog(jobId, sysConfigData, fileToParse) {
       let headDelta = await execHead(headPath, delta, complete_file_path);
 
       rl = headDelta.toString().split(/(?:\r\n|\r|\n)/g);
-    }
+    } 
+    */
 
     for await (const line of rl) {
       let matches = line.match(philips_re.cv[parsers[0]]);

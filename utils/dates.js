@@ -15,7 +15,7 @@ async function convertDT(date) {
     formatted_date = DateTime.fromFormat(`${date}`, "dd-MMM-yyyy");
   }
 
-  let newDate = new Date(formatted_date.toISO());
+  let newDate = new Date(formatted_date.plus({ hours: 5 }).toISO());
   return newDate;
 }
 

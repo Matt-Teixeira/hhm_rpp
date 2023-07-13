@@ -24,9 +24,6 @@ async function type_1(sysConfigData, System_Monitor, directory) {
     );
 
     if (json_data) {
-      console.log("redis_cache");
-      console.log(redis_cache);
-
       // Find index of monitoring object within config data
       let monitoring_index;
       for (let i = 0; i < sysConfigData.hhm_file_config.length; i++) {

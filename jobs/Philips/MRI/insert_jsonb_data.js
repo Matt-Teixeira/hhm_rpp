@@ -106,6 +106,7 @@ async function phil_mri_monitor(System, directory) {
     // send data to be aggregated
     return [jsonData, date, redis_cache];
   } catch (error) {
+    console.log(error);
     await log(
       "error",
       System.jobId,

@@ -234,10 +234,11 @@ module.exports = queries = {
         size_copy_value,
         data_8,
         reconstructor,
+        magnet_meu,
         host_datetime
     )
     SELECT * FROM UNNEST (
-      $1::text[], $2::date[], $3::time[], $4::text[], $5::text[], $6::text[], $7::text[], $8::text[], $9::text[], $10::text[], $11::text[], $12::text[], $13::text[], $14::text[], $15::text[], $16::timestamptz[]
+      $1::text[], $2::date[], $3::time[], $4::text[], $5::text[], $6::text[], $7::text[], $8::text[], $9::text[], $10::text[], $11::text[], $12::text[], $13::text[], $14::text[], $15::text[], $16::text[], $17::timestamptz[]
     )
       `,
       rmmu_short: `

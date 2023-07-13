@@ -57,7 +57,7 @@ const philips_re = {
   ct_events_v2:
     /"(?<event_time>\d{2}\/\d{2}\/\d{2}\s\d{2}:\d{2}:\d{2})"\s"?(?<type>.*?)"?\s(?<level>\d+?)\s"?(?<module>.*?)"?\s(?<time_stamp>\d+?)\s"?(?<host_date>\d{4}\/\d{2}\/\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2}\.\d{3})"\s"?(?<message>.*?)"?\s"?(?<eal>.*?)"/g,
   mri_logcurrent:
-    /((?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2}\.\d+)\s(?<row_type>\w+)\s(?<event_type>\w+)\s(?<subsystem>.*?)\s+(?<code_1>\w+)\s(?<code_2>\w+)(\s(?<group_1>\w+))?\s+(?<message>.*))|(Number\sof\sPackets\sCreated\s:\s(?<packets_created>\d*\.?\d*)|Total\sSize\sof\sData\sCreated\s:\s(?<data_created_value>\d*\.?\d*)\s[A-Z]+|Size\sof\sCopy\sDone\s:\s(?<size_copy_value>\d*\.?\d*)\s[A-Z]+|(?<data_8>>.*)|(?<reconstructor>[A-Za-z].*))/,
+    /((?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2}\.\d+)\s(?<row_type>\w+)\s(?<event_type>\w+)\s(?<subsystem>.*?)\s+(?<code_1>\w+)\s(?<code_2>\w+)(\s(?<group_1>\w+))?\s+(?<message>.*))|(Number\sof\sPackets\sCreated\s:\s(?<packets_created>\d*\.?\d*)|Total\sSize\sof\sData\sCreated\s:\s(?<data_created_value>\d*\.?\d*)\s[A-Z]+|Size\sof\sCopy\sDone\s:\s(?<size_copy_value>\d*\.?\d*)\s[A-Z]+|(?<data_8>>.*)|(?<reconstructor>[A-Za-z].*)|(?<magnet_meu>([\d+,?]+([N,Y]+)?[\d+,?]+)))/,
   cv: {
     eventlog:
       /(?<category>[\w\. \-\$&\.]+)�(?<host_date>[\d-]+)�(?<host_time>[\d:]+)�(?<error_type>\w*)�(?<num_1>\d+)�(?:Technical ?Event ?ID: {1,3}(?<technical_event_id>\d+) ?�Description: (?<description>[^�\r\n]+)�Channel Identification: (?<channel_id>[^�]+)�Module: (?<module>[^�]+)�Source [Ff]ile: (?<source>[^�]+)�Line Number: (?<line>\d+) ?�Memo: ?(?<memo>[^\r\n�]*)(?:�SubsystemNumber: (?<subsystem_number>\d+)�ThreadName: ?(?<thread_name>[\w \-]*))?|(?<message>[^\r\n]*))/,
@@ -67,7 +67,8 @@ const philips_re = {
   mri: {
     rmmu_meta_data:
       /System.*:(?<system_reference_number>\d+)\s+Hospital.*:(?<hospital_name>.*)\s+Serial.*:(?<serial_number_magnet>.*)\s+Serial.*:(?<serial_number_meu>.*)/,
-    rmmu_meta_data_history: /System.*:(?<system_reference_number>\d+)\s+Hospital.*:(?<hospital_name>.*)/,
+    rmmu_meta_data_history:
+      /System.*:(?<system_reference_number>\d+)\s+Hospital.*:(?<hospital_name>.*)/,
     rmmu_long_re:
       /(?<LineNo>\d+),(?<year>\d+),(?<mo>\d+),(?<dy>\d+),(?<hr>\d+),(?<mn>\d+),(?<ss>\d+),(?<hs>\d+),(?<dow_value>\d+),(?<AvgPwr_value>\d+),(?<MinPwr_value>\d+),(?<MaxPwr_value>\d+),(?<AvgAbs_value>\d+),(?<AvgPrMbars_value>\d+),(?<MinPrMbars_value>\d+),(?<MaxPrMbars_value>\d+),(?<LHePct_value>\d+),(?<LHe2_value>\d+),(?<DiffPressureSwitch_state>[YN]+?),(?<TempAlarm_state>[YN]+?),(?<PressureAlarm_state>[YN]+?),(?<Cerr_state>[YN]+?),(?<CompressorReset_state>[YN]+?),(?<Chd_value>\d+),(?<Cpr_value>\d+)/g,
     rmmu_short_re:
@@ -143,6 +144,8 @@ const philips_re = {
         /(?<host_date>\d{4}-\d{2}-\d{2})\s+(?<host_time>\d{2}:\d{2}:\d{2})\s+(?<exam_room_humidity>(-)?\d+(\.\d+)?)/g,
       monitor_System_HumTechRoom:
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<tech_room_humidity_value>(-)?\d+(\.\d+)?)/g,
+      monitor_magnet_pressure_avg:
+        /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<he_psi_avg_value>(-)?\d+(\.\d+)?)/g,
       monitor_System_TempExamRoom:
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<exam_room_temp>(-)?\d+(\.\d+)?)/g,
       monitor_System_TempTechRoom:
@@ -175,6 +178,8 @@ const philips_re = {
         /(?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2})\s(?<mag_dps_status_days>(-)?\d+(\.\d+)?)/g,
       HELIUM_LEVEL:
         /(?<host_date>\d{2}-\w+-\d{4})\s+?(?<helium_level_value>(-)?\d+(\.\d+)?)/g,
+      monitor_magnet_pressure:
+        /(?<host_date>\d{4}-\d{2}-\d{2})\s+(?<host_time>\d{2}:\d{2}:\d{2})\s+(?<monitor_magnet_pressure_value>(-)?\d+(\.\d+)?)/g,
     },
   },
 };

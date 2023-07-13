@@ -47,7 +47,7 @@ const onBoot = async (systems_list) => {
     }
     console.log("*************** END ***************");
     console.timeEnd();
-    return;
+    process.exit();
   } catch (error) {
     await log("error", "NA", "NA", "onBoot", "FN CATCH", {
       error: error,
@@ -55,8 +55,20 @@ const onBoot = async (systems_list) => {
   }
 };
 
-onBoot(["SME15805", "SME15809", "SME15811", "SME15816", "SME15802"]); // SME01138 SME01139 
-  */
+onBoot([
+  "SME01142",
+  "SME01399",
+  "SME01402",
+  "SME01403",
+  "SME01404",
+  "SME01405",
+  "SME01406",
+  "SME01424",
+  "SME08284",
+  "SME08285",
+  "SME10234",
+]); // "SME10234", "SME01142"
+ */
 
 const determineManufacturer = async (jobId, system) => {
   try {
@@ -92,7 +104,7 @@ const onBoot = async () => {
     let shell_value = [process.argv[2]];
 
     const queries = {
-      CT: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CT' AND hhm_config->'run_group' = '1'",
+      CT: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality LIKE '%CT' AND hhm_config->'run_group' = '1'",
       CV: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND hhm_config->'run_group' = '1'",
       MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1'",
       phil_cv_hr_24:
@@ -110,7 +122,7 @@ const onBoot = async () => {
     }
     console.log("*************** END ***************");
     console.timeEnd();
-    return;
+    process.exit();
   } catch (error) {
     await log("error", "NA", "NA", "onBoot", "FN CATCH", {
       error: error,

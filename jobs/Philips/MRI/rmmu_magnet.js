@@ -50,6 +50,12 @@ async function phil_mri_rmmu_magnet(fileToParse, System) {
       return;
     }
 
+    // Get cached last file in directory from Redis
+    await System.get_last_file_parsed("last_rmmu_magnet_file");
+
+    // Set last file in rmmu directory
+    System.update_files_to_process();
+
     // ** End Data Acquisition
 
     // Loops through each file in the dir
@@ -115,7 +121,11 @@ async function phil_mri_rmmu_magnet(fileToParse, System) {
       // ** Upon successfull db insert, move file to archive dir
 
       if (insertSuccess) {
-        await System.archive_file(complete_file_path);
+        await System.cache_last_file_name(
+          System.last_file_in_dir,
+          "last_rmmu_magnet_file"
+        );
+        // await System.archive_file(complete_file_path);
       }
 
       data.length = 0;

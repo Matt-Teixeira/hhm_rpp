@@ -35,6 +35,9 @@ class PHILIPS_MRI_LOGCURRENT {
         this.sme,
         this.fileToParse.logcurrent.file_name
       );
+
+      console.log("REDIS FILE SIZE");
+      console.log(this.prev_file_size);
     } catch (error) {
       await log(
         "error",

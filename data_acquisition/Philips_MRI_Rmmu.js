@@ -75,12 +75,13 @@ class PHILIPS_MRI_RMMU {
     this.last_file_in_dir = this.files_in_dir[this.files_in_dir.length - 1];
   }
 
-  async cache_last_file_name(file) {
-    await update_redis_last_file(this.sme, file);
+  async cache_last_file_name(file, rmmu_file_type) {
+    await update_redis_last_file(this.sme, file, rmmu_file_type);
   }
 
-  async get_last_file_parsed() {
-    this.last_file_parsed = await get_last_cached_file(this.sme);
+  async get_last_file_parsed(rmmu_file_type) {
+
+    this.last_file_parsed = await get_last_cached_file(this.sme, rmmu_file_type);
   }
 }
 

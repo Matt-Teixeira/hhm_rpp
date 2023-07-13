@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node index.js",
     "update": "./proj.sh",
-    "read_log": "node logReader/index.js"
+    "read_log": "node logReader/index.js",
+    "ct": "node index.js CT",
+    "cv": "node index.js CV",
+    "mri": "node index.js MRI"
   },
   "keywords": [],
   "author": "",

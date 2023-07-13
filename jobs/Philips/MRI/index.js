@@ -42,6 +42,7 @@ const philips_mri_parsers = async (jobId, sysConfigData) => {
           );
 
           await phil_rmmu_history(directory.rmmu, Rmmu_System);
+           
           break;
         case "rmmu_short":
           const Rmmu_Short_System = new PHILIPS_MRI_RMMU(

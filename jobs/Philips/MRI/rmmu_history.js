@@ -26,7 +26,10 @@ async function phil_rmmu_history(fileToParse, System) {
     await System.get_directory_files();
 
     // Get cached last file in directory from Redis
-    await System.get_last_file_parsed();
+    await System.get_last_file_parsed('last_rmmu_file');
+
+    console.log("System.get_last_file_parsed");
+    console.log(System.last_file_parsed);
 
     // Set last file in rmmu directory
     System.update_files_to_process();
@@ -117,7 +120,7 @@ async function phil_rmmu_history(fileToParse, System) {
     }
 
     // Cache name of last file parsed
-    await System.cache_last_file_name(System.last_file_in_dir);
+    await System.cache_last_file_name(System.last_file_in_dir, "last_rmmu_file");
 
     return;
   } catch (error) {

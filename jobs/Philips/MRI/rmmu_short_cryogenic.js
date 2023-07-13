@@ -9,7 +9,6 @@ const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
 
-
 async function phil_mri_rmmu_short(fileToParse, System) {
   const parsers = fileToParse.parsers;
   const data = [];
@@ -48,6 +47,12 @@ async function phil_mri_rmmu_short(fileToParse, System) {
       );
       return;
     }
+
+    // Get cached last file in directory from Redis
+    await System.get_last_file_parsed("last_rmmu_short_file");
+
+    // Set last file in rmmu directory
+    System.update_files_to_process();
 
     // ** End Data Acquisition
 
@@ -114,7 +119,10 @@ async function phil_mri_rmmu_short(fileToParse, System) {
       // ** Upon successfull db insert, move file to archive dir
 
       if (insertSuccess) {
-        await System.archive_file(complete_file_path);
+        await System.cache_last_file_name(
+          System.last_file_in_dir,
+          "last_rmmu_short_file"
+        );
       }
 
       data.length = 0;
