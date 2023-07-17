@@ -5,8 +5,8 @@ const {
   get_captured_datetime_entry,
   insert_into_secondary_table,
   update_secondary_table,
-} = require("../../../utils/phil_mri_monitor_helpers"); //cryo_comp_malf_minutes
-const { convertDT } = require("../../../utils/dates");
+} = require("../../../util/phil_mri_monitor_helpers"); //cryo_comp_malf_minutes
+const { convertDT } = require("../../../util/dates");
 
 async function boolValue(jobId, sme, data, column, capture_datetime) {
   try {

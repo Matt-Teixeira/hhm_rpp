@@ -7,7 +7,7 @@ const { philips_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_cv_eventlog_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
-const { blankLineTest } = require("../../../utils/regExHelpers");
+const { blankLineTest } = require("../../../util/regExHelpers");
 const execLastMod = require("../../../read/exec-file_last_mod");
 const {
   getCurrentFileSize,

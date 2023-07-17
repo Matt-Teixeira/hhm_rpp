@@ -5,7 +5,7 @@ const { win_10_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { siemens_ct_mri } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
-const { blankLineTest } = require("../../../utils/regExHelpers");
+const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
 

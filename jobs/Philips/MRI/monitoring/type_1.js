@@ -3,7 +3,7 @@ const phil_mri_monitor_jsonb = require("../insert_jsonb_data");
 const phil_mri_monitor_display = require("../insert_display_data");
 const {
   update_jsonb_state,
-} = require("../../../../utils/phil_mri_monitor_helpers");
+} = require("../../../../util/phil_mri_monitor_helpers");
 
 async function type_1(sysConfigData, System_Monitor, directory) {
   try {

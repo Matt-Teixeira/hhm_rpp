@@ -6,6 +6,18 @@ const pgPool = require("./db/pg-pool");
 const siemens_parser = require("./jobs/Siemens");
 const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");
+const [
+  addLogEvent,
+  writeLogEvents,
+  dbInsertLogEvents,
+  makeAppRunLog,
+] = require("./utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, det, cat, seq, qaf },
+} = require("./utils/logger/enums");
+const { v4: uuidv4 } = require("uuid");
+
 /* 
 const determineManufacturer = async (jobId, sme) => {
   try {
@@ -70,43 +82,60 @@ onBoot([
 ]); // "SME10234", "SME01142"
  */
 
-const determineManufacturer = async (jobId, system) => {
+const determineManufacturer = async (job_id, system, run_log) => {
+  let note = {
+    job_id: job_id,
+    sme: system.id,
+  };
   try {
-    await log("info", jobId, system.id, "determineManufacturer", "FN CALL", {
+    await addLogEvent(I, run_log, "determineManufacturer", cal, note, null);
+    await log("info", job_id, system.id, "determineManufacturer", "FN CALL", {
       mod: process.argv[2],
     });
 
     switch (system.manufacturer) {
       case "Siemens":
-        await siemens_parser(jobId, system);
+        await siemens_parser(job_id, system);
         break;
       case "Philips":
-        await philips_parser(jobId, system);
+        await philips_parser(job_id, system);
         break;
       case "GE":
-        await ge_parser(jobId, system);
+        await ge_parser(job_id, system, run_log);
         break;
       default:
         break;
     }
   } catch (error) {
-    await log("error", jobId, system.id, "determineManufacturer", "FN CATCH", {
+    await addLogEvent(E, run_log, "determineManufacturer", cat, note, error);
+    await log("error", job_id, system.id, "determineManufacturer", "FN CATCH", {
       error: error,
     });
   }
 };
 
 const onBoot = async () => {
+  const run_log = await makeAppRunLog();
+
+  let note = {
+    LOGGER: process.env.LOGGER,
+    REDIS_IP: process.env.REDIS_IP,
+    PG_USER: process.env.PG_USER,
+    PG_DB: process.env.PG_DB,
+    argv: process.argv,
+  };
+
   try {
+    await addLogEvent(I, run_log, "onBoot", cal, note, null);
     await log("info", "NA", "NA", "onBoot", `FN CALL`);
     console.time();
 
     let shell_value = [process.argv[2]];
 
     const queries = {
-      CT: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality LIKE '%CT' AND hhm_config->'run_group' = '1'",
-      CV: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND hhm_config->'run_group' = '1'",
-      MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1'",
+      CT: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality LIKE '%CT' AND hhm_config->'run_group' = '1' AND id IN ('SME00847', 'SME00896', 'SME00897')",
+      CV: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND hhm_config->'run_group' = '1' AND id IN ('SME00865', 'SME01442')",
+      MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1' AND id IN ('SME01096', 'SME01123', 'SME01422')",
       phil_cv_hr_24:
         "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND manufacturer = 'Philips' AND hhm_config->'run_group' = '2'",
       all: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL",
@@ -116,14 +145,36 @@ const onBoot = async () => {
 
     const system_array = await pgPool.query(queryString);
 
+    /*      
+   const child_processes = [];
     for await (const system of system_array.rows) {
       let jobId = crypto.randomUUID();
-      await determineManufacturer(jobId, system);
+      child_processes.push(
+        async () => await determineManufacturer(jobId, system, run_log)
+      );
     }
+
+    // CREATE AN ARRAY OF PROMISES BY CALLING EACH child_process FUNCTION
+    const promises = child_processes.map((child_process) => child_process());
+
+    // AWAIT PROMISIS
+    await Promise.all(promises); 
+   */
+
+    for await (const system of system_array.rows) {
+      const job_id = uuidv4();
+
+      await determineManufacturer(job_id, system, run_log);
+    }
+
+    await writeLogEvents(run_log);
+
     console.log("*************** END ***************");
     console.timeEnd();
     process.exit();
   } catch (error) {
+    console.log(error);
+    await addLogEvent(E, run_log, "onBoot", cat, null, error);
     await log("error", "NA", "NA", "onBoot", "FN CATCH", {
       error: error,
     });

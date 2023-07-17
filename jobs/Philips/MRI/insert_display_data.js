@@ -3,8 +3,8 @@ const initialUpdate = require("../../../processing/phil_mri_monitor_data/initial
 const updatePhilMriTable = require("../../../processing/phil_mri_monitor_data/update_secondary_table/updatePhilMriTable");
 const {
   getSystemDbData,
-} = require("../../../utils/phil_mri_monitor_helpers");
-const { compare_dates } = require("../../../utils/dates");
+} = require("../../../util/phil_mri_monitor_helpers");
+const { compare_dates } = require("../../../util/dates");
 
 async function insertDisplayData(
   jobId,

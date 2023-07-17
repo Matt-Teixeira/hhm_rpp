@@ -5,8 +5,8 @@ const {
   getDateRanges,
   updateTable,
   insertData,
-} = require("../../../utils/phil_mri_monitor_helpers"); //cryo_comp_comm_error
-const { convertDT } = require("../../../utils/dates");
+} = require("../../../util/phil_mri_monitor_helpers"); //cryo_comp_comm_error
+const { convertDT } = require("../../../util/dates");
 
 async function booleanValue(jobId, sme, data, column) {
   try {

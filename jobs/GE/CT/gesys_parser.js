@@ -5,8 +5,13 @@ const { ge_ct_gesys_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const extract = require("../../../processing/date_processing/ge_ct/extract_metadata");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, det, cat },
+} = require("../../../utils/logger/enums");
 
-async function ge_ct_gesys(system) {
+async function ge_ct_gesys(system, run_log, job_id) {
   // an array in each parser accossiated with a file
   const parsers = system.fileToParse.parsers;
   const data = [];
@@ -14,8 +19,13 @@ async function ge_ct_gesys(system) {
 
   const tube_test_re = /tube usage data reports/;
 
+  let note = {
+    job_id: job_id,
+  };
+
   try {
-    await log("info", system.jobId, system.sme, "ge_ct_gesys", "FN CALL");
+    await addLogEvent(I, run_log, "ge_ct_gesys", cal, note, null);
+    await log("info", job_id, system.sme, "ge_ct_gesys", "FN CALL");
 
     // ** Start Data Acquisition
 
@@ -38,6 +48,14 @@ async function ge_ct_gesys(system) {
 
       // matchGroups will be null if no match
       if (!matchGroups) {
+        let note = {
+          job_id: job_id,
+          sme: system.sme,
+          prev_epoch: data[data.length - 1].epoch,
+          sr_group: data[data.length - 1].sr,
+          message: "Failed match",
+        };
+        await addLogEvent(W, run_log, "ge_ct_gesys", det, note, null);
         await log("error", system.sme, "ge_ct_gesys", "FN CALL", {
           message: "Failed match",
           prev_epoch: data[data.length - 1].epoch,
@@ -54,7 +72,7 @@ async function ge_ct_gesys(system) {
       matchGroups.groups.system_id = system.sysConfigData.id;
 
       const dtObject = await generateDateTime(
-        system.jobId,
+        job_id,
         matchGroups.groups.system_id,
         system.fileToParse.pg_table,
         matchGroups.groups.host_date,
@@ -62,7 +80,15 @@ async function ge_ct_gesys(system) {
       );
 
       if (dtObject === null) {
-        await log("warn", system.jobId, system.sme, "date_time", "FN CALL", {
+        let note = {
+          job_id: job_id,
+          sme: system.sme,
+          date: matchGroups.groups.host_date,
+          time: matchGroups.groups.host_time,
+          message: "date_time object null",
+        };
+        await addLogEvent(W, run_log, "ge_ct_gesys", det, note, null);
+        await log("warn", job_id, system.sme, "date_time", "FN CALL", {
           message: "date_time object null",
         });
       }
@@ -90,10 +116,11 @@ async function ge_ct_gesys(system) {
     // ** Begin Persist
 
     const insertSuccess = await bulkInsert(
-      system.jobId,
+      job_id,
       dataToArray,
       system.sysConfigData,
-      system.fileToParse
+      system.fileToParse,
+      run_log
     );
 
     // ** End Persist
@@ -102,10 +129,17 @@ async function ge_ct_gesys(system) {
 
     if (insertSuccess) {
       await system.updateRedisFileSize();
-      if (extraction_data.length > 0) await extract(system.jobId, extraction_data);
+      console.log(extraction_data);
+      if (extraction_data.length > 0) await extract(job_id, extraction_data, run_log);
     }
   } catch (error) {
-    await log("error", system.jobId, system.sme, "ge_ct_gesys", "FN CALL", {
+    console.log(error);
+    let note = {
+      job_id: job_id,
+      sme: system.sme,
+    };
+    await addLogEvent(E, run_log, "ge_ct_gesys", cat, note, error);
+    await log("error", job_id, system.sme, "ge_ct_gesys", "FN CALL", {
       error: error.message,
     });
   }

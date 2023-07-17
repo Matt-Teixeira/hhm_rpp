@@ -4,16 +4,26 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { ge_mri_gesys_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, det, cat, seq, qaf },
+} = require("../../../utils/logger/enums");
 
-async function ge_mri_gesys(System) {
+async function ge_mri_gesys(System, run_log, job_id) {
   // an array in each config accossiated with a file
   const parsers = System.fileToParse.parsers;
   const data = [];
 
+  let note = {
+    job_id: job_id,
+  };
+
   try {
+    await addLogEvent(I, run_log, "ge_mri_gesys", cal, note, null);
     await log(
       "info",
-      System.jobId,
+      job_id,
       System.sysConfigData.id,
       "ge_mri_gesys",
       "FN CALL"
@@ -39,9 +49,17 @@ async function ge_mri_gesys(System) {
       const matchGroups = match.match(ge_re.mri.gesys[parsers[1]]);
       // matchGroups will be null if no match
       if (!matchGroups) {
+        let note = {
+          job_id: job_id,
+          sme: System.sysConfigData.id,
+          message: "Failed match",
+          prev_epoch: data[data.length - 1].epoch,
+          sr_group: data[data.length - 1].sr,
+        };
+        await addLogEvent(W, run_log, "ge_mri_gesys", det, note, null);
         await log(
           "error",
-          System.jobId,
+          job_id,
           System.sysConfigData.id,
           "ge_mri_gesys",
           "FN CALL",
@@ -63,7 +81,7 @@ async function ge_mri_gesys(System) {
       matchGroups.groups.system_id = System.sysConfigData.id;
 
       const dtObject = await generateDateTime(
-        System.jobId,
+        job_id,
         matchGroups.groups.system_id,
         System.fileToParse.pg_table,
         matchGroups.groups.host_date,
@@ -71,9 +89,15 @@ async function ge_mri_gesys(System) {
       );
 
       if (dtObject === null) {
+        let note = {
+          job_id: job_id,
+          sme: System.sysConfigData.id,
+          message: "date_time object null",
+        };
+        await addLogEvent(W, run_log, "ge_mri_gesys", det, note, null);
         await log(
           "warn",
-          System.jobId,
+          job_id,
           System.sysConfigData.id,
           "date_time",
           "FN CALL",
@@ -96,10 +120,11 @@ async function ge_mri_gesys(System) {
     // ** Begin Persist
 
     const insertSuccess = await bulkInsert(
-      System.jobId,
+      job_id,
       dataToArray,
       System.sysConfigData,
-      System.fileToParse
+      System.fileToParse,
+      run_log
     );
 
     // ** End Persist
@@ -110,9 +135,14 @@ async function ge_mri_gesys(System) {
       await System.updateRedisFileSize();
     }
   } catch (error) {
+    let note = {
+      job_id: job_id,
+      sme: System.sysConfigData.id,
+    };
+    await addLogEvent(E, run_log, "ge_mri_gesys", cat, note, error);
     await log(
       "error",
-      System.jobId,
+      job_id,
       System.sysConfigData.id,
       "ge_mri_gesys",
       "FN CALL",

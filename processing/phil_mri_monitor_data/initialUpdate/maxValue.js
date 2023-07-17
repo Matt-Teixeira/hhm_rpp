@@ -5,8 +5,8 @@ const {
   getExistingDates,
   updateTable,
   insertData,
-} = require("../../../utils/phil_mri_monitor_helpers"); //cryo_comp_malf_minutes
-const { convertDT } = require("../../../utils/dates");
+} = require("../../../util/phil_mri_monitor_helpers"); //cryo_comp_malf_minutes
+const { convertDT } = require("../../../util/dates");
 
 async function maxValue(jobId, sme, data, column) {
 

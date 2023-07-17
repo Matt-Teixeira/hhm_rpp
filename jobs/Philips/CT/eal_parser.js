@@ -5,7 +5,7 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_ct_eal_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
-const { remove_dub_quotes } = require("../../../utils/regExHelpers");
+const { remove_dub_quotes } = require("../../../util/regExHelpers");
 
 async function phil_ct_eal(system) {
   const data = [];

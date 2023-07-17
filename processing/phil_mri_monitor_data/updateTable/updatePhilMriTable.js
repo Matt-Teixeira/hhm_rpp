@@ -3,7 +3,7 @@ require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
 const {
   getExistingNotNullDates,
-} = require("../../../utils/phil_mri_monitor_helpers");
+} = require("../../../util/phil_mri_monitor_helpers");
 const philMonitorTableUpdate = require("./index");
 
 async function updatePhilMriTable(jobId, sme, file_config, data) {

@@ -5,7 +5,7 @@ const { philips_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { phil_mri_logcurrent_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
-const { blankLineTest } = require("../../../utils/regExHelpers");
+const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
 async function phil_mri_logcurrent(fileToParse, System) {

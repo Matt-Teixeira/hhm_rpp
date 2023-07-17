@@ -5,8 +5,8 @@ const {
   getDateRanges,
   updateTable,
   insertData,
-} = require("../../../utils/phil_mri_monitor_helpers");
-const {convertDT} = require("../../../utils/dates");
+} = require("../../../util/phil_mri_monitor_helpers");
+const {convertDT} = require("../../../util/dates");
 
 async function minValue(jobId, sme, data, column) {
   try {
