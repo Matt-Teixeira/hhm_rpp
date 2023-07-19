@@ -21,6 +21,8 @@ async function ge_ct_gesys(system, run_log, job_id) {
 
   let note = {
     job_id: job_id,
+    sme: system.sme,
+    file: system.fileToParse.file_name,
   };
 
   try {
@@ -130,14 +132,10 @@ async function ge_ct_gesys(system, run_log, job_id) {
     if (insertSuccess) {
       await system.updateRedisFileSize();
       console.log(extraction_data);
-      if (extraction_data.length > 0) await extract(job_id, extraction_data, run_log);
+      if (extraction_data.length > 0)
+        await extract(job_id, extraction_data, run_log);
     }
   } catch (error) {
-    console.log(error);
-    let note = {
-      job_id: job_id,
-      sme: system.sme,
-    };
     await addLogEvent(E, run_log, "ge_ct_gesys", cat, note, error);
     await log("error", job_id, system.sme, "ge_ct_gesys", "FN CALL", {
       error: error.message,

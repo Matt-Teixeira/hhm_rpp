@@ -55,7 +55,6 @@ async function extract(job_id, extraction_data, run_log) {
     await log(
       "error",
       job_id,
-      data[0].system_id,
       "ge_ct_metadata",
       "FN CATCH",
       {

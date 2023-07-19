@@ -11,6 +11,7 @@ const {
 const geModalities = async (job_id, sysConfigData, run_log) => {
   let note = {
     job_id: job_id,
+    sme: sysConfigData.id
   };
   try {
     await addLogEvent(I, run_log, "geModalities", cal, note, null);

@@ -2,25 +2,34 @@ const { log } = require("../../../logger");
 const maxValue = require("./maxValue");
 const booleanValue = require("./booleanValue");
 const minValue = require("./minValue");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, cat, det },
+} = require("../../../utils/logger/enums");
 
-async function initialUpdate(jobId, sme, file_config, data) {
+async function initialUpdate(job_id, sme, file_config, data, run_log) {
+  let process_type = file_config.aggregation;
+  let successful_agg = false;
+  let note = {
+    job_id,
+    sme,
+    file: file_config.file_name,
+    process_type,
+  };
   try {
-    await log("info", jobId, sme, "initialUpdate", "FN CALL", {
-      file: file_config.file_name,
-    });
-    let process_type = file_config.aggregation;
-    let successful_agg = false;
+    await addLogEvent(I, run_log, "initialUpdate", cal, note, null);
 
     switch (process_type) {
       case "max":
-        successful_agg = await maxValue(jobId, sme, data, file_config.column);
+        successful_agg = await maxValue(job_id, sme, data, file_config.column);
         break;
       case "min":
-        successful_agg = await minValue(jobId, sme, data, file_config.column);
+        successful_agg = await minValue(job_id, sme, data, file_config.column);
         break;
       case "bool":
         successful_agg = await booleanValue(
-          jobId,
+          job_id,
           sme,
           data,
           file_config.column
@@ -29,10 +38,13 @@ async function initialUpdate(jobId, sme, file_config, data) {
       default:
         break;
     }
+    note.successful_agg = successful_agg;
+    await addLogEvent(I, run_log, "initialUpdate", det, note, null);
     return successful_agg;
   } catch (error) {
     console.log(error);
-    await log("error", jobId, sme, "initialUpdate", "FN CALL", {
+    await addLogEvent(E, run_log, "initialUpdate", cat, note, error);
+    await log("error", job_id, sme, "initialUpdate", "FN CALL", {
       file: file_config.file_name,
       error: error,
     });

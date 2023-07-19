@@ -4,26 +4,36 @@ const { log } = require("../../../logger");
 const maxValue = require("./maxValue");
 const booleanValue = require("./booleanValue");
 const minValue = require("./minValue");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, cat, det },
+} = require("../../../utils/logger/enums");
 
 async function philMonitorTableUpdate(
-  jobId,
+  job_id,
   sme,
   col_name,
   file_config,
   data,
-  capture_datetime
+  capture_datetime,
+  run_log
 ) {
+  let processType = file_config.aggregation;
+  let successful_agg = false;
+  let note = {
+    job_id,
+    sme,
+    file: file_config.file_name,
+    process_type: processType,
+  };
   try {
-    await log("info", jobId, sme, "philMonitorTableUpdate", "FN CALL", {
-      sme: sme,
-    });
-    let processType = file_config.aggregation;
-    let successful_agg = false;
+    await addLogEvent(I, run_log, "philMonitorTableUpdate", cal, note, null);
 
     switch (processType) {
       case "max":
         successful_agg = await maxValue(
-          jobId,
+          job_id,
           sme,
           data,
           col_name,
@@ -32,7 +42,7 @@ async function philMonitorTableUpdate(
         break;
       case "min":
         successful_agg = await minValue(
-          jobId,
+          job_id,
           sme,
           data,
           col_name,
@@ -41,7 +51,7 @@ async function philMonitorTableUpdate(
         break;
       case "bool":
         successful_agg = await booleanValue(
-          jobId,
+          job_id,
           sme,
           data,
           col_name,
@@ -51,9 +61,12 @@ async function philMonitorTableUpdate(
       default:
         break;
     }
+    note.successful_agg = successful_agg;
+    await addLogEvent(I, run_log, "philMonitorTableUpdate", det, note, null);
     return successful_agg;
   } catch (error) {
-    await log("error", jobId, sme, "philMonitorTableUpdate", "FN CALL", {
+    await addLogEvent(E, run_log, "philMonitorTableUpdate", cat, note, error);
+    await log("error", job_id, sme, "philMonitorTableUpdate", "FN CALL", {
       sme: sme,
       error: error,
     });

@@ -14,6 +14,10 @@ const convertRowsToColumns = async (job_id, sme, rows, run_log) => {
   const lastRow = rows[rows.length - 1];
   const dbColumnCount = firstRow.length;
 
+  note.first_row = firstRow;
+  note.last_row = lastRow;
+  note.db_column_count = dbColumnCount;
+
   await addLogEvent(I, run_log, "convertRowsToColumns", cal, note, null);
   await log("info", job_id, sme, "convertRowsToColumns", "FN DETAILS", {
     "FIRST ROW": firstRow,

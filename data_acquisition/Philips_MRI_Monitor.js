@@ -7,10 +7,17 @@ const {
 const exec_tail_last_line = require("../read/exec-tail-last-line");
 const exec_monitor_delta = require("../read/exec-monitor_delta");
 const execLastMod = require("../read/exec-file_last_mod");
+const [addLogEvent] = require("../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, det, cat, seq, qaf },
+} = require("../utils/logger/enums");
 
 class PHILIPS_MRI_MONITORING {
-  constructor(jobId, sysConfigData) {
-    (this.jobId = jobId), (this.sysConfigData = sysConfigData);
+  constructor(job_id, sysConfigData, run_log) {
+    this.job_id = job_id;
+    this.run_log = run_log;
+    this.sysConfigData = sysConfigData;
     this.sme = this.sysConfigData.id;
   }
 
@@ -19,13 +26,34 @@ class PHILIPS_MRI_MONITORING {
   lastModPath = "./read/sh/get_file_last_mod.sh";
 
   async get_all_monitor_data(complete_file_path) {
+    let note = {
+      job_id: this.job_id,
+      sme: this.sme,
+      file: complete_file_path,
+    };
     try {
+      await addLogEvent(
+        I,
+        this.run_log,
+        "PHILIPS_MRI_MONITORING: get_all_monitor_data",
+        cal,
+        note,
+        null
+      );
       const file_data = (await fs.readFile(complete_file_path)).toString();
       return file_data;
     } catch (error) {
+      await addLogEvent(
+        E,
+        this.run_log,
+        "PHILIPS_MRI_MONITORING: get_all_monitor_data",
+        cat,
+        note,
+        error
+      );
       await log(
         "error",
-        this.jobId,
+        this.job_id,
         this.sme,
         "get_all_monitor_data",
         "FN CALL",
@@ -35,21 +63,58 @@ class PHILIPS_MRI_MONITORING {
   }
 
   async get_redis_line(file) {
+    let note = {
+      job_id: this.job_id,
+      sme: this.sme,
+      file: file.file_name,
+    };
+
+    await addLogEvent(
+      I,
+      this.run_log,
+      "PHILIPS_MRI_MONITORING: get_redis_line",
+      cal,
+      note,
+      null
+    );
+
     let last_line = await getRedisLine(this.sme, file.file_name);
 
-    if (last_line === null || last_line === "") return null;
+    note.last_line = last_line;
+    await addLogEvent(
+      I,
+      this.run_log,
+      "PHILIPS_MRI_MONITORING: get_redis_line",
+      det,
+      note,
+      null
+    );
 
-    console.log("\nfile");
-    console.log(file);
-    console.log("last_line parsed of file");
-    console.log(last_line + "\n");
+    if (last_line === null || last_line === "") return null;
 
     const matched_last_line = last_line.match(
       /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+/
     )[0]; // \d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2} 4/21/2023 change
 
     if (!matched_last_line) {
-      await log("error", this.jobId, this.sme, "get_redis_line", "FN CALL", {
+      let note = {
+        job_id: this.job_id,
+        sme: this.sme,
+        file: file.file_name,
+        message: "last_line is null. Need to mod regex",
+        re: /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+/,
+        last_line,
+        matched_last_line,
+      };
+      await addLogEvent(
+        W,
+        this.run_log,
+        "PHILIPS_MRI_MONITORING: get_redis_line",
+        det,
+        note,
+        null
+      );
+      await log("error", this.job_id, this.sme, "get_redis_line", "FN CALL", {
         message: "last_line is null. Need to mod regex",
         re: /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+/,
         last_line,
@@ -61,42 +126,137 @@ class PHILIPS_MRI_MONITORING {
   }
 
   async get_last_monitor_line(complete_file_path, file_name) {
-    const last_line = await exec_tail_last_line(
-      this.exec_tail_path,
-      complete_file_path
-    );
+    let note = {
+      job_id: this.job_id,
+      sme: this.sme,
+      file: file_name,
+    };
+    try {
+      const last_line = await exec_tail_last_line(
+        this.exec_tail_path,
+        complete_file_path
+      );
 
-    this.update_redis_monitor_line(file_name, last_line);
+      note.last_line = last_line;
+      await addLogEvent(
+        I,
+        this.run_log,
+        "PHILIPS_MRI_MONITORING: get_last_monitor_line",
+        det,
+        note,
+        null
+      );
+
+      this.update_redis_monitor_line(file_name, last_line);
+    } catch (error) {
+      await addLogEvent(
+        E,
+        this.run_log,
+        "PHILIPS_MRI_MONITORING: get_last_monitor_line",
+        cat,
+        note,
+        error
+      );
+    }
   }
 
   async update_redis_monitor_line(file_name, line) {
-    await updateRedisLine(this.sme, file_name, line);
+    let note = {
+      job_id: this.job_id,
+      sme: this.sme,
+      file: file_name,
+      line,
+    };
+    try {
+      await addLogEvent(
+        I,
+        this.run_log,
+        "PHILIPS_MRI_MONITORING: update_redis_monitor_line",
+        cal,
+        note,
+        null
+      );
+      await updateRedisLine(this.sme, file_name, line);
+    } catch (error) {
+      await addLogEvent(
+        E,
+        this.run_log,
+        "PHILIPS_MRI_MONITORING: update_redis_monitor_line",
+        cat,
+        note,
+        error
+      );
+    }
   }
 
   async get_monitor_delta(complete_file_path, last_line) {
-    // Gets delta based on last line parsed and cached in redis
-    const delta = await exec_monitor_delta(
-      this.jobId,
-      this.exec_monitor_delta_path,
-      [last_line, complete_file_path]
-    );
+    let note = {
+      job_id: this.job_id,
+      sme: this.sme,
+      file: complete_file_path,
+      last_line,
+    };
 
-    // Will return null if no new lines detected
-    if (delta === null) {
-      // Get file's last mod datetime
-      const file_mod_datetime = await execLastMod(this.lastModPath, [
-        complete_file_path,
-      ]);
+    try {
+      await addLogEvent(
+        I,
+        this.run_log,
+        "PHILIPS_MRI_MONITORING: get_monitor_delta",
+        cal,
+        note,
+        null
+      );
+      // Gets delta based on last line parsed and cached in redis
+      const delta = await exec_monitor_delta(
+        this.job_id,
+        this.exec_monitor_delta_path,
+        [last_line, complete_file_path]
+      );
 
-      await log("warn", this.jobId, this.sme, "get_monitor_delta", "FN CALL", {
-        message: "File does not have new data",
-        last_mod: file_mod_datetime,
-      });
-      return null;
+      // Will return null if no new lines detected
+      if (delta === null) {
+        // Get file's last mod datetime
+        const file_mod_datetime = await execLastMod(this.lastModPath, [
+          complete_file_path,
+        ]);
+        note.data = delta;
+        note.message = "File does not have new data";
+        note.last_mod = file_mod_datetime;
+        await addLogEvent(
+          I,
+          this.run_log,
+          "PHILIPS_MRI_MONITORING: get_monitor_delta",
+          det,
+          note,
+          null
+        );
+
+        await log(
+          "warn",
+          this.job_id,
+          this.sme,
+          "get_monitor_delta",
+          "FN CALL",
+          {
+            message: "File does not have new data",
+            last_mod: file_mod_datetime,
+          }
+        );
+        return null;
+      }
+
+      return delta.toString();
+    } catch (error) {
+      console.log(error);
+      await addLogEvent(
+        E,
+        this.run_log,
+        "PHILIPS_MRI_MONITORING: get_monitor_delta",
+        cat,
+        note,
+        error
+      );
     }
-    console.log("NEW LINE BASED ON DELTA LINES");
-    console.log(delta + "\n");
-    return delta.toString();
   }
 
   // Logcurrent.log

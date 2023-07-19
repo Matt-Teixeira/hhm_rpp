@@ -9,6 +9,11 @@ const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
 const extract = require("../../../processing/date_processing/siemens_ct/extract_metadata");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, det, cat },
+} = require("../../../utils/logger/enums");
 
 /*
 NOTE ON EvtApplication_Today.txt
@@ -26,15 +31,24 @@ const win10_siemens_ct = async (System) => {
   // first_line will be the most recent line data
   let first_line;
 
+  let note = {
+    job_id: System.job_id,
+    sme: System.sme,
+    file: System.fileToParse,
+  };
+
   try {
-    await log("info", System.jobId, System.sme, "win10_siemens_ct", "FN CALL");
+    await addLogEvent(I, System.run_log, "win10_siemens_ct", cal, note, null);
+    await log("info", System.job_id, System.sme, "win10_siemens_ct", "FN CALL");
 
     await System.get_redis_line();
 
     // Returns true if file in dir.
     if (!System.is_file_present()) return;
 
-    System.get_file_data();
+    await System.get_file_data();
+
+    console.log(System.file_data);
 
     for await (const line of System.file_data) {
       // Save first line (most resent parsed line) to redis
@@ -43,11 +57,26 @@ const win10_siemens_ct = async (System) => {
 
       // If line (in file) === redis_line, we break because we have reached point of last rpp.
       if (line == System.redis_line) {
+        let note = {
+          job_id: System.job_id,
+          sme: System.sme,
+          file: System.fileToParse,
+          message: `End of new data`,
+        };
         // Log file's last mod datetime
         const file_mod_datetime = await execLastMod(lastModPath, [
           System.complete_file_path,
         ]);
-        await log("warn", System.jobId, System.sme, "getFileData", "FN CALL", {
+        note.last_mod = file_mod_datetime;
+        await addLogEvent(
+          W,
+          System.run_log,
+          "win10_siemens_ct",
+          cal,
+          note,
+          null
+        );
+        await log("warn", System.job_id, System.sme, "getFileData", "FN CALL", {
           message: `End of new data`,
           lines: line_num - 1,
           last_mod: file_mod_datetime,
@@ -62,9 +91,24 @@ const win10_siemens_ct = async (System) => {
         if (isNewLine) {
           continue;
         } else {
+          let note = {
+            job_id: System.job_id,
+            sme: System.sme,
+            file: System.fileToParse,
+            message: "This is not a blank new line - Bad Match",
+            line: line,
+          };
+          await addLogEvent(
+            W,
+            System.run_log,
+            "win10_siemens_ct",
+            cal,
+            note,
+            null
+          );
           await log(
             "error",
-            System.jobId,
+            System.job_id,
             System.sme,
             "Not_New_Line",
             "FN CALL",
@@ -79,7 +123,7 @@ const win10_siemens_ct = async (System) => {
       matches.groups.system_id = System.sme;
 
       const dtObject = await generateDateTime(
-        System.jobId,
+        System.job_id,
         matches.groups.system_id,
         System.fileToParse.pg_table,
         matches.groups.host_date,
@@ -87,7 +131,22 @@ const win10_siemens_ct = async (System) => {
       );
 
       if (dtObject === null) {
-        await log("warn", System.jobId, System.sme, "date_time", "FN CALL", {
+        let note = {
+          job_id: System.job_id,
+          sme: System.sme,
+          line,
+          match_group: matches.groups,
+          message: "date_time object null",
+        };
+        await addLogEvent(
+          W,
+          System.run_log,
+          "win10_siemens_ct: date_time",
+          det,
+          note,
+          null
+        );
+        await log("warn", System.job_id, System.sme, "date_time", "FN CALL", {
           message: "date_time object null",
         });
       }
@@ -116,22 +175,25 @@ const win10_siemens_ct = async (System) => {
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
     const insertSuccess = await bulkInsert(
-      System.jobId,
+      System.job_id,
       dataToArray,
       System.sysConfigData,
-      System.fileToParse
+      System.fileToParse,
+      System.run_log
     );
     if (insertSuccess) {
       await System.update_redis_line(first_line);
       if (extracted_metadata.length > 0)
-        await extract(System.jobId, extracted_metadata);
+        await extract(System.job_id, extracted_metadata, System.run_log);
     }
 
     return true;
   } catch (error) {
+    console.log(error);
+    await addLogEvent(E, System.run_log, "win10_siemens_ct", cat, note, error);
     await log(
       "error",
-      System.jobId,
+      System.job_id,
       System.sme,
       "win10_siemens_ct",
       "FN CATCH",

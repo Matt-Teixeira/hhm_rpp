@@ -11,6 +11,8 @@ const {
 async function bulkInsert(job_id, data, sysConfigData, fileConfig, run_log) {
   let note = {
     job_id: job_id,
+    sme: sysConfigData.id,
+    file: fileConfig.file_name,
   };
 
   await addLogEvent(I, run_log, "bulkInsert", cal, note, null);
@@ -26,12 +28,19 @@ async function bulkInsert(job_id, data, sysConfigData, fileConfig, run_log) {
     console.log("\n" + sysConfigData.id);
     console.log(query);
 
-    const payload = await convertRowsToColumns(job_id, sysConfigData.id, data, run_log);
+    const payload = await convertRowsToColumns(
+      job_id,
+      sysConfigData.id,
+      data,
+      run_log
+    );
     const insertData = await pgPool.query(query, payload);
 
     let note = {
       job_id: job_id,
-      query: JSON.stringify(query),
+      sme: sysConfigData.id,
+      file: fileConfig.file_name,
+      query: fileConfig.query,
       rowsInserted: insertData.rowCount,
     };
     await addLogEvent(I, run_log, "bulkInsert", det, note, null);

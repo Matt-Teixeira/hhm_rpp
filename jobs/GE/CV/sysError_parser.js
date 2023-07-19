@@ -6,12 +6,10 @@ const bulkInsert = require("../../../persist/queryBuilder");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const { remove_dub_quotes } = require("../../../util/regExHelpers");
-const [
-  addLogEvent,
-] = require("../../../utils/logger/log");
+const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, det, cat},
+  tag: { cal, det, cat },
 } = require("../../../utils/logger/enums");
 
 // File to parse is read line by line for regEx to match
@@ -22,6 +20,8 @@ async function ge_cv_sys_error(System, run_log, job_id) {
 
   let note = {
     job_id: job_id,
+    sme: System.sme,
+    file: System.fileToParse.file_name,
   };
 
   try {
@@ -91,7 +91,9 @@ async function ge_cv_sys_error(System, run_log, job_id) {
         if (dtObject === null) {
           let note = {
             job_id: job_id,
-            sme: System.sysConfigData.id,
+            sme: System.sme,
+            line: line,
+            match_group: matches.groups,
             message: "date_time object null",
           };
           await addLogEvent(W, run_log, "ge_cv_sys_error", det, note, null);

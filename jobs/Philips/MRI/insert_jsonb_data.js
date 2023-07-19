@@ -3,16 +3,25 @@ require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
 const { philips_re } = require("../../../parse/parsers");
 const insertJsonB = require("../../../processing/phil_mri_monitor_data/bulk_jsonb_insert");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, cat, det },
+} = require("../../../utils/logger/enums");
 
-async function phil_mri_monitor(System, directory) {
+async function phil_mri_monitor(System, directory, run_log, job_id) {
+  let note = {
+    job_id,
+    sme: System.sme,
+  };
   try {
-    await log("info", System.jobId, System.sme, "phil_mri_monitor", "FN CALL");
-
     const jsonData = {};
     let redis_cache = [];
 
     // Loop through monitoring files in monitoring directory
     for await (const file of directory.monitoring) {
+      note.file = file;
+      await addLogEvent(I, run_log, "phil_mri_monitor", det, note, null);
       //if (file.file_name === "monitor_System_TempTechRoom.dat") {
       const complete_file_path = `${System.sysConfigData.hhm_config.file_path}/monitoring/${file.file_name}`;
 
@@ -45,14 +54,8 @@ async function phil_mri_monitor(System, directory) {
 
       // Catch and handle when file not present in dir.
       if (file_data === undefined) {
-        await log(
-          "warn",
-          System.jobId,
-          System.sme,
-          "phil_mri_monitor",
-          "FN CALL",
-          { message: "File not present" }
-        );
+        note.message = "File not present";
+        await addLogEvent(W, run_log, "phil_mri_monitor", det, note, null);
         continue;
       }
 
@@ -61,17 +64,8 @@ async function phil_mri_monitor(System, directory) {
       );
 
       if (!matches) {
-        await log(
-          "warn",
-          System.jobId,
-          System.sme,
-          "phil_mri_monitor",
-          "FN CALL",
-          {
-            message: "Matches failed",
-            file: file.file_name,
-          }
-        );
+        note.message = "Matches failed";
+        await addLogEvent(W, run_log, "phil_mri_monitor", det, note, null);
         continue;
       }
 
@@ -88,35 +82,18 @@ async function phil_mri_monitor(System, directory) {
 
     // Skip db insert step if no new data was pushed into jsonData{}
     if (Object.keys(jsonData).length === 0) {
-      await log(
-        "warn",
-        System.jobId,
-        System.sme,
-        "phil_mri_monitor",
-        "FN CALL",
-        {
-          message: "No new monitoring data found.",
-        }
-      );
+      note.message = "No new monitoring data found.";
+      await addLogEvent(W, run_log, "phil_mri_monitor", det, note, null);
       return [null, null, null];
     }
 
-    const date = await insertJsonB(System.jobId, [System.sme, jsonData]);
+    const date = await insertJsonB(job_id, [System.sme, jsonData]);
 
     // send data to be aggregated
     return [jsonData, date, redis_cache];
   } catch (error) {
     console.log(error);
-    await log(
-      "error",
-      System.jobId,
-      System.sme,
-      "phil_mri_monitor",
-      "FN CALL",
-      {
-        error,
-      }
-    );
+    await addLogEvent(E, run_log, "phil_mri_monitor", cat, note, error);
   }
 }
 

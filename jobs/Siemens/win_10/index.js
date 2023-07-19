@@ -4,20 +4,41 @@ const { log } = require("../../../logger");
 const win10_siemens_ct = require("./win10_siemens_ct");
 const win10_siemens_mri = require("./win10_siemens_mri");
 const Siemens_10 = require("../../../data_acquisition/Siemens_10");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, det, cat },
+} = require("../../../utils/logger/enums");
 
-const win_10_parsers = async (jobId, sysConfigData, fileConfig) => {
-  await log("info", jobId, sysConfigData.id, "win_10_parsers", "FN CALL");
+const win_10_parsers = async (job_id, sysConfigData, fileConfig, run_log) => {
+  let note = {
+    job_id,
+    sme: sysConfigData.id,
+    file_config: fileConfig
+  }
+  await addLogEvent(I, run_log, "win_10_parsers", cal, note, null);
+  await log("info", job_id, sysConfigData.id, "win_10_parsers", "FN CALL");
 
   switch (sysConfigData.hhm_config.modality) {
     case "CT":
-      const CT_System = new Siemens_10(sysConfigData, fileConfig, jobId);
+      const CT_System = new Siemens_10(
+        sysConfigData,
+        fileConfig,
+        job_id,
+        run_log
+      );
       await win10_siemens_ct(CT_System);
       break;
     case "CV":
-      //await parse_win_10(jobId, sysConfigData, fileConfig);
+      //await parse_win_10(job_id, sysConfigData, fileConfig);
       break;
     case "MRI":
-      const MRI_System = new Siemens_10(sysConfigData, fileConfig, jobId);
+      const MRI_System = new Siemens_10(
+        sysConfigData,
+        fileConfig,
+        job_id,
+        run_log
+      );
       await win10_siemens_mri(MRI_System);
       break;
     default:
@@ -26,7 +47,8 @@ const win_10_parsers = async (jobId, sysConfigData, fileConfig) => {
 
   try {
   } catch (error) {
-    await log("error", jobId, sysConfigData.id, "win_10_parsers", "FN CATCH", {
+    await addLogEvent(E, run_log, "win_10_parsers", cat, note, error);
+    await log("error", job_id, sysConfigData.id, "win_10_parsers", "FN CATCH", {
       error: error,
     });
   }

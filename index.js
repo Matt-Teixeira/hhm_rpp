@@ -95,10 +95,10 @@ const determineManufacturer = async (job_id, system, run_log) => {
 
     switch (system.manufacturer) {
       case "Siemens":
-        await siemens_parser(job_id, system);
+        await siemens_parser(job_id, system, run_log);
         break;
       case "Philips":
-        await philips_parser(job_id, system);
+        await philips_parser(job_id, system, run_log);
         break;
       case "GE":
         await ge_parser(job_id, system, run_log);
@@ -133,11 +133,11 @@ const onBoot = async () => {
     let shell_value = [process.argv[2]];
 
     const queries = {
-      CT: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality LIKE '%CT' AND hhm_config->'run_group' = '1' AND id IN ('SME00847', 'SME00896', 'SME00897')",
-      CV: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND hhm_config->'run_group' = '1' AND id IN ('SME00865', 'SME01442')",
-      MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1' AND id IN ('SME01096', 'SME01123', 'SME01422')",
+      CT: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality LIKE '%CT' AND hhm_config->'run_group' = '1' AND id IN ('SME00885', 'SME01129')",
+      CV: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND hhm_config->'run_group' = '1' AND id IN ('')",
+      MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1' AND id IN ('SME15811')",
       phil_cv_hr_24:
-        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND manufacturer = 'Philips' AND hhm_config->'run_group' = '2'",
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND manufacturer = 'Philips' AND hhm_config->'run_group' = '2' AND id IN ('SME00444', 'SME00445')",
       all: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL",
     };
 
@@ -160,6 +160,8 @@ const onBoot = async () => {
     // AWAIT PROMISIS
     await Promise.all(promises); 
    */
+
+    console.log(system_array.rows);
 
     for await (const system of system_array.rows) {
       const job_id = uuidv4();

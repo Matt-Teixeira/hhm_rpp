@@ -6,14 +6,26 @@ const { philips_ct_eal_schema } = require("../../../persist/pg-schemas");
 const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const { remove_dub_quotes } = require("../../../util/regExHelpers");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, det, cat },
+} = require("../../../utils/logger/enums");
 
-async function phil_ct_eal(system) {
+async function phil_ct_eal(system, run_log, job_id) {
   const data = [];
 
+  let note = {
+    job_id: job_id,
+    sme: system.sme,
+    file: system.fileToParse.file_name,
+  };
+
   try {
+    await addLogEvent(I, run_log, "phil_ct_eal", cal, note, null);
     await log(
       "info",
-      system.jobId,
+      job_id,
       system.sysConfigData.id,
       "phil_ct_eal",
       "FN CALL"
@@ -26,7 +38,9 @@ async function phil_ct_eal(system) {
 
     // Break out of function if no file found
     if (system.current_file_size === null) {
-      await log("warn", system.jobId, system.sme, "phil_ct_eal", "FN CALL", {
+      note.message = "File not found in dir";
+      await addLogEvent(I, run_log, "phil_ct_eal", cal, note, null);
+      await log("warn", job_id, system.sme, "phil_ct_eal", "FN CALL", {
         message: "File not found in dir",
       });
       return;
@@ -45,12 +59,25 @@ async function phil_ct_eal(system) {
     for await (const match of matches) {
       match.groups.system_id = system.sme;
       const dtObject = await generateDateTime(
-        system.jobId,
+        job_id,
         match.groups.system_id,
         system.fileToParse.pg_table,
         match.groups.host_date,
         match.groups.host_time
       );
+
+      if (dtObject === null) {
+        let note = {
+          job_id: job_id,
+          sme: system.sme,
+          match_group: matches.groups,
+          message: "date_time object null",
+        };
+        await addLogEvent(W, run_log, "phil_ct_eal", det, note, null);
+        await log("warn", job_id, system.sme, "date_time", "FN CALL", {
+          message: "date_time object null",
+        });
+      }
 
       match.groups.host_datetime = dtObject;
 
@@ -69,19 +96,21 @@ async function phil_ct_eal(system) {
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
     const insertSuccess = await bulkInsert(
-      system.jobId,
+      job_id,
       dataToArray,
       system.sysConfigData,
-      system.fileToParse
+      system.fileToParse,
+      run_log
     );
 
     if (insertSuccess) {
       await system.updateRedisFileSize();
     }
   } catch (error) {
+    await addLogEvent(E, run_log, "phil_ct_eal", cat, note, error);
     await log(
       "error",
-      system.jobId,
+      job_id,
       system.sysConfigData.id,
       "phil_ct_eal",
       "FN CALL",

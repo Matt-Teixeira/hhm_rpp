@@ -1,16 +1,23 @@
 const { log } = require("../logger");
 const pgPool = require("../db/pg-pool");
+const [addLogEvent] = require("../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, cat, det },
+} = require("../utils/logger/enums");
 
-async function getSystemDbData(jobId, sme) {
+async function getSystemDbData(job_id, run_log, sme) {
+  let note = {
+    job_id,
+    sme,
+  };
   try {
+    await addLogEvent(I, run_log, "getSystemDbData", cal, note, null);
     const queryStr =
       "SELECT system_id, host_datetime FROM mag.philips_mri_monitoring_data WHERE system_id = ($1) ORDER BY host_datetime DESC LIMIT 1";
     return await pgPool.query(queryStr, [sme]);
   } catch (error) {
-    await log("error", jobId, sme, "getSystemDbData", "FN CALL", {
-      sme: sme,
-      error: error,
-    });
+    await addLogEvent(E, run_log, "getSystemDbData", cat, note, error);
   }
 }
 
@@ -217,5 +224,5 @@ module.exports = {
   update_jsonb_state,
   get_captured_datetime_entry,
   insert_into_secondary_table,
-  update_secondary_table
+  update_secondary_table,
 };

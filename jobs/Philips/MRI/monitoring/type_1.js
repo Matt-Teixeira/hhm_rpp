@@ -4,23 +4,32 @@ const phil_mri_monitor_display = require("../insert_display_data");
 const {
   update_jsonb_state,
 } = require("../../../../util/phil_mri_monitor_helpers");
+const [addLogEvent] = require("../../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, cat, det },
+} = require("../../../../utils/logger/enums");
 
-async function type_1(sysConfigData, System_Monitor, directory) {
+async function type_1(
+  sysConfigData,
+  System_Monitor,
+  directory,
+  run_log,
+  job_id
+) {
+  let note = {
+    job_id: job_id,
+    sme: System_Monitor.sme,
+  };
+
   try {
-    await log(
-      "info",
-      System_Monitor.jobId,
-      System_Monitor.sysConfigData.id,
-      "monitor_agg_type_1",
-      "FN CALL",
-      {
-        system: sysConfigData,
-      }
-    );
+    await addLogEvent(I, run_log, "type_1", cal, note, null);
 
     const [json_data, date, redis_cache] = await phil_mri_monitor_jsonb(
       System_Monitor,
-      directory
+      directory,
+      run_log,
+      job_id
     );
 
     if (json_data) {
@@ -32,12 +41,13 @@ async function type_1(sysConfigData, System_Monitor, directory) {
       }
 
       let successful_agg = await phil_mri_monitor_display(
-        System_Monitor.jobId,
+        System_Monitor.job_id,
         System_Monitor.sysConfigData.id,
         sysConfigData.hhm_config.modality,
         sysConfigData.hhm_file_config[monitoring_index].monitoring,
         json_data,
-        date
+        date,
+        run_log
       );
 
       if (successful_agg) {
@@ -48,23 +58,15 @@ async function type_1(sysConfigData, System_Monitor, directory) {
           );
         }
         await update_jsonb_state(
-          System_Monitor.jobId,
+          System_Monitor.job_id,
           System_Monitor.sysConfigData.id,
           [date]
         );
       }
     }
   } catch (error) {
-    await log(
-      "error",
-      System_Monitor.jobId,
-      System_Monitor.sysConfigData.id,
-      "monitor_agg_type_1",
-      "FN CALL",
-      {
-        error: error,
-      }
-    );
+    console.log(error);
+    await addLogEvent(I, run_log, "type_1", cat, note, error);
   }
 }
 

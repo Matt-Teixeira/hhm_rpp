@@ -1,27 +1,42 @@
 const { log } = require("../../../logger");
 const initialUpdate = require("../../../processing/phil_mri_monitor_data/initialUpdate");
 const updatePhilMriTable = require("../../../processing/phil_mri_monitor_data/update_secondary_table/updatePhilMriTable");
-const {
-  getSystemDbData,
-} = require("../../../util/phil_mri_monitor_helpers");
+const { getSystemDbData } = require("../../../util/phil_mri_monitor_helpers");
 const { compare_dates } = require("../../../util/dates");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, cat, det },
+} = require("../../../utils/logger/enums");
 
 async function insertDisplayData(
-  jobId,
+  job_id,
   sme,
   modality,
   monitoring_configs,
   data,
-  date
+  date,
+  run_log
 ) {
+  let note = {
+    job_id,
+    sme,
+  };
   try {
-    await log("info", jobId, sme, "insertDisplayData", "FN CALL");
+    await addLogEvent(I, run_log, "insertDisplayData", cal, note, null);
 
-    const has_prev_data = await getSystemDbData(jobId, sme);
+    const has_prev_data = await getSystemDbData(job_id, run_log, sme);
     let hours_diff = 0;
 
-    if (has_prev_data.rowCount > 0)
+    if (has_prev_data.rowCount > 0) {
+      let note = {
+        job_id,
+        sme,
+      };
       hours_diff = await compare_dates(has_prev_data.rows[0].host_datetime);
+      note.hours_diff = hours_diff;
+      await addLogEvent(I, run_log, "compare_dates", det, note, null);
+    }
 
     let successful_agg = false;
 
@@ -33,16 +48,16 @@ async function insertDisplayData(
           (monitor_object) => monitor_object.file_name.split(".")[0] === prop
         );
         successful_agg = await initialUpdate(
-          jobId,
+          job_id,
           sme,
           file_config,
-          data[prop]
+          data[prop],
+          run_log
         );
         console.log("successful_agg");
         console.log(successful_agg);
         if (successful_agg === false) break;
       }
-
     } else {
       // Find most recent date in database and start process on that data for data[prop]
       for (const prop in data) {
@@ -50,14 +65,22 @@ async function insertDisplayData(
           (monitor_object) => monitor_object.file_name.split(".")[0] === prop
         );
 
-        successful_agg = await updatePhilMriTable(jobId, sme, file_config, data[prop], date);
+        successful_agg = await updatePhilMriTable(
+          job_id,
+          sme,
+          file_config,
+          data[prop],
+          date,
+          run_log
+        );
         if (successful_agg === false) break;
       }
     }
     return successful_agg;
   } catch (error) {
     console.log(error);
-    await log("error", jobId, sme, "insertDisplayData", "FN CALL", {
+    await addLogEvent(E, run_log, "insertDisplayData", cat, note, error);
+    await log("error", job_id, sme, "insertDisplayData", "FN CALL", {
       sme: sme,
       modality,
       error,

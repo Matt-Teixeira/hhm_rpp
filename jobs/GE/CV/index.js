@@ -14,6 +14,7 @@ const {
 const ge_mri_parsers = async (job_id, sysConfigData, run_log) => {
   let note = {
     job_id: job_id,
+    sme: sysConfigData.id
   };
   try {
     await addLogEvent(I, run_log, "ge_mri_parsers", cal, note, null);
@@ -22,7 +23,7 @@ const ge_mri_parsers = async (job_id, sysConfigData, run_log) => {
     for await (const file of sysConfigData.hhm_file_config) {
       switch (file.query) {
         case "sysError":
-          const system = new GE_CV(sysConfigData, file, job_id);
+          const system = new GE_CV(sysConfigData, file, job_id, run_log);
           await ge_cv_sysError(system, run_log, job_id);
           break;
         default:
