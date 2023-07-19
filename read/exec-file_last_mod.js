@@ -3,7 +3,7 @@ const execFile = util.promisify(require("node:child_process").execFile);
 
 async function execLastMod(exec_path, args) {
   const execOptions = {
-    maxBuffer: 1024 * 1024 * 700,
+    maxBuffer: 1024 * 1024 * 500,
   };
 
   try {
