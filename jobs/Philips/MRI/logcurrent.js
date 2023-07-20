@@ -112,7 +112,20 @@ async function phil_mri_logcurrent(fileToParse, System, run_log, job_id) {
 
     // Homogenize data to prep for insert to db
     const mappedData = mapDataToSchema(data, phil_mri_logcurrent_schema);
-    const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
+    const logcurrent_si = [];
+    const logcurrent = [];
+    for (let data of mappedData) {
+      if (data.event_type === "S" || data.event_type === "I") {
+        logcurrent_si.push(data);
+      } else {
+        logcurrent.push(data);
+      }
+    }
+
+    const dataToArray_si = logcurrent_si.map(({ ...rest }) =>
+      Object.values(rest)
+    );
+    const dataToArray = logcurrent.map(({ ...rest }) => Object.values(rest));
 
     // ** End Parse
 
@@ -126,11 +139,23 @@ async function phil_mri_logcurrent(fileToParse, System, run_log, job_id) {
       run_log
     );
 
+    console.log("Firest insert success")
+
+    System.fileToParse.logcurrent.query += '_si'
+
+    const insertSuccess_si = await bulkInsert(
+      job_id,
+      dataToArray_si,
+      System.sysConfigData,
+      System.fileToParse.logcurrent,
+      run_log
+    );
+
     // ** End Persist
 
     // Update Redis Cache
 
-    if (insertSuccess) {
+    if (insertSuccess && insertSuccess_si) {
       await System.updateRedisFileSize();
     }
   } catch (error) {

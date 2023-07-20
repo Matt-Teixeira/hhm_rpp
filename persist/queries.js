@@ -241,6 +241,30 @@ module.exports = queries = {
       $1::text[], $2::date[], $3::time[], $4::text[], $5::text[], $6::text[], $7::text[], $8::text[], $9::text[], $10::text[], $11::text[], $12::text[], $13::text[], $14::text[], $15::text[], $16::text[], $17::timestamptz[]
     )
       `,
+      logcurrent_si: `
+      INSERT INTO log.philips_mri_logcurrent_si (
+        system_id,
+        host_date,
+        host_time,
+        row_type,
+        event_type,
+        subsystem,
+        code_1,
+        code_2,
+        group_1,
+        message,
+        packets_created,
+        data_created_value,
+        size_copy_value,
+        data_8,
+        reconstructor,
+        magnet_meu,
+        host_datetime
+    )
+    SELECT * FROM UNNEST (
+      $1::text[], $2::date[], $3::time[], $4::text[], $5::text[], $6::text[], $7::text[], $8::text[], $9::text[], $10::text[], $11::text[], $12::text[], $13::text[], $14::text[], $15::text[], $16::text[], $17::timestamptz[]
+    )
+      `,
       rmmu_short: `
     INSERT INTO mag.philips_mri_rmmu_short(
       system_id,
