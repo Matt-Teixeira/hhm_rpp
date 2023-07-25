@@ -58,6 +58,8 @@ const philips_re = {
     /"(?<event_time>\d{2}\/\d{2}\/\d{2}\s\d{2}:\d{2}:\d{2})"\s"?(?<type>.*?)"?\s(?<level>\d+?)\s"?(?<module>.*?)"?\s(?<time_stamp>\d+?)\s"?(?<host_date>\d{4}\/\d{2}\/\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2}\.\d{3})"\s"?(?<message>.*?)"?\s"?(?<eal>.*?)"/g,
   mri_logcurrent:
     /((?<host_date>\d{4}-\d{2}-\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2}\.\d+)\s(?<row_type>\w+)\s(?<event_type>\w+)\s(?<subsystem>.*?)\s+(?<code_1>\w+)\s(?<code_2>\w+)(\s(?<group_1>\w+))?\s+(?<message>.*))|(Number\sof\sPackets\sCreated\s:\s(?<packets_created>\d*\.?\d*)|Total\sSize\sof\sData\sCreated\s:\s(?<data_created_value>\d*\.?\d*)\s[A-Z]+|Size\sof\sCopy\sDone\s:\s(?<size_copy_value>\d*\.?\d*)\s[A-Z]+|(?<data_8>>.*)|(?<reconstructor>[A-Za-z].*)|(?<magnet_meu>([\d+,?]+([N,Y]+)?[\d+,?]+)))/,
+  stt_magnet:
+    /(?<host_date>\d{2}-[A-Z]+-\d{4})\s(?<host_time>\d+:\d+:\d+\.\d+)\s(?<header_1>.*?)\t(?<header_2>.*?)\t(?<category>.*?)\t((?<status_value>\d+(\.\d+)?)|(?<test_result_2>.*?))\t(?<test_result>.*?)\t(?<message>.*)/,
   cv: {
     eventlog:
       /(?<category>[\w\. \-\$&\.]+)�(?<host_date>[\d-]+)�(?<host_time>[\d:]+)�(?<error_type>\w*)�(?<num_1>\d+)�(?:Technical ?Event ?ID: {1,3}(?<technical_event_id>\d+) ?�Description: (?<description>[^�\r\n]+)�Channel Identification: (?<channel_id>[^�]+)�Module: (?<module>[^�]+)�Source [Ff]ile: (?<source>[^�]+)�Line Number: (?<line>\d+) ?�Memo: ?(?<memo>[^\r\n�]*)(?:�SubsystemNumber: (?<subsystem_number>\d+)�ThreadName: ?(?<thread_name>[\w \-]*))?|(?<message>[^\r\n]*))/,

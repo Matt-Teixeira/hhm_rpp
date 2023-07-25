@@ -5,7 +5,7 @@ function mapDataToSchema(parsedData, schema) {
     const clearedSchema = { ...schema };
 
     for (let [groupName, groupValue] of Object.entries(parsedData[i])) {
-      if (groupValue === '') {groupValue = null}
+      if (groupValue === '' || groupValue === undefined) {groupValue = null}
       clearedSchema[groupName] = groupValue;
     }
     allData.push(clearedSchema);

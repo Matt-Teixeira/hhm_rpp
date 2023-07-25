@@ -13,14 +13,14 @@ const {
   tag: { cal, cat, det },
 } = require("../../../utils/logger/enums");
 
-async function phil_mri_logcurrent(fileToParse, System, run_log, job_id) {
-  const parsers = fileToParse.logcurrent.parsers;
+async function phil_mri_logcurrent(file_config, System, run_log, job_id) {
+  const parsers = file_config.logcurrent.parsers;
   const data = [];
 
   let note = {
     job_id,
     sme: System.sme,
-    file: fileToParse,
+    file: file_config,
   };
 
   try {
@@ -41,8 +41,9 @@ async function phil_mri_logcurrent(fileToParse, System, run_log, job_id) {
     // ** Begin Parse
 
     let line_number = 1;
+    let date_time;
     for await (const line of System.file_data) {
-      let matches = line.match(philips_re[parsers[0]]);
+      let matches = await line.match(philips_re[parsers[0]]);
 
       // Account for lines that are blank (\n)
       if (matches === null) {
@@ -54,7 +55,7 @@ async function phil_mri_logcurrent(fileToParse, System, run_log, job_id) {
           let note = {
             job_id,
             sme: System.sme,
-            file: fileToParse,
+            file: file_config,
             message: "This is not a blank or new line - Bad Match",
             line,
             line_number,
@@ -68,7 +69,7 @@ async function phil_mri_logcurrent(fileToParse, System, run_log, job_id) {
         const dtObject = await generateDateTime(
           job_id,
           matches.groups.system_id,
-          System.fileToParse.logcurrent.pg_table,
+          System.file_config.logcurrent.pg_table,
           matches.groups.host_date,
           matches.groups.host_time
         );
@@ -78,18 +79,17 @@ async function phil_mri_logcurrent(fileToParse, System, run_log, job_id) {
           !!matches.groups.reconstructor ||
           !!matches.groups.data_created_value ||
           !!matches.groups.packets_created ||
-          !!matches.groups.size_copy_value ||
-          !!matches.groups.magnet_meu
+          !!matches.groups.size_copy_value
         ) {
           continue;
         }
 
         // magnet_meu group does not have datetime. Ex: '0114,2022,04,01,00,06,08,17,14,00000,'
-        if (dtObject === null) {
+        if (dtObject === null && matches.groups.magnet_meu === undefined) {
           let note = {
             job_id,
             sme: System.sme,
-            file: fileToParse,
+            file: file_config,
             line,
             match_group: matches.groups,
             message: "date_time object null",
@@ -112,20 +112,7 @@ async function phil_mri_logcurrent(fileToParse, System, run_log, job_id) {
 
     // Homogenize data to prep for insert to db
     const mappedData = mapDataToSchema(data, phil_mri_logcurrent_schema);
-    const logcurrent_si = [];
-    const logcurrent = [];
-    for (let data of mappedData) {
-      if (data.event_type === "S" || data.event_type === "I") {
-        logcurrent_si.push(data);
-      } else {
-        logcurrent.push(data);
-      }
-    }
-
-    const dataToArray_si = logcurrent_si.map(({ ...rest }) =>
-      Object.values(rest)
-    );
-    const dataToArray = logcurrent.map(({ ...rest }) => Object.values(rest));
+    const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
     // ** End Parse
 
@@ -135,19 +122,7 @@ async function phil_mri_logcurrent(fileToParse, System, run_log, job_id) {
       job_id,
       dataToArray,
       System.sysConfigData,
-      System.fileToParse.logcurrent,
-      run_log
-    );
-
-    console.log("Firest insert success")
-
-    System.fileToParse.logcurrent.query += '_si'
-
-    const insertSuccess_si = await bulkInsert(
-      job_id,
-      dataToArray_si,
-      System.sysConfigData,
-      System.fileToParse.logcurrent,
+      System.file_config.logcurrent,
       run_log
     );
 
@@ -155,7 +130,7 @@ async function phil_mri_logcurrent(fileToParse, System, run_log, job_id) {
 
     // Update Redis Cache
 
-    if (insertSuccess && insertSuccess_si) {
+    if (insertSuccess) {
       await System.updateRedisFileSize();
     }
   } catch (error) {

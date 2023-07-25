@@ -15,14 +15,15 @@ const {
 } = require("../utils/logger/enums");
 
 class PHILIPS_MRI_LOGCURRENT {
-  constructor(sysConfigData, fileToParse, job_id, run_log) {
+  constructor(sysConfigData, file_config, job_id, run_log, file_prop_name) {
     this.sysConfigData = sysConfigData;
-    this.fileToParse = fileToParse;
+    this.file_config = file_config;
     this.job_id = job_id;
     this.run_log = run_log;
     this.sme = this.sysConfigData.id;
-    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.logcurrent.file_name}`;
-    this.parsers = fileToParse.logcurrent.parsers;
+    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${file_config[file_prop_name].file_name}`;
+    this.parsers = file_config[file_prop_name].parsers;
+    this.file_config_prop_name = file_prop_name;
   }
 
   updateSizePath = "./read/sh/readFileSize.sh";
@@ -39,12 +40,12 @@ class PHILIPS_MRI_LOGCURRENT {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config,
     };
     try {
       this.prev_file_size = await getRedisFileSize(
         this.sme,
-        this.fileToParse.logcurrent.file_name
+        this.file_config[this.file_config_prop_name].file_name
       );
 
       note.prev_file_size = this.prev_file_size;
@@ -82,16 +83,21 @@ class PHILIPS_MRI_LOGCURRENT {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config,
     };
+    /* console.log(note);
+    console.log(this.file_config[this.file_config_prop_name].file_name);
+    console.log(this.fileSizePath);
+    console.log(this.sysConfigData.hhm_config.file_path); */
     try {
       this.current_file_size = await getCurrentFileSize(
         this.sme,
         this.fileSizePath,
         this.sysConfigData.hhm_config.file_path,
-        this.fileToParse.logcurrent.file_name
+        this.file_config[this.file_config_prop_name].file_name
       );
       note.current_file_size = this.current_file_size;
+      console.log(note);
       await addLogEvent(
         I,
         this.run_log,
@@ -125,6 +131,11 @@ class PHILIPS_MRI_LOGCURRENT {
   }
 
   checkFileExists() {
+    let note = {
+      job_id: this.job_id,
+      sme: this.sme,
+      file: this.file_config[this.file_config_prop_name].file_name,
+    };
     try {
       if (this.current_file_size === null) {
         throw new Error(
@@ -147,10 +158,13 @@ class PHILIPS_MRI_LOGCURRENT {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config[this.file_config_prop_name].file_name,
     };
+    console.log("Getting DELTA")
+    
     this.delta = this.current_file_size - this.prev_file_size;
     note.delta = this.delta;
+    console.log(this.delta)
     addLogEvent(
       I,
       this.run_log,
@@ -165,14 +179,14 @@ class PHILIPS_MRI_LOGCURRENT {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config[this.file_config_prop_name].file_name,
     };
     try {
       await updateRedisFileSize(
         this.sme,
         this.updateSizePath,
         this.sysConfigData.hhm_config.file_path,
-        this.fileToParse.logcurrent.file_name
+        this.file_config[this.file_config_prop_name].file_name
       );
     } catch (error) {
       addLogEvent(
@@ -200,8 +214,10 @@ class PHILIPS_MRI_LOGCURRENT {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config[this.file_config_prop_name].file_name
     };
+    console.log("\nGet File Data Note");
+    console.log(this.delta);
     try {
       if (
         this.prev_file_size === null ||

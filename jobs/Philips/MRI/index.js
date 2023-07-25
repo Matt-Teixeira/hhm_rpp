@@ -7,9 +7,10 @@ const phil_mri_rmmu_short = require("./rmmu_short_cryogenic");
 const phil_mri_rmmu_long = require("./rmmu_long_cryogenic");
 const phil_mri_rmmu_magnet = require("./rmmu_magnet");
 const phil_rmmu_history = require("./rmmu_history");
+const stt_parser = require("./stt");
 const { type_1 } = require("./monitoring");
 const PHILIPS_MRI_MONITORING = require("../../../data_acquisition/Philips_MRI_Monitor");
-const PHILIPS_MRI_LOGCURRENT = require("../../../data_acquisition/Philips_MRI_Logcurrent");
+const PHILIPS_MRI_LOGCURRENT_STT = require("../../../data_acquisition/Philips_MRI_Logcurrent");
 const PHILIPS_MRI_RMMU = require("../../../data_acquisition/Philips_MRI_Rmmu");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
@@ -38,14 +39,20 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
       await addLogEvent(I, run_log, "philips_mri_parsers", det, note, null);
       switch (dir) {
         case "logcurrent":
-          const Logcurrent_System = new PHILIPS_MRI_LOGCURRENT(
+          const Logcurrent_System = new PHILIPS_MRI_LOGCURRENT_STT(
             sysConfigData,
             directory,
             job_id,
-            run_log
+            run_log,
+            dir
           );
 
-          await phil_mri_logcurrent(directory, Logcurrent_System, run_log, job_id);
+          await phil_mri_logcurrent(
+            directory,
+            Logcurrent_System,
+            run_log,
+            job_id
+          );
           break;
         case "rmmu":
           const Rmmu_System = new PHILIPS_MRI_RMMU(
@@ -70,7 +77,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
           const Rmmu_Long_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory.rmmu_long,
-            job_id
+            job_id,
           );
           await phil_mri_rmmu_long(directory.rmmu_long, Rmmu_Long_System);
           break;
@@ -89,8 +96,25 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
             run_log
           );
 
-          await type_1(sysConfigData, System_Monitor, directory, run_log, job_id);
+          await type_1(
+            sysConfigData,
+            System_Monitor,
+            directory,
+            run_log,
+            job_id
+          );
 
+          break;
+        case "stt_magnet":
+          const STT_Magnet_System = new PHILIPS_MRI_LOGCURRENT_STT(
+            sysConfigData,
+            directory,
+            job_id,
+            run_log,
+            dir
+          );
+
+          await stt_parser(directory, STT_Magnet_System);
           break;
         default:
           break;

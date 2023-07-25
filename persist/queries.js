@@ -389,6 +389,24 @@ module.exports = queries = {
     $1::text[], $2::numeric[], $3::numeric[], $4::numeric[], $5::numeric[], $6::numeric[], $7::numeric[], $8::numeric[], $9::numeric[], $10::numeric[], $11::numeric[], $12::numeric[], $13::numeric[], $14::numeric[], $15::numeric[], $16::numeric[], $17::text[], $18::timestamptz[]
   )
     `,
+    stt_magnet: `
+    INSERT INTO log.stt_magnet(
+    system_id,
+    host_date,
+    host_time,
+    header_1,
+    header_2,
+    category,
+    status_value,
+    test_result_2,
+    test_result,
+    message,
+    host_datetime
+  )
+  SELECT * FROM UNNEST (
+    $1::text[], $2::date[], $3::time[], $4::text[], $5::text[], $6::text[], $7::numeric[], $8::text[], $9::text[], $10::text[], $11::timestamptz[]
+  )
+    `,
     },
     CV: {
       EventLog: `

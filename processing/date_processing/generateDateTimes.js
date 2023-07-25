@@ -9,6 +9,15 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
   try {
     let date;
     switch (pgTable) {
+      case "stt_magnet":
+        date = await dateTimeTemplate(
+          jobId,
+          sme,
+          `${hostDate}${hostTime}`,
+          "dd-MMM-yyyyHH:mm:ss.SSS",
+          "America/New_York"
+        );
+        break;
       case "philips_mri_rmmu_history":
         date = await date_minus_one_template(
           jobId,
@@ -17,7 +26,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
           "yyyy-MM-ddHH:mm:ss",
           "America/New_York"
         );
-        
+
         break;
       case "philips_mri_rmmu_magnet":
         date = await date_minus_one_template(

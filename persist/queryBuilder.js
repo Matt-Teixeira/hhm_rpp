@@ -27,7 +27,7 @@ async function bulkInsert(job_id, data, sysConfigData, fileConfig, run_log) {
       ][`${fileConfig.query}`];
     console.log("\n" + sysConfigData.id);
     console.log(query);
-
+    
     const payload = await convertRowsToColumns(
       job_id,
       sysConfigData.id,

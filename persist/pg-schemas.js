@@ -274,7 +274,7 @@ const philips_mri_rmmu_history = {
   system_reference_number: null,
   hospital_name: null,
   host_datetime: null,
-}
+};
 
 const philips_cv_eventlog_schema = {
   system_id: null,
@@ -303,6 +303,20 @@ const logfile_event_history_metadata = {
   host_datetime: null,
 };
 
+const stt_magnet = {
+  system_id: null,
+  host_date: null,
+  host_time: null,
+  header_1: null,
+  header_2: null,
+  category: null,
+  status_value: null,
+  test_result_2: null,
+  test_result: null,
+  message: null,
+  host_datetime: null,
+};
+
 module.exports = {
   ge_mri_gesys_schema,
   siemens_ct_mri,
@@ -318,4 +332,5 @@ module.exports = {
   ge_cv_syserror_schema,
   philips_cv_eventlog_schema,
   logfile_event_history_metadata,
+  stt_magnet,
 };
