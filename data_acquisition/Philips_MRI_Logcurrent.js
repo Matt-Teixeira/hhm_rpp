@@ -58,6 +58,7 @@ class PHILIPS_MRI_LOGCURRENT {
         null
       );
     } catch (error) {
+      console.log(error);
       await addLogEvent(
         E,
         this.run_log,
@@ -107,6 +108,7 @@ class PHILIPS_MRI_LOGCURRENT {
         null
       );
     } catch (error) {
+      console.log(error);
       await addLogEvent(
         E,
         this.run_log,
@@ -143,6 +145,7 @@ class PHILIPS_MRI_LOGCURRENT {
         );
       }
     } catch (error) {
+      console.log(error);
       addLogEvent(
         E,
         this.run_log,
@@ -160,11 +163,11 @@ class PHILIPS_MRI_LOGCURRENT {
       sme: this.sme,
       file: this.file_config[this.file_config_prop_name].file_name,
     };
-    console.log("Getting DELTA")
-    
+    console.log("Getting DELTA");
+
     this.delta = this.current_file_size - this.prev_file_size;
     note.delta = this.delta;
-    console.log(this.delta)
+    console.log(this.delta);
     addLogEvent(
       I,
       this.run_log,
@@ -189,6 +192,7 @@ class PHILIPS_MRI_LOGCURRENT {
         this.file_config[this.file_config_prop_name].file_name
       );
     } catch (error) {
+      console.log(error);
       addLogEvent(
         I,
         this.run_log,
@@ -214,7 +218,7 @@ class PHILIPS_MRI_LOGCURRENT {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.file_config[this.file_config_prop_name].file_name
+      file: this.file_config[this.file_config_prop_name].file_name,
     };
     console.log("\nGet File Data Note");
     console.log(this.delta);
@@ -294,6 +298,7 @@ class PHILIPS_MRI_LOGCURRENT {
         return;
       }
     } catch (error) {
+      console.log(error);
       await addLogEvent(
         E,
         this.run_log,

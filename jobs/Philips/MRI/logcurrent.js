@@ -118,6 +118,10 @@ async function phil_mri_logcurrent(file_config, System, run_log, job_id) {
 
     // ** Begin Persist
 
+    console.log(System.sme);
+    console.log(dataToArray[0]);
+
+    return;
     const insertSuccess = await bulkInsert(
       job_id,
       dataToArray,

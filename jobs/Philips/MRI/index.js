@@ -23,6 +23,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
     job_id: job_id,
     sme: sysConfigData.id,
   };
+
   try {
     await addLogEvent(I, run_log, "philips_mri_parsers", cal, note, null);
     await log(
@@ -39,6 +40,8 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
       await addLogEvent(I, run_log, "philips_mri_parsers", det, note, null);
       switch (dir) {
         case "logcurrent":
+          console.log(sysConfigData.id);
+          console.log(dir);
           const Logcurrent_System = new PHILIPS_MRI_LOGCURRENT_STT(
             sysConfigData,
             directory,
@@ -54,6 +57,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
             job_id
           );
           break;
+        /*
         case "rmmu":
           const Rmmu_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
@@ -118,6 +122,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
           break;
         default:
           break;
+          */
       }
     }
   } catch (error) {
