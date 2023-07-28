@@ -131,11 +131,16 @@ class PHILIPS_MRI_MONITORING {
       sme: this.sme,
       file: file_name,
     };
+    console.log("\\note");
+    console.log(note)
     try {
       const last_line = await exec_tail_last_line(
         this.exec_tail_path,
         complete_file_path
       );
+
+      console.log("\nLAST LINE");
+      console.log(last_line);
 
       note.last_line = last_line;
       await addLogEvent(
@@ -147,8 +152,11 @@ class PHILIPS_MRI_MONITORING {
         null
       );
 
-      this.update_redis_monitor_line(file_name, last_line);
+      console.log("\nfile_name")
+      console.log(file_name)
+      await this.update_redis_monitor_line(file_name, last_line);
     } catch (error) {
+      console.log(error)
       await addLogEvent(
         E,
         this.run_log,
@@ -176,6 +184,7 @@ class PHILIPS_MRI_MONITORING {
         note,
         null
       );
+      
       await updateRedisLine(this.sme, file_name, line);
     } catch (error) {
       await addLogEvent(

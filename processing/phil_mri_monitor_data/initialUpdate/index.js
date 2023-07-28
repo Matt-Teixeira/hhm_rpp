@@ -22,6 +22,8 @@ async function initialUpdate(job_id, sme, file_config, data, run_log) {
 
     switch (process_type) {
       case "max":
+        console.log("\nfile_config.column");
+        console.log(file_config.column);
         successful_agg = await maxValue(job_id, sme, data, file_config.column);
         break;
       case "min":

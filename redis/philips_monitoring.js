@@ -22,13 +22,19 @@ async function getRedisLine(sme, file) {
 }
 
 async function updateRedisLine(sme, file, first_line) {
-  const redisClient = await initRedis();
+  console.log("\nINSIED REDIS UPDATE");
+  console.log(sme, file, first_line)
   try {
+    const redisClient = await initRedis();
+    console.log("\nsetKey");
     const setKey = `${sme}.${file}`;
+    console.log("\nsetKey");
+    console.log(setKey);
     await redisClient.set(setKey, first_line);
     await redisClient.quit();
     return;
   } catch (error) {
+    console.log(error);
     await log("error", "NA", sme, "updateRedisLine", "FN CALL", {
       error: error,
     });
@@ -66,4 +72,9 @@ async function get_last_cached_file(sme, rmmu_file_type) {
   }
 }
 
-module.exports = { getRedisLine, updateRedisLine, update_redis_last_file, get_last_cached_file };
+module.exports = {
+  getRedisLine,
+  updateRedisLine,
+  update_redis_last_file,
+  get_last_cached_file,
+};

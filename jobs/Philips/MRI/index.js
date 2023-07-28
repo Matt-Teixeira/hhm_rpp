@@ -37,7 +37,6 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
     for await (const directory of sysConfigData.hhm_file_config) {
       let dir = Object.keys(directory)[0];
       note.directory = dir;
-      console.log(dir);
       await addLogEvent(I, run_log, "philips_mri_parsers", det, note, null);
       switch (dir) {
         case "logcurrent":
@@ -70,7 +69,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
 
           break;
         case "rmmu_short":
-          console.log("IN RMMU_SHORT");
+          
           const Rmmu_Short_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory.rmmu_short,
@@ -81,23 +80,30 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
 
           await phil_mri_rmmu_short(Rmmu_Short_System);
           break;
-        /*
+
         case "rmmu_long":
           const Rmmu_Long_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory.rmmu_long,
             job_id,
+            run_log,
+            dir
           );
-          await phil_mri_rmmu_long(directory.rmmu_long, Rmmu_Long_System);
+          await phil_mri_rmmu_long(Rmmu_Long_System);
           break;
+        
         case "rmmu_magnet":
+          console.log("IN RMMU_MAGNET");
           const Rmmu_Magnet_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory.rmmu_magnet,
-            job_id
+            job_id,
+            run_log,
+            dir
           );
-          await phil_mri_rmmu_magnet(directory.rmmu_magnet, Rmmu_Magnet_System);
+          await phil_mri_rmmu_magnet(Rmmu_Magnet_System);
           break;
+          
         case "monitoring":
           const System_Monitor = new PHILIPS_MRI_MONITORING(
             job_id,
@@ -106,14 +112,12 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
           );
 
           await type_1(
-            sysConfigData,
             System_Monitor,
             directory,
-            run_log,
-            job_id
           );
 
           break;
+          /*
         case "stt_magnet":
           const STT_Magnet_System = new PHILIPS_MRI_LOGCURRENT_STT(
             sysConfigData,

@@ -22,18 +22,23 @@ async function insertDisplayData(
     job_id,
     sme,
   };
+  console.log("In insert_display_data");
   try {
     await addLogEvent(I, run_log, "insertDisplayData", cal, note, null);
 
     const has_prev_data = await getSystemDbData(job_id, run_log, sme);
+
+    console.log("\nhas_prev_data");
+    console.log(has_prev_data);
+
     let hours_diff = 0;
 
-    if (has_prev_data.rowCount > 0) {
+    if (has_prev_data.length > 0) {
       let note = {
         job_id,
         sme,
       };
-      hours_diff = await compare_dates(has_prev_data.rows[0].host_datetime);
+      hours_diff = await compare_dates(has_prev_data[0].host_datetime);
       note.hours_diff = hours_diff;
       await addLogEvent(I, run_log, "compare_dates", det, note, null);
     }
@@ -41,9 +46,11 @@ async function insertDisplayData(
     let successful_agg = false;
 
     // Check to see if this system has data in db. If not, do an initial data insert.
-    if (has_prev_data.rowCount === 0 || hours_diff >= 48) {
+    if (has_prev_data.length === 0 || hours_diff >= 48) {
       // Create entry for new SME
       for (const prop in data) {
+        console.log("\nprop")
+        console.log(prop)
         const file_config = monitoring_configs.find(
           (monitor_object) => monitor_object.file_name.split(".")[0] === prop
         );
@@ -76,6 +83,8 @@ async function insertDisplayData(
         if (successful_agg === false) break;
       }
     }
+    console.log("successful_agg");
+        console.log(successful_agg);
     return successful_agg;
   } catch (error) {
     console.log(error);

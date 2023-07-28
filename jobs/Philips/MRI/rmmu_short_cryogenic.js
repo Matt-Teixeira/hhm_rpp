@@ -1,6 +1,5 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
-const { log } = require("../../../logger");
 const pgp = require("pg-promise")();
 const db = require("../../../utils/db/pg-pool");
 const fsp = require("node:fs").promises;
@@ -136,6 +135,14 @@ async function phil_mri_rmmu_short(System) {
       );
 
       await db.any(query);
+
+      // ** End Persist
+
+      // Cache last file parsed
+      await System.cache_last_file_name(
+        System.last_file_in_dir,
+        "last_rmmu_short_file"
+      );
 
       // reset global data variable in prep for next file in loop.
       data.length = 0;

@@ -2,7 +2,7 @@
 require("dotenv").config();
 const crypto = require("crypto");
 const { log } = require("./logger");
-const pgPool = require("./db/pg-pool");
+const pgPool = require("./utils/db/pg-pool");
 const siemens_parser = require("./jobs/Siemens");
 const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");

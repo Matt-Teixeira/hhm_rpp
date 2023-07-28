@@ -72,14 +72,14 @@ const philips_re = {
     rmmu_meta_data_history:
       /System.*:(?<system_reference_number>\d+)\s+Hospital.*:(?<hospital_name>.*)/,
     rmmu_long_re:
-      /(?<LineNo>\d+),(?<year>\d+),(?<mo>\d+),(?<dy>\d+),(?<hr>\d+),(?<mn>\d+),(?<ss>\d+),(?<hs>\d+),(?<dow_value>\d+),(?<AvgPwr_value>\d+),(?<MinPwr_value>\d+),(?<MaxPwr_value>\d+),(?<AvgAbs_value>\d+),(?<AvgPrMbars_value>\d+),(?<MinPrMbars_value>\d+),(?<MaxPrMbars_value>\d+),(?<LHePct_value>\d+),(?<LHe2_value>\d+),(?<DiffPressureSwitch_state>[YN]+?),(?<TempAlarm_state>[YN]+?),(?<PressureAlarm_state>[YN]+?),(?<Cerr_state>[YN]+?),(?<CompressorReset_state>[YN]+?),(?<Chd_value>\d+),(?<Cpr_value>\d+)/g,
+      /(?<lineno>\d+),(?<year>\d+),(?<mo>\d+),(?<dy>\d+),(?<hr>\d+),(?<mn>\d+),(?<ss>\d+),(?<hs>\d+),(?<dow_value>\d+),(?<avgpwr_value>\d+),(?<minpwr_value>\d+),(?<maxpwr_value>\d+),(?<avgabs_value>\d+),(?<avgprmbars_value>\d+),(?<minprmbars_value>\d+),(?<maxprmbars_value>\d+),(?<lhepct_value>\d+),(?<lhe2_value>\d+),(?<diffpressureswitch_state>[YN]+?),(?<tempalarm_state>[YN]+?),(?<pressurealarm_state>[YN]+?),(?<cerr_state>[YN]+?),(?<compressorreset_state>[YN]+?),(?<chd_value>\d+),(?<cpr_value>\d+)/g,
     rmmu_short_re:
       /(?<lineno>\d+),(?<year>\d+),(?<mo>\d+),(?<dy>\d+),(?<hr>\d+),(?<mn>\d+),(?<ss>\d+),(?<hs>\d+),(?<avgpwr_value>\d+),(?<minpwr_value>\d+),(?<maxpwr_value>\d+),(?<avgabs_value>\d+),(?<avgprmbars_value>\d+),(?<minprmbars_value>\d+),(?<maxprmbars_value>\d+),(?<lhepct_value>\d+),(?<lhe2_value>\d+),(?<diffpressureswitch_state>[YN]+?),(?<tempalarm_state>[YN]+?),(?<pressurealarm_state>[YN]+?),(?<cerr_state>[YN]+?),(?<compressorreset_state>[YN]+?),(?<chd_value>\d+),(?<cpr_value>\d+)/g,
     rmmu_magnet_re:
-      /(?<LineNo>\d+?),(?<year>\d+?),(?<mo>\d+?),(?<dy>\d+?),(?<hr>\d+?),(?<mn>\d+?),(?<ss>\d+?),(?<hs>\d+?),(?<Event>\d+?),(?<Data>\d+?),(?<Descr>.*)/g,
+      /(?<lineno>\d+?),(?<year>\d+?),(?<mo>\d+?),(?<dy>\d+?),(?<hr>\d+?),(?<mn>\d+?),(?<ss>\d+?),(?<hs>\d+?),(?<event>\d+?),(?<data>\d+?),(?<descr>.*)/g,
     rmmu_history:
-      /(?<Time>\d+?),(?<Stat>\d+?),(?<AvgPwr>\d+?),(?<MinPwr>\d+?),(?<MaxPwr>\d+?),(?<MinPr>\d+?),(?<MaxPr>\d+?),(?<LHe1>\d+?),(?<LHe2>\d+?),(?<DPS>\d+?),(?<TALM>\d+?),(?<PALM>\d+?),(?<CRes>\d+?)/g,
-    rmmu: /(?<Line>\d+?),(?<Time>\d+?),(?<Stat>\d+?),(?<AvgPwr>\d+?),(?<MinPwr>\d+?),(?<MaxPwr>\d+?),(?<MinPr>\d+?),(?<MaxPr>\d+?),(?<LHe1>\d+?),(?<LHe2>\d+?),(?<DPS>\d+?),(?<TALM>\d+?),(?<PALM>\d+?),(?<CRes>\d+?)/g,
+      /(?<time>\d+?),(?<stat>\d+?),(?<avgpwr>\d+?),(?<minpwr>\d+?),(?<maxpwr>\d+?),(?<minpr>\d+?),(?<maxpr>\d+?),(?<lhe1>\d+?),(?<lhe2>\d+?),(?<dps>\d+?),(?<talm>\d+?),(?<palm>\d+?),(?<cres>\d+?)/g,
+    rmmu: /(?<line>\d+?),(?<time>\d+?),(?<stat>\d+?),(?<avgpwr>\d+?),(?<minpwr>\d+?),(?<maxpwr>\d+?),(?<minpr>\d+?),(?<maxpr>\d+?),(?<lhe1>\d+?),(?<lhe2>\d+?),(?<dps>\d+?),(?<talm>\d+?),(?<palm>\d+?),(?<cres>\d+?)/g,
     rmmu_file_date: /rmmu(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})/,
     monitor: {
       monitor_1HRFAmp1_AvgPower:
