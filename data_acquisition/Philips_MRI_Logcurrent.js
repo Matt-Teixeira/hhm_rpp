@@ -86,10 +86,7 @@ class PHILIPS_MRI_LOGCURRENT {
       sme: this.sme,
       file: this.file_config,
     };
-    /* console.log(note);
-    console.log(this.file_config[this.file_config_prop_name].file_name);
-    console.log(this.fileSizePath);
-    console.log(this.sysConfigData.hhm_config.file_path); */
+
     try {
       this.current_file_size = await getCurrentFileSize(
         this.sme,
@@ -98,7 +95,7 @@ class PHILIPS_MRI_LOGCURRENT {
         this.file_config[this.file_config_prop_name].file_name
       );
       note.current_file_size = this.current_file_size;
-      console.log(note);
+
       await addLogEvent(
         I,
         this.run_log,
@@ -163,11 +160,10 @@ class PHILIPS_MRI_LOGCURRENT {
       sme: this.sme,
       file: this.file_config[this.file_config_prop_name].file_name,
     };
-    console.log("Getting DELTA");
 
     this.delta = this.current_file_size - this.prev_file_size;
     note.delta = this.delta;
-    console.log(this.delta);
+
     addLogEvent(
       I,
       this.run_log,
@@ -220,8 +216,7 @@ class PHILIPS_MRI_LOGCURRENT {
       sme: this.sme,
       file: this.file_config[this.file_config_prop_name].file_name,
     };
-    console.log("\nGet File Data Note");
-    console.log(this.delta);
+
     try {
       if (
         this.prev_file_size === null ||

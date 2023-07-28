@@ -37,11 +37,10 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
     for await (const directory of sysConfigData.hhm_file_config) {
       let dir = Object.keys(directory)[0];
       note.directory = dir;
+      console.log(dir);
       await addLogEvent(I, run_log, "philips_mri_parsers", det, note, null);
       switch (dir) {
         case "logcurrent":
-          console.log(sysConfigData.id);
-          console.log(dir);
           const Logcurrent_System = new PHILIPS_MRI_LOGCURRENT_STT(
             sysConfigData,
             directory,
@@ -57,26 +56,32 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
             job_id
           );
           break;
-        /*
+
         case "rmmu":
           const Rmmu_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory.rmmu,
-            job_id
+            job_id,
+            run_log,
+            dir
           );
 
           await phil_rmmu_history(directory.rmmu, Rmmu_System);
 
           break;
         case "rmmu_short":
+          console.log("IN RMMU_SHORT");
           const Rmmu_Short_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory.rmmu_short,
-            job_id
+            job_id,
+            run_log,
+            dir
           );
 
-          await phil_mri_rmmu_short(directory.rmmu_short, Rmmu_Short_System);
+          await phil_mri_rmmu_short(Rmmu_Short_System);
           break;
+        /*
         case "rmmu_long":
           const Rmmu_Long_System = new PHILIPS_MRI_RMMU(
             sysConfigData,

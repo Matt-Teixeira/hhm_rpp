@@ -2,7 +2,7 @@
 require("dotenv").config();
 const crypto = require("crypto");
 const { log } = require("./logger");
-const db = require("./db/pg-pool");
+const pgPool = require("./db/pg-pool");
 const siemens_parser = require("./jobs/Siemens");
 const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");
@@ -135,7 +135,7 @@ const onBoot = async () => {
     const queries = {
       CT: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality LIKE '%CT' AND hhm_config->'run_group' = '1'",
       CV: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND hhm_config->'run_group' = '1'",
-      MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1' AND id IN ('SME01138', 'SME01139', 'SME01142', 'SME01399', 'SME01402', 'SME01403', 'SME01404', 'SME01405', 'SME01406')",
+      MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1' AND id IN ('SME01138')", // 'SME01424' , 'SME01139', 'SME01142', 'SME01399', 'SME01402', 'SME01403', 'SME01404', 'SME01405', 'SME01406'
       phil_cv_hr_24:
         "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND manufacturer = 'Philips' AND hhm_config->'run_group' = '2'",
       all: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL",
@@ -143,11 +143,10 @@ const onBoot = async () => {
 
     let queryString = queries[shell_value];
 
-    const system_array = await db.any(queryString);
-
-    /*      
-   const child_processes = [];
-    for await (const system of system_array.rows) {
+    const system_array = await pgPool.any(queryString);
+    /* 
+    const child_processes = [];
+    for await (const system of system_array) {
       let jobId = crypto.randomUUID();
       child_processes.push(
         async () => await determineManufacturer(jobId, system, run_log)
@@ -158,10 +157,8 @@ const onBoot = async () => {
     const promises = child_processes.map((child_process) => child_process());
 
     // AWAIT PROMISIS
-    await Promise.all(promises); 
-   */
-
-    //console.log(system_array);
+    await Promise.all(promises);
+ */
 
     for await (const system of system_array) {
       const job_id = uuidv4();

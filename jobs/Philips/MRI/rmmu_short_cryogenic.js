@@ -1,25 +1,43 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
+const pgp = require("pg-promise")();
+const db = require("../../../utils/db/pg-pool");
 const fsp = require("node:fs").promises;
 const { philips_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { phil_mri_rmmu_short_schema } = require("../../../persist/pg-schemas");
-const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, cat, det },
+} = require("../../../utils/logger/enums");
 
-async function phil_mri_rmmu_short(fileToParse, System) {
-  const parsers = fileToParse.parsers;
+const {
+  pg_column_sets: pg_cs,
+} = require("../../../utils/db/sql/pg-helpers_hhm");
+
+async function phil_mri_rmmu_short(System) {
+  const parsers = System.file_config.parsers;
   const data = [];
   const lastModPath = "./read/sh/get_dir_last_mod.sh";
+
+  let note = {
+    job_id: System.job_id,
+    sme: System.sme,
+    file: System.file_config,
+  };
+
   try {
-    await log(
-      "info",
-      System.jobId,
-      System.sme,
+    await addLogEvent(
+      I,
+      System.run_log,
       "phil_mri_rmmu_short",
-      "FN CALL"
+      cal,
+      note,
+      null
     );
 
     // ** Start Data Acquisition
@@ -33,17 +51,17 @@ async function phil_mri_rmmu_short(fileToParse, System) {
         "rmmu_short",
       ]);
 
-      await log(
-        "warn",
-        System.jobId,
-        System.sme,
+      note.path = System.directory_path;
+      note.last_mod = file_mod_datetime;
+      note.message = "No new files detected";
+
+      await addLogEvent(
+        W,
+        System.run_log,
         "phil_mri_rmmu_short",
-        "FN CALL",
-        {
-          message: "No new files detected",
-          path: System.directory_path,
-          last_mod: file_mod_datetime,
-        }
+        det,
+        note,
+        null
       );
       return;
     }
@@ -80,19 +98,25 @@ async function phil_mri_rmmu_short(fileToParse, System) {
         const time = `${match.groups.hr}:${match.groups.mn}:${match.groups.ss}.${match.groups.hs}`;
 
         const dtObject = await generateDateTime(
-          System.jobId,
+          System.job_id,
           match.groups.system_id,
-          System.fileToParse.pg_table,
+          System.file_config.pg_table,
           date,
           time
         );
 
         if (dtObject === null) {
-          await log("warn", System.jobId, System.sme, "date_time", "FN CALL", {
-            message: "date_time object null",
-            date,
-            time,
-          });
+          note.file = file;
+          note.date = date;
+          note.time = time;
+          await addLogEvent(
+            W,
+            System.run_log,
+            "phil_mri_rmmu_short",
+            det,
+            note,
+            null
+          );
         }
 
         match.groups.host_datetime = dtObject;
@@ -101,44 +125,32 @@ async function phil_mri_rmmu_short(fileToParse, System) {
       }
 
       const mappedData = mapDataToSchema(data, phil_mri_rmmu_short_schema);
-      const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
       // ** End Parse
 
       // ** Begin Persist
 
-      const insertSuccess = await bulkInsert(
-        System.jobId,
-        dataToArray,
-        System.sysConfigData,
-        System.fileToParse
+      const query = pgp.helpers.insert(
+        mappedData,
+        pg_cs.mag.philips.rmmu_short
       );
 
-      // ** End Persist
+      await db.any(query);
 
-      // ** Upon successfull db insert, move file to archive dir
-
-      if (insertSuccess) {
-        await System.cache_last_file_name(
-          System.last_file_in_dir,
-          "last_rmmu_short_file"
-        );
-      }
-
+      // reset global data variable in prep for next file in loop.
       data.length = 0;
     }
 
     return;
   } catch (error) {
-    await log(
-      "error",
-      System.jobId,
-      System.sme,
+    console.log(error);
+    await addLogEvent(
+      E,
+      System.run_log,
       "phil_mri_rmmu_short",
-      "FN CALL",
-      {
-        error,
-      }
+      cat,
+      note,
+      error
     );
   }
 }

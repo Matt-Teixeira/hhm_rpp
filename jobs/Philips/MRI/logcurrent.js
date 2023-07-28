@@ -1,10 +1,11 @@
 ("use strict");
 require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
+const db = require("../../../utils/db/pg-pool");
+const pgp = require("pg-promise")();
 const { philips_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { phil_mri_logcurrent_schema } = require("../../../persist/pg-schemas");
-const bulkInsert = require("../../../persist/queryBuilder");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const [addLogEvent] = require("../../../utils/logger/log");
@@ -12,6 +13,10 @@ const {
   type: { I, W, E },
   tag: { cal, cat, det },
 } = require("../../../utils/logger/enums");
+
+const {
+  pg_column_sets: pg_cs,
+} = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function phil_mri_logcurrent(file_config, System, run_log, job_id) {
   const parsers = file_config.logcurrent.parsers;
@@ -112,31 +117,20 @@ async function phil_mri_logcurrent(file_config, System, run_log, job_id) {
 
     // Homogenize data to prep for insert to db
     const mappedData = mapDataToSchema(data, phil_mri_logcurrent_schema);
-    const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
     // ** End Parse
 
     // ** Begin Persist
 
-    console.log(System.sme);
-    console.log(dataToArray[0]);
+    const query = pgp.helpers.insert(mappedData, pg_cs.log.philips.logcurrent);
 
-    return;
-    const insertSuccess = await bulkInsert(
-      job_id,
-      dataToArray,
-      System.sysConfigData,
-      System.file_config.logcurrent,
-      run_log
-    );
+    await db.any(query);
 
     // ** End Persist
 
     // Update Redis Cache
 
-    if (insertSuccess) {
-      await System.updateRedisFileSize();
-    }
+    await System.updateRedisFileSize();
   } catch (error) {
     console.log(error);
     await addLogEvent(E, run_log, "phil_mri_logcurrent", cat, note, error);
