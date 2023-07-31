@@ -46,7 +46,6 @@ async function phil_mri_logcurrent(file_config, System, run_log, job_id) {
     // ** Begin Parse
 
     let line_number = 1;
-    let date_time;
     for await (const line of System.file_data) {
       let matches = await line.match(philips_re[parsers[0]]);
 
@@ -84,7 +83,8 @@ async function phil_mri_logcurrent(file_config, System, run_log, job_id) {
           !!matches.groups.reconstructor ||
           !!matches.groups.data_created_value ||
           !!matches.groups.packets_created ||
-          !!matches.groups.size_copy_value
+          !!matches.groups.size_copy_value ||
+          !!matches.groups.magnet_meu
         ) {
           continue;
         }

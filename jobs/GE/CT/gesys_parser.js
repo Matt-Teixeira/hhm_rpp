@@ -1,8 +1,9 @@
 const { log } = require("../../../logger");
+const db = require("../../../utils/db/pg-pool");
+const pgp = require("pg-promise")();
 const { ge_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { ge_ct_gesys_schema } = require("../../../persist/pg-schemas");
-const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const extract = require("../../../processing/date_processing/ge_ct/extract_metadata");
 const [addLogEvent] = require("../../../utils/logger/log");
@@ -11,39 +12,43 @@ const {
   tag: { cal, det, cat },
 } = require("../../../utils/logger/enums");
 
-async function ge_ct_gesys(system, run_log, job_id) {
+const {
+  pg_column_sets: pg_cs,
+} = require("../../../utils/db/sql/pg-helpers_hhm");
+
+async function ge_ct_gesys(System) {
   // an array in each parser accossiated with a file
-  const parsers = system.fileToParse.parsers;
+  const parsers = System.fileToParse.parsers;
   const data = [];
   const extraction_data = [];
 
   const tube_test_re = /tube usage data reports/;
 
   let note = {
-    job_id: job_id,
-    sme: system.sme,
-    file: system.fileToParse.file_name,
+    job_id: System.job_id,
+    sme: System.sme,
+    file: System.fileToParse.file_name,
   };
 
   try {
-    await addLogEvent(I, run_log, "ge_ct_gesys", cal, note, null);
-    await log("info", job_id, system.sme, "ge_ct_gesys", "FN CALL");
+    await addLogEvent(I, System.run_log, "ge_ct_gesys", cal, note, null);
+    await log("info", System.job_id, System.sme, "ge_ct_gesys", "FN CALL");
 
     // ** Start Data Acquisition
 
-    await system.getRedisFileSize();
+    await System.getRedisFileSize();
 
-    await system.getCurrentFileSize();
+    await System.getCurrentFileSize();
 
-    await system.getFileData();
+    await System.getFileData();
 
-    if (system.file_data === null) return;
+    if (System.file_data === null) return;
 
     // ** End Data Acquisition
 
     // ** Begin Parse
 
-    let matches = system.file_data.match(ge_re.ct.gesys[parsers[0]]);
+    let matches = System.file_data.match(ge_re.ct.gesys[parsers[0]]);
 
     for await (let match of matches) {
       const matchGroups = match.match(ge_re.ct.gesys[parsers[1]]);
@@ -51,14 +56,14 @@ async function ge_ct_gesys(system, run_log, job_id) {
       // matchGroups will be null if no match
       if (!matchGroups) {
         let note = {
-          job_id: job_id,
-          sme: system.sme,
+          job_id: System.job_id,
+          sme: System.sme,
           prev_epoch: data[data.length - 1].epoch,
           sr_group: data[data.length - 1].sr,
           message: "Failed match",
         };
-        await addLogEvent(W, run_log, "ge_ct_gesys", det, note, null);
-        await log("error", system.sme, "ge_ct_gesys", "FN CALL", {
+        await addLogEvent(W, System.run_log, "ge_ct_gesys", det, note, null);
+        await log("error", System.sme, "ge_ct_gesys", "FN CALL", {
           message: "Failed match",
           prev_epoch: data[data.length - 1].epoch,
           sr_group: data[data.length - 1].sr,
@@ -71,26 +76,26 @@ async function ge_ct_gesys(system, run_log, job_id) {
           ? 0 + matchGroups.groups.day
           : matchGroups.groups.day
       }-${matchGroups.groups.month}-${matchGroups.groups.year}`;
-      matchGroups.groups.system_id = system.sysConfigData.id;
+      matchGroups.groups.system_id = System.sysConfigData.id;
 
       const dtObject = await generateDateTime(
-        job_id,
+        System.job_id,
         matchGroups.groups.system_id,
-        system.fileToParse.pg_table,
+        System.fileToParse.pg_table,
         matchGroups.groups.host_date,
         matchGroups.groups.host_time
       );
 
       if (dtObject === null) {
         let note = {
-          job_id: job_id,
-          sme: system.sme,
+          job_id: System.job_id,
+          sme: System.sme,
           date: matchGroups.groups.host_date,
           time: matchGroups.groups.host_time,
           message: "date_time object null",
         };
-        await addLogEvent(W, run_log, "ge_ct_gesys", det, note, null);
-        await log("warn", job_id, system.sme, "date_time", "FN CALL", {
+        await addLogEvent(W, System.run_log, "ge_ct_gesys", det, note, null);
+        await log("warn", System.job_id, System.sme, "date_time", "FN CALL", {
           message: "date_time object null",
         });
       }
@@ -111,33 +116,26 @@ async function ge_ct_gesys(system, run_log, job_id) {
     }
 
     const mappedData = mapDataToSchema(data, ge_ct_gesys_schema);
-    const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
     // ** End Parse
 
     // ** Begin Persist
 
-    const insertSuccess = await bulkInsert(
-      job_id,
-      dataToArray,
-      system.sysConfigData,
-      system.fileToParse,
-      run_log
-    );
+    const query = pgp.helpers.insert(mappedData, pg_cs.log.ge.ge_ct_gesys);
+
+    await db.any(query);
 
     // ** End Persist
 
     // Update Redis Cache
 
-    if (insertSuccess) {
-      await system.updateRedisFileSize();
-      console.log(extraction_data);
-      if (extraction_data.length > 0)
-        await extract(job_id, extraction_data, run_log);
-    }
+    if (extraction_data.length > 0)
+      await extract(System.job_id, extraction_data, System.run_log);
+
+    await System.updateRedisFileSize();
   } catch (error) {
-    await addLogEvent(E, run_log, "ge_ct_gesys", cat, note, error);
-    await log("error", job_id, system.sme, "ge_ct_gesys", "FN CALL", {
+    await addLogEvent(E, System.run_log, "ge_ct_gesys", cat, note, error);
+    await log("error", System.job_id, System.sme, "ge_ct_gesys", "FN CALL", {
       error: error.message,
     });
   }

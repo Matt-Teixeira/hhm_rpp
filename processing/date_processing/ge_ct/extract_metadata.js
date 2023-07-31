@@ -1,10 +1,14 @@
-const extracted_insert = require("../../../persist/extracted_query_builder");
+const db = require("../../../utils/db/pg-pool");
+const pgp = require("pg-promise")();
 const { log } = require("../../../logger");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
   tag: { cal, det, cat },
 } = require("../../../utils/logger/enums");
+const {
+  pg_column_sets: pg_cs,
+} = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function extract(job_id, extraction_data, run_log) {
   let note = {
@@ -28,22 +32,16 @@ async function extract(job_id, extraction_data, run_log) {
       }
     }
 
-    const dataToArray = data.map(({ ...rest }) => Object.values(rest));
+    // ** Begin Persist
 
-    console.log("\ndataToArray");
-
-    console.log(dataToArray);
-
-    const insertSuccess = await extracted_insert(
-      job_id,
-      dataToArray,
-      "logfile_event_history_metadata",
-      data[0].system_id,
-      run_log
+    const query = pgp.helpers.insert(
+      data,
+      pg_cs.meta_data.logfile_event_history_metadata
     );
 
-    if (!insertSuccess)
-      throw new Error("logfile_event_history_metadata failed");
+    await db.any(query);
+
+    // ** End Persist
   } catch (error) {
     let note = {
       job_id,
@@ -52,15 +50,9 @@ async function extract(job_id, extraction_data, run_log) {
     console.log("\nMETADATA ERROR");
     console.log(error);
     await addLogEvent(E, run_log, "extract", cat, note, error);
-    await log(
-      "error",
-      job_id,
-      "ge_ct_metadata",
-      "FN CATCH",
-      {
-        error: error,
-      }
-    );
+    await log("error", job_id, "ge_ct_metadata", "FN CATCH", {
+      error: error,
+    });
   }
 }
 

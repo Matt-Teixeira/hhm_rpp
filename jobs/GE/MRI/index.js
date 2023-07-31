@@ -22,8 +22,8 @@ const ge_mri_parsers = async (job_id, sysConfigData, run_log) => {
     for await (const file of sysConfigData.hhm_file_config) {
       switch (file.query) {
         case "gesys":
-          const system = new GE_CT_MRI(sysConfigData, file, job_id, run_log);
-          await ge_mri_gesys(system, run_log, job_id);
+          const System = new GE_CT_MRI(sysConfigData, file, job_id, run_log);
+          await ge_mri_gesys(System);
           break;
         default:
           break;

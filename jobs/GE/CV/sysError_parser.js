@@ -1,4 +1,6 @@
 const { log } = require("../../../logger");
+const db = require("../../../utils/db/pg-pool");
+const pgp = require("pg-promise")();
 const { ge_re } = require("../../../parse/parsers");
 const { ge_cv_syserror_schema } = require("../../../persist/pg-schemas");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
@@ -12,23 +14,27 @@ const {
   tag: { cal, det, cat },
 } = require("../../../utils/logger/enums");
 
+const {
+  pg_column_sets: pg_cs,
+} = require("../../../utils/db/sql/pg-helpers_hhm");
+
 // File to parse is read line by line for regEx to match
-async function ge_cv_sys_error(System, run_log, job_id) {
+async function ge_cv_sys_error(System) {
   // an array in each config accossiated with a file
   const parsers = System.fileToParse.parsers;
   const data = [];
 
   let note = {
-    job_id: job_id,
+    job_id: System.job_id,
     sme: System.sme,
     file: System.fileToParse.file_name,
   };
 
   try {
-    await addLogEvent(I, run_log, "ge_cv_sys_error", cal, note, null);
+    await addLogEvent(I, System.run_log, "ge_cv_sys_error", cal, note, null);
     await log(
       "info",
-      job_id,
+      System.job_id,
       System.sysConfigData.id,
       "ge_cv_sys_error",
       "FN CALL"
@@ -56,15 +62,22 @@ async function ge_cv_sys_error(System, run_log, job_id) {
           continue;
         } else {
           let note = {
-            job_id: job_id,
+            job_id: System.job_id,
             sme: System.sysConfigData.id,
             message: "This is not a blank new line - Bad Match",
             line: line,
           };
-          await addLogEvent(W, run_log, "ge_cv_sys_error", det, note, null);
+          await addLogEvent(
+            W,
+            System.run_log,
+            "ge_cv_sys_error",
+            det,
+            note,
+            null
+          );
           await log(
             "error",
-            job_id,
+            System.job_id,
             System.sysConfigData.id,
             "Not_New_Line",
             "FN CALL",
@@ -81,7 +94,7 @@ async function ge_cv_sys_error(System, run_log, job_id) {
         let splitColens = matches.groups.host_time.split(":");
         matches.groups.host_time = `${splitColens[0]}:${splitColens[1]}:${splitColens[2]}.${splitColens[3]}`;
         const dtObject = await generateDateTime(
-          job_id,
+          System.job_id,
           matches.groups.system_id,
           System.fileToParse.pg_table,
           matches.groups.host_date,
@@ -90,16 +103,23 @@ async function ge_cv_sys_error(System, run_log, job_id) {
 
         if (dtObject === null) {
           let note = {
-            job_id: job_id,
+            job_id: System.job_id,
             sme: System.sme,
             line: line,
             match_group: matches.groups,
             message: "date_time object null",
           };
-          await addLogEvent(W, run_log, "ge_cv_sys_error", det, note, null);
+          await addLogEvent(
+            W,
+            System.run_log,
+            "ge_cv_sys_error",
+            det,
+            note,
+            null
+          );
           await log(
             "warn",
-            job_id,
+            System.job_id,
             System.sysConfigData.id,
             "date_time",
             "FN CALL",
@@ -124,36 +144,30 @@ async function ge_cv_sys_error(System, run_log, job_id) {
     data.shift();
 
     const mappedData = mapDataToSchema(data, ge_cv_syserror_schema);
-    const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
     // ** End Parse
 
     // ** Begin Persist
 
-    const insertSuccess = await bulkInsert(
-      job_id,
-      dataToArray,
-      System.sysConfigData,
-      System.fileToParse,
-      run_log
-    );
+    const query = pgp.helpers.insert(mappedData, pg_cs.log.ge.ge_cv_syserror);
+
+    await db.any(query);
 
     // ** End Persist
 
     // Update Redis Cache
 
-    if (insertSuccess) {
-      await System.updateRedisFileSize();
-    }
+    await System.updateRedisFileSize();
   } catch (error) {
+    console.log(error);
     let note = {
-      job_id: job_id,
+      job_id: System.job_id,
       sme: System.sysConfigData.id,
     };
-    await addLogEvent(E, run_log, "ge_cv_sys_error", cat, note, error);
+    await addLogEvent(E, System.run_log, "ge_cv_sys_error", cat, note, error);
     await log(
       "error",
-      job_id,
+      System.job_id,
       System.sysConfigData.id,
       "ge_cv_sys_error",
       "FN CALL",
