@@ -1,12 +1,11 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
+const db = require("../../../utils/db/pg-pool");
+const pgp = require("pg-promise")();
 const fs = require("node:fs");
 const readline = require("readline");
 const { philips_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_cv_eventlog_schema } = require("../../../persist/pg-schemas");
-const bulkInsert = require("../../../persist/queryBuilder");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const execLastMod = require("../../../read/exec-file_last_mod");
 const {
@@ -22,6 +21,10 @@ const {
   type: { I, W, E },
   tag: { cal, det, cat },
 } = require("../../../utils/logger/enums");
+
+const {
+  pg_column_sets: pg_cs,
+} = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
   const sme = sysConfigData.id;
@@ -206,26 +209,32 @@ async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
 
     // homogenize data to prep for insert to db
     const mappedData = mapDataToSchema(data, philips_cv_eventlog_schema);
-    const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
-    const insertSuccess = await bulkInsert(
-      job_id,
-      dataToArray,
-      sysConfigData,
-      fileToParse,
-      run_log
+    // ** End Parse
+
+    // ** Begin Persist
+
+    const query = pgp.helpers.insert(
+      mappedData,
+      pg_cs.log.philips.philips_cv_eventlog
     );
-    if (insertSuccess) {
-      await updateRedisFileSize(
-        sme,
-        updateSizePath,
-        sysConfigData.hhm_config.file_path,
-        fileToParse.file_name
-      );
-      // insert metadata
-      if (memo_data.length > 0) await extract(job_id, memo_data, run_log);
-    }
+
+    await db.any(query);
+
+    // ** End Persist
+
+    // Update Redis Cache
+
+    await updateRedisFileSize(
+      sme,
+      updateSizePath,
+      sysConfigData.hhm_config.file_path,
+      fileToParse.file_name
+    );
+    // insert metadata
+    if (memo_data.length > 0) await extract(job_id, memo_data, run_log);
   } catch (error) {
+    console.log(error);
     await addLogEvent(E, run_log, "phil_cv_eventlog", cat, note, error);
     await log("error", job_id, sme, "phil_cv_eventlog", "FN CALL", {
       sme: sme,
