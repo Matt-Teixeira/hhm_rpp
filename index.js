@@ -133,7 +133,7 @@ const onBoot = async () => {
     let shell_value = [process.argv[2]];
 
     const queries = {
-      CT: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality LIKE '%CT' AND hhm_config->'run_group' = '1' AND id IN ('SME00847')",
+      CT: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality LIKE '%CT' AND hhm_config->'run_group' = '1' AND id IN ('SME00410')",
       CV: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND hhm_config->'run_group' = '1' AND id IN ('SME00865')",
       MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1' AND id IN ('SME01123')", // 'SME01424' , 'SME01139', 'SME01142', 'SME01399', 'SME01402', 'SME01403', 'SME01404', 'SME01405', 'SME01406'
       phil_cv_hr_24:
