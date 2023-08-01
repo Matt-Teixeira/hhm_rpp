@@ -1,5 +1,4 @@
 const fsp = require("node:fs").promises;
-const { log } = require("../logger");
 const exec_move_to_archive = require("../read/exec-move_to_archive");
 const {
   update_redis_last_file,

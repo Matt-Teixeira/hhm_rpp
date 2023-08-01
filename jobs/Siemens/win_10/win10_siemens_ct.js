@@ -184,6 +184,20 @@ const win10_siemens_ct = async (System) => {
 
     // ** End Persist
 
+    note.number_of_rows = mappedData.length;
+    note.first_row = mappedData[0];
+    note.last_row = mappedData[mappedData.length - 1];
+    note.message = "Successful Insert";
+
+    await addLogEvent(
+      I,
+      System.run_log,
+      "win10_siemens_ct",
+      det,
+      note,
+      null
+    );
+
     // Update Redis Cache
 
     await System.update_redis_line(first_line);

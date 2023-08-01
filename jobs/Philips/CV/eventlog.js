@@ -223,6 +223,13 @@ async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
 
     // ** End Persist
 
+    note.number_of_rows = mappedData.length;
+    note.first_row = mappedData[0];
+    note.last_row = mappedData[mappedData.length - 1];
+    note.message = "Successful Insert";
+
+    await addLogEvent(I, run_log, "phil_cv_eventlog", det, note, null);
+
     // Update Redis Cache
 
     await updateRedisFileSize(

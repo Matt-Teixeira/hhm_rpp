@@ -1,4 +1,3 @@
-const { log } = require("../../logger");
 const { DateTime } = require("luxon");
 
 const dateTimeTemplate = async (

@@ -7,6 +7,11 @@ const { siemens_ct_mri } = require("../../../persist/pg-schemas");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, det, cat },
+} = require("../../../utils/logger/enums");
 
 const {
   pg_column_sets: pg_cs,
@@ -25,7 +30,14 @@ const win10_siemens_mri = async (System) => {
   // first_line will be the most recent line data
   let first_line;
 
+  let note = {
+    job_id: System.job_id,
+    sme: System.sme,
+    file: System.fileToParse,
+  };
+
   try {
+    await addLogEvent(I, System.run_log, "win10_siemens_mri", cal, note, null);
     await log("info", System.jobId, System.sme, "win10_siemens_mri", "FN CALL");
 
     await System.get_redis_line();
@@ -46,8 +58,11 @@ const win10_siemens_mri = async (System) => {
         const file_mod_datetime = await execLastMod(lastModPath, [
           System.complete_file_path,
         ]);
+        note.message = "No delta measured";
+        note.last_mod = file_mod_datetime;
+        await addLogEvent(I, System.run_log, "win10_siemens_mri", cal, note, null);
         await log("warn", System.jobId, System.sme, "getFileData", "FN CALL", {
-          message: `No delta measured`,
+          message: "No delta measured",
           last_mod: file_mod_datetime,
         });
         break;
@@ -85,6 +100,20 @@ const win10_siemens_mri = async (System) => {
       );
 
       if (dtObject === null) {
+        let note = {
+          job_id: System.job_id,
+          sme: System.sme,
+          line,
+          message: "date_time object null",
+        };
+        await addLogEvent(
+          W,
+          System.run_log,
+          "win10_siemens_mri: date_time",
+          det,
+          note,
+          null
+        );
         await log("warn", System.jobId, System.sme, "date_time", "FN CALL", {
           message: "date_time object null",
         });
@@ -112,13 +141,29 @@ const win10_siemens_mri = async (System) => {
 
     // ** End Persist
 
+    note.number_of_rows = mappedData.length;
+    note.first_row = mappedData[0];
+    note.last_row = mappedData[mappedData.length - 1];
+    note.message = "Successful Insert";
+
+    await addLogEvent(
+      I,
+      System.run_log,
+      "win10_siemens_mri",
+      det,
+      note,
+      null
+    );
+
     // Update Redis Cache
 
     await System.update_redis_line(first_line);
 
     return true;
   } catch (error) {
+
     console.log(error);
+    await addLogEvent(E, System.run_log, "win10_siemens_mri", det, note, error);
     await log(
       "error",
       System.jobId,

@@ -26,10 +26,9 @@ async function updateRedisLine(sme, file, first_line) {
   console.log(sme, file, first_line)
   try {
     const redisClient = await initRedis();
-    console.log("\nsetKey");
+
     const setKey = `${sme}.${file}`;
-    console.log("\nsetKey");
-    console.log(setKey);
+
     await redisClient.set(setKey, first_line);
     await redisClient.quit();
     return;

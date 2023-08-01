@@ -22,14 +22,11 @@ async function insertDisplayData(
     job_id,
     sme,
   };
-  console.log("In insert_display_data");
+
   try {
     await addLogEvent(I, run_log, "insertDisplayData", cal, note, null);
 
     const has_prev_data = await getSystemDbData(job_id, run_log, sme);
-
-    console.log("\nhas_prev_data");
-    console.log(has_prev_data);
 
     let hours_diff = 0;
 

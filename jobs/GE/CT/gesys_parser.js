@@ -125,6 +125,13 @@ async function ge_ct_gesys(System) {
 
     await db.any(query);
 
+    note.number_of_rows = mappedData.length;
+    note.first_row = mappedData[0];
+    note.last_row = mappedData[mappedData.length - 1];
+    note.message = "Successful Insert";
+
+    await addLogEvent(I, System.run_log, "ge_ct_gesys", det, note, null);
+
     // ** End Persist
 
     // Update Redis Cache

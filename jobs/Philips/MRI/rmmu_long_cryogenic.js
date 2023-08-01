@@ -126,6 +126,21 @@ async function phil_mri_rmmu_long(System) {
 
       // ** End Persist
 
+      note.file = file;
+      note.number_of_rows = mappedData.length;
+      note.first_row = mappedData[0];
+      note.last_row = mappedData[mappedData.length - 1];
+      note.message = "Successful Insert";
+
+      await addLogEvent(
+        I,
+        System.run_log,
+        "phil_mri_rmmu_long",
+        det,
+        note,
+        null
+      );
+
       // ** Upon successfull db insert, move file to archive dir
 
       await System.cache_last_file_name(

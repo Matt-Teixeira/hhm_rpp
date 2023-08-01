@@ -34,7 +34,13 @@ async function phil_rmmu_history(file_config, System) {
 
   try {
     await addLogEvent(I, System.run_log, "phil_rmmu_history", cal, note, null);
-    await log("info", System.job_id, System.sme, "phil_rmmu_history", "FN CALL");
+    await log(
+      "info",
+      System.job_id,
+      System.sme,
+      "phil_rmmu_history",
+      "FN CALL"
+    );
 
     // ** Start Data Acquisition **
 
@@ -78,6 +84,7 @@ async function phil_rmmu_history(file_config, System) {
     // Loops through each file in the dir
     // Change to loop backwards
     for await (const file of System.files_in_dir) {
+      console.log(file)
       const complete_file_path = `${System.directory_path}/${file}`;
 
       const fileData = (await fsp.readFile(complete_file_path)).toString();
@@ -153,6 +160,21 @@ async function phil_rmmu_history(file_config, System) {
       await db.any(query);
 
       // ** End Persist **
+
+      note.file = file;
+      note.number_of_rows = mappedData.length;
+      note.first_row = mappedData[0];
+      note.last_row = mappedData[mappedData.length - 1];
+      note.message = "Successful Insert";
+
+      await addLogEvent(
+        I,
+        System.run_log,
+        "phil_rmmu_history",
+        det,
+        note,
+        null
+      );
 
       // Reset data array for next file's data
       data.length = 0;

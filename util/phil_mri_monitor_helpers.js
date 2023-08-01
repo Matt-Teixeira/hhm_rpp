@@ -1,5 +1,4 @@
 const { log } = require("../logger");
-const pgPool = require("../db/pg-pool");
 const db = require("../utils/db/pg-pool");
 const [addLogEvent] = require("../utils/logger/log");
 const {
@@ -45,46 +44,6 @@ async function getExistingDates(jobId, sme) {
   }
 }
 
-async function getDateRanges(jobId, sme, values) {
-  try {
-    let queryStr = `SELECT date FROM mag.philips_mri_monitoring_data WHERE system_id = $1 AND date BETWEEN $2 AND $3`;
-
-    const systemDates = await pgPool.query(queryStr, values);
-    const systemDatesToArray = [];
-
-    for await (const date of systemDates.rows) {
-      systemDatesToArray.push(date.date);
-    }
-    return systemDatesToArray;
-  } catch (error) {
-    console.log(error);
-    await log("error", jobId, sme, "getDateRanges", "FN CALL", {
-      sme: sme,
-      values: values,
-      error: error,
-    });
-  }
-}
-
-async function getExistingNotNullDates(jobId, sme, col_name) {
-  try {
-    const queryStr = `SELECT date FROM mag.philips_mri_monitoring_data WHERE system_id = ($1) AND ${col_name} IS NOT NULL ORDER BY date DESC LIMIT 1`;
-    const v = [sme];
-    const systemDates = await pgPool.query(queryStr, v);
-    const systemDatesToArray = [];
-    for await (const date of systemDates.rows) {
-      systemDatesToArray.push(date.date);
-    }
-    return systemDatesToArray;
-  } catch (error) {
-    console.log(error);
-    await log("error", jobId, sme, "getExistingNotNullDates", "FN CALL", {
-      sme: sme,
-      error: error,
-    });
-  }
-}
-
 async function updateTable(jobId, col_name, arr) {
   try {
     if (arr[0] === -Infinity) return;
@@ -119,7 +78,7 @@ async function update_jsonb_state(jobId, sme, values) {
       values,
     });
     const queryStr = `UPDATE mag.philips_mri_json SET process_success = true WHERE capture_time = $1`;
-    await pgPool.query(queryStr, values);
+    await db.none(queryStr, values);
   } catch (error) {
     console.log(error);
     await log("error", jobId, sme, "update_jsonb_state", "FN CALL", {
@@ -180,58 +139,9 @@ async function update_secondary_table(jobId, sme, col_name, values) {
   }
 }
 
-/* const process_file_config = {
-  monitor_System_HumExamRoom: {
-    type: "max",
-    col: "tech_room_humidity_value",
-  },
-  monitor_System_HumTechRoom: {
-    type: "max",
-    col: "tech_room_humidity_value",
-  },
-  monitor_System_TempTechRoom: {
-    type: "max",
-    col: "tech_room_temp_value",
-  },
-  monitor_magnet_lt_boiloff: {
-    type: "max",
-    col: "long_term_boil_off_value",
-  },
-  monitor_cryocompressor_time_status: {
-    type: "max",
-    col: "cryo_comp_malf_value",
-  },
-  monitor_magnet_pressure_dps: {
-    type: "max",
-    col: "mag_dps_status_value",
-  },
-  monitor_cryocompressor_cerr: {
-    type: "bool",
-    col: "cryo_comp_comm_error_state",
-  },
-  monitor_cryocompressor_palm: {
-    type: "bool",
-    col: "cryo_comp_press_alarm_state",
-  },
-  monitor_cryocompressor_talm: {
-    type: "bool",
-    col: "cryo_comp_temp_alarm_state",
-  },
-  monitor_magnet_quench: {
-    type: "bool",
-    col: "quenched_state",
-  },
-  monitor_magnet_helium_level_value: {
-    type: "min",
-    col: "helium_level_value",
-  },
-}; */
-
 module.exports = {
   getSystemDbData,
   getExistingDates,
-  getDateRanges,
-  getExistingNotNullDates,
   updateTable,
   insertData,
   update_jsonb_state,

@@ -110,6 +110,13 @@ async function phil_ct_eal(System) {
 
     // ** End Persist
 
+    note.number_of_rows = mappedData.length;
+    note.first_row = mappedData[0];
+    note.last_row = mappedData[mappedData.length - 1];
+    note.message = "Successful Insert";
+
+    await addLogEvent(I, System.run_log, "phil_ct_eal", det, note, null);
+
     // Update Redis Cache
 
     await System.updateRedisFileSize();

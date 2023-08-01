@@ -152,6 +152,13 @@ async function ge_cv_sys_error(System) {
 
     await db.any(query);
 
+    note.number_of_rows = mappedData.length;
+    note.first_row = mappedData[0];
+    note.last_row = mappedData[mappedData.length - 1];
+    note.message = "Successful Insert";
+
+    await addLogEvent(I, System.run_log, "ge_cv_sys_error", det, note, null);
+
     // ** End Persist
 
     // Update Redis Cache
