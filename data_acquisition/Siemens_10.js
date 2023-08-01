@@ -96,12 +96,13 @@ class Siemens_10 extends System {
       note
     );
     try {
+
       this.file_data = readline.createInterface({
         input: fs.createReadStream(this.complete_file_path),
         crlfDelay: Infinity,
       });
-      console.log(this.file_data);
     } catch (error) {
+      console.log(error);
       await System.addLogEvent(
         this.E,
         this.run_log,

@@ -1,6 +1,5 @@
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
-const extracted_insert = require("../../../persist/extracted_query_builder");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },

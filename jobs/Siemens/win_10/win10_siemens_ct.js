@@ -1,10 +1,9 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
+const db = require("../../../utils/db/pg-pool");
+const pgp = require("pg-promise")();
 const { win_10_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { siemens_ct_mri } = require("../../../persist/pg-schemas");
-const bulkInsert = require("../../../persist/queryBuilder");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
@@ -14,6 +13,10 @@ const {
   type: { I, W, E },
   tag: { cal, det, cat },
 } = require("../../../utils/logger/enums");
+
+const {
+  pg_column_sets: pg_cs,
+} = require("../../../utils/db/sql/pg-helpers_hhm");
 
 /*
 NOTE ON EvtApplication_Today.txt
@@ -47,8 +50,6 @@ const win10_siemens_ct = async (System) => {
     if (!System.is_file_present()) return;
 
     await System.get_file_data();
-
-    console.log(System.file_data);
 
     for await (const line of System.file_data) {
       // Save first line (most resent parsed line) to redis
@@ -172,20 +173,22 @@ const win10_siemens_ct = async (System) => {
     if (data.length === 0) return;
 
     const mappedData = mapDataToSchema(data, siemens_ct_mri);
-    const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
-    const insertSuccess = await bulkInsert(
-      System.job_id,
-      dataToArray,
-      System.sysConfigData,
-      System.fileToParse,
-      System.run_log
-    );
-    if (insertSuccess) {
-      await System.update_redis_line(first_line);
-      if (extracted_metadata.length > 0)
-        await extract(System.job_id, extracted_metadata, System.run_log);
-    }
+    // ** End Parse
+
+    // ** Begin Persist
+
+    const query = pgp.helpers.insert(mappedData, pg_cs.log.siemens.siemens_ct);
+
+    await db.any(query);
+
+    // ** End Persist
+
+    // Update Redis Cache
+
+    await System.update_redis_line(first_line);
+    if (extracted_metadata.length > 0)
+      await extract(System.job_id, extracted_metadata, System.run_log);
 
     return true;
   } catch (error) {
