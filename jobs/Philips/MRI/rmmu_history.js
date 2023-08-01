@@ -1,24 +1,40 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
+const db = require("../../../utils/db/pg-pool");
+const pgp = require("pg-promise")();
 const fsp = require("node:fs").promises;
 const { philips_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_mri_rmmu_history } = require("../../../persist/pg-schemas");
-const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
 const {
   seconds_past_midnight,
 } = require("../../../processing/date_processing/incoming_date_cleaning");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, cat, det },
+} = require("../../../utils/logger/enums");
 
-async function phil_rmmu_history(fileToParse, System) {
-  const parsers = fileToParse.parsers;
+const {
+  pg_column_sets: pg_cs,
+} = require("../../../utils/db/sql/pg-helpers_hhm");
+
+async function phil_rmmu_history(file_config, System) {
+  const parsers = file_config.parsers;
   const data = [];
 
   lastModPath = "./read/sh/get_dir_last_mod.sh";
+
+  let note = {
+    job_id: System.job_id,
+    sme: System.sme,
+    file: file_config,
+  };
+
   try {
-    await log("info", System.jobId, System.sme, "phil_rmmu_history", "FN CALL");
+    await addLogEvent(I, System.run_log, "phil_rmmu_history", cal, note, null);
+    await log("info", System.job_id, System.sme, "phil_rmmu_history", "FN CALL");
 
     // ** Start Data Acquisition **
 
@@ -26,10 +42,7 @@ async function phil_rmmu_history(fileToParse, System) {
     await System.get_directory_files();
 
     // Get cached last file in directory from Redis
-    await System.get_last_file_parsed('last_rmmu_file');
-
-    console.log("System.get_last_file_parsed");
-    console.log(System.last_file_parsed);
+    await System.get_last_file_parsed("last_rmmu_file");
 
     // Set last file in rmmu directory
     System.update_files_to_process();
@@ -40,7 +53,19 @@ async function phil_rmmu_history(fileToParse, System) {
         "rmmu",
       ]);
 
-      await log("warn", System.jobId, System.sme, "phil_rmmu", "FN CALL", {
+      note.message = "No new files detected";
+      note.path = System.directory_path;
+      note.last_mod = file_mod_datetime;
+
+      await addLogEvent(
+        W,
+        System.run_log,
+        "phil_rmmu_history",
+        det,
+        note,
+        null
+      );
+      await log("warn", System.job_id, System.sme, "phil_rmmu", "FN CALL", {
         message: "No new files detected",
         path: System.directory_path,
         last_mod: file_mod_datetime,
@@ -76,18 +101,33 @@ async function phil_rmmu_history(fileToParse, System) {
         match.groups.hospital_name = metaData.groups.hospital_name;
 
         // Time associated with each data entry as seconds past midnight (line): 00:07:46
-        const time = seconds_past_midnight(match.groups.Time);
+        const time = seconds_past_midnight(match.groups.time);
 
         const dtObject = await generateDateTime(
-          System.jobId,
+          System.job_id,
           match.groups.system_id,
-          System.fileToParse.pg_table,
+          System.file_config.pg_table,
           date,
           time
         );
 
         if (dtObject === null) {
-          await log("warn", System.jobId, System.sme, "date_time", "FN CALL", {
+          let note = {
+            job_id: System.job_id,
+            sme: System.sme,
+            file: file_config,
+            message: "date_time object null",
+          };
+          await addLogEvent(
+            W,
+            System.run_log,
+            "phil_rmmu_history",
+            det,
+            note,
+            null
+          );
+
+          await log("warn", System.job_id, System.sme, "date_time", "FN CALL", {
             message: "date_time object null",
             date,
             time,
@@ -100,18 +140,17 @@ async function phil_rmmu_history(fileToParse, System) {
       }
 
       const mappedData = mapDataToSchema(data, philips_mri_rmmu_history);
-      const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
       // ** End Parse **
 
       // ** Begin Persist **
 
-      const insertSuccess = await bulkInsert(
-        System.jobId,
-        dataToArray,
-        System.sysConfigData,
-        System.fileToParse
+      const query = pgp.helpers.insert(
+        mappedData,
+        pg_cs.mag.philips.rmmu_history
       );
+
+      await db.any(query);
 
       // ** End Persist **
 
@@ -120,13 +159,18 @@ async function phil_rmmu_history(fileToParse, System) {
     }
 
     // Cache name of last file parsed
-    await System.cache_last_file_name(System.last_file_in_dir, "last_rmmu_file");
+    await System.cache_last_file_name(
+      System.last_file_in_dir,
+      "last_rmmu_file"
+    );
 
     return;
   } catch (error) {
+    console.log(error);
+    await addLogEvent(I, System.run_log, "phil_rmmu_history", cat, note, null);
     await log(
       "error",
-      System.jobId,
+      System.job_id,
       System.sme,
       "phil_rmmu_history",
       "FN CALL",
