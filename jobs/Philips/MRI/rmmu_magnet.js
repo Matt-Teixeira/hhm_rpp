@@ -1,5 +1,3 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
 const pgp = require("pg-promise")();
 const db = require("../../../utils/db/pg-pool");
 const fsp = require("node:fs").promises;
@@ -8,7 +6,6 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const {
   philips_mri_rmmu_magnet_schema,
 } = require("../../../persist/pg-schemas");
-const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
 const [addLogEvent] = require("../../../utils/logger/log");

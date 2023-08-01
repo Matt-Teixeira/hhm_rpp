@@ -4,7 +4,6 @@ const pgp = require("pg-promise")();
 const { ge_re } = require("../../../parse/parsers");
 const { ge_cv_syserror_schema } = require("../../../persist/pg-schemas");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
-const bulkInsert = require("../../../persist/queryBuilder");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const { remove_dub_quotes } = require("../../../util/regExHelpers");

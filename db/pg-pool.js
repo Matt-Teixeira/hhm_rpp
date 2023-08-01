@@ -21,7 +21,7 @@ const pgPool = new Pool({
 module.exports = pgPool;
  */
 
-const fs = require('fs');
+/* const fs = require('fs');
 const pgp = require('pg-promise')();
 
 const config = {
@@ -39,4 +39,4 @@ const config = {
 
 const db = pgp(config);
 
-module.exports = db;
+module.exports = db; */

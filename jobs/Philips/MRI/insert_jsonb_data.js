@@ -1,6 +1,3 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
-const db = require("../../../utils/db/pg-pool");
 const { philips_re } = require("../../../parse/parsers");
 const insertJsonB = require("../../../processing/phil_mri_monitor_data/bulk_jsonb_insert");
 const [addLogEvent] = require("../../../utils/logger/log");

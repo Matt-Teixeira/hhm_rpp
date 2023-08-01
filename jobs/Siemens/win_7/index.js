@@ -1,5 +1,3 @@
-("use strict");
-require("dotenv").config();
 const { log } = require("../../../logger");
 const fs = require("node:fs").promises;
 const win_7_siemens_ct = require("./siemens_cv");

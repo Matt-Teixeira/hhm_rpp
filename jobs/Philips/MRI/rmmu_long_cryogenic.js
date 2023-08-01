@@ -1,5 +1,3 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
 const pgp = require("pg-promise")();
 const db = require("../../../utils/db/pg-pool");
 const fsp = require("node:fs").promises;

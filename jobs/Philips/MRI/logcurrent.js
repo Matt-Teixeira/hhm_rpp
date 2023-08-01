@@ -1,5 +1,3 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
 const { log } = require("../../../logger");
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
@@ -18,18 +16,18 @@ const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
-async function phil_mri_logcurrent(file_config, System, run_log, job_id) {
+async function phil_mri_logcurrent(file_config, System) {
   const parsers = file_config.logcurrent.parsers;
   const data = [];
 
   let note = {
-    job_id,
+    job_id: System.job_id,
     sme: System.sme,
     file: file_config,
   };
 
   try {
-    await addLogEvent(I, run_log, "phil_mri_logcurrent", cal, note, null);
+    await addLogEvent(I, System.run_log, "phil_mri_logcurrent", cal, note, null);
 
     // ** Start Data Acquisition
 
@@ -57,21 +55,21 @@ async function phil_mri_logcurrent(file_config, System, run_log, job_id) {
           continue;
         } else {
           let note = {
-            job_id,
+            job_id: System.job_id,
             sme: System.sme,
             file: file_config,
             message: "This is not a blank or new line - Bad Match",
             line,
             line_number,
           };
-          await addLogEvent(I, run_log, "phil_mri_logcurrent", cal, note, null);
+          await addLogEvent(I, System.run_log, "phil_mri_logcurrent", cal, note, null);
           line_number++;
         }
       } else {
         line_number++;
         matches.groups.system_id = System.sme;
         const dtObject = await generateDateTime(
-          job_id,
+          System.job_id,
           matches.groups.system_id,
           System.file_config.logcurrent.pg_table,
           matches.groups.host_date,
@@ -92,15 +90,15 @@ async function phil_mri_logcurrent(file_config, System, run_log, job_id) {
         // magnet_meu group does not have datetime. Ex: '0114,2022,04,01,00,06,08,17,14,00000,'
         if (dtObject === null && matches.groups.magnet_meu === undefined) {
           let note = {
-            job_id,
+            job_id: System.job_id,
             sme: System.sme,
             file: file_config,
             line,
             match_group: matches.groups,
             message: "date_time object null",
           };
-          await addLogEvent(W, run_log, "phil_mri_logcurrent", det, note, null);
-          await log("warn", job_id, System.sme, "date_time", "FN CALL", {
+          await addLogEvent(W, System.run_log, "phil_mri_logcurrent", det, note, null);
+          await log("warn", System.job_id, System.sme, "date_time", "FN CALL", {
             message: "date_time object null",
             date: matches.groups.host_date,
             time: matches.groups.host_time,
@@ -133,8 +131,8 @@ async function phil_mri_logcurrent(file_config, System, run_log, job_id) {
     await System.updateRedisFileSize();
   } catch (error) {
     console.log(error);
-    await addLogEvent(E, run_log, "phil_mri_logcurrent", cat, note, error);
-    await log("error", job_id, System.sme, "phil_mri_logcurrent", "FN CALL", {
+    await addLogEvent(E, System.run_log, "phil_mri_logcurrent", cat, note, error);
+    await log("error", System.job_id, System.sme, "phil_mri_logcurrent", "FN CALL", {
       error: error,
     });
   }

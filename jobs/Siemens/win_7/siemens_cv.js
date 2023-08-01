@@ -1,11 +1,9 @@
-("use strict");
-require("dotenv").config({ path: "../../../.env" });
 const { log } = require("../../../logger");
 const fs = require("node:fs").promises;
 const { win_7_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { siemens_cv_schema } = require("../../../persist/pg-schemas");
-const bulkInsert = require("../../../persist/queryBuilder");
+//const bulkInsert = require("../../../persist/queryBuilder");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 
 const win_7_siemens_ct = async (jobId, sysConfigData, fileConfig, file) => {
@@ -53,6 +51,7 @@ const win_7_siemens_ct = async (jobId, sysConfigData, fileConfig, file) => {
     const mappedData = mapDataToSchema(data, siemens_cv_schema);
     const dataToArray = mappedData.map(({ ...rest }) => Object.values(rest));
 
+    /* 
     const insertSuccess = await bulkInsert(
       jobId,
       dataToArray,
@@ -63,6 +62,7 @@ const win_7_siemens_ct = async (jobId, sysConfigData, fileConfig, file) => {
     if (insertSuccess) {
       await fs.rename(complete_file_path, `${fileConfig.move_path}/${file}`);
     }
+    */
 
     return true;
   } catch (error) {

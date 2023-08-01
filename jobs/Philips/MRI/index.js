@@ -1,5 +1,3 @@
-("use strict");
-require("dotenv").config();
 const { log } = require("../../../logger");
 const fs = require("node:fs").promises;
 const phil_mri_logcurrent = require("./logcurrent");
@@ -39,6 +37,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
       note.directory = dir;
       await addLogEvent(I, run_log, "philips_mri_parsers", det, note, null);
       switch (dir) {
+        /*
         case "logcurrent":
           const Logcurrent_System = new PHILIPS_MRI_LOGCURRENT_STT(
             sysConfigData,
@@ -51,11 +50,9 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
           await phil_mri_logcurrent(
             directory,
             Logcurrent_System,
-            run_log,
-            job_id
           );
           break;
-
+          
         case "rmmu":
           const Rmmu_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
@@ -68,6 +65,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
           await phil_rmmu_history(directory.rmmu, Rmmu_System);
 
           break;
+        
         case "rmmu_short":
           
           const Rmmu_Short_System = new PHILIPS_MRI_RMMU(
@@ -117,7 +115,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
           );
 
           break;
-          /*
+          */
         case "stt_magnet":
           const STT_Magnet_System = new PHILIPS_MRI_LOGCURRENT_STT(
             sysConfigData,
@@ -131,7 +129,6 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
           break;
         default:
           break;
-          */
       }
     }
   } catch (error) {
