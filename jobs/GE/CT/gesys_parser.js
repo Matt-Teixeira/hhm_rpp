@@ -17,6 +17,9 @@ const {
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function ge_ct_gesys(System) {
+  
+  console.log(System.sme);
+  console.log("\n")
   // an array in each parser accossiated with a file
   const parsers = System.fileToParse.parsers;
   const data = [];
@@ -141,6 +144,7 @@ async function ge_ct_gesys(System) {
 
     await System.updateRedisFileSize();
   } catch (error) {
+    console.log(error);
     await addLogEvent(E, System.run_log, "ge_ct_gesys", cat, note, error);
     await log("error", System.job_id, System.sme, "ge_ct_gesys", "FN CALL", {
       error: error.message,

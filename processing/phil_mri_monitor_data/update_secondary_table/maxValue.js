@@ -33,10 +33,7 @@ async function maxValue(jobId, sme, data, column, capture_datetime) {
 
     if (previous_entries.length < 1) {
       const host_datetime = await convertDT(max_value.host_date);
-      console.log("max_value");
-      console.log(max_value);
-      console.log("host_datetime");
-      console.log(host_datetime);
+
       await insert_into_secondary_table(jobId, sme, column, [
         sme,
         capture_datetime,

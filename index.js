@@ -144,8 +144,6 @@ const onBoot = async () => {
     let queryString = queries[shell_value];
 
     const system_array = await pgPool.any(queryString);
-    console.log(system_array);
-
     /* 
     const child_processes = [];
     for await (const system of system_array) {
@@ -170,8 +168,9 @@ const onBoot = async () => {
 
     await writeLogEvents(run_log);
 
-    console.log("*************** END ***************");
+    console.log("\n*************** END ***************");
     console.timeEnd();
+
     process.exit();
   } catch (error) {
     console.log(error);

@@ -43,8 +43,7 @@ async function type_1(System, directory) {
 
       if (successful_agg) {
         for await (const file_data of redis_cache) {
-          console.log("\nfile_data");
-          console.log(file_data);
+          
           await System.get_last_monitor_line(
             file_data.path,
             file_data.file_name

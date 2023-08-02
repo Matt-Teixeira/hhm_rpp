@@ -46,8 +46,7 @@ async function insertDisplayData(
     if (has_prev_data.length === 0 || hours_diff >= 48) {
       // Create entry for new SME
       for (const prop in data) {
-        console.log("\nprop")
-        console.log(prop)
+
         const file_config = monitoring_configs.find(
           (monitor_object) => monitor_object.file_name.split(".")[0] === prop
         );
@@ -58,8 +57,8 @@ async function insertDisplayData(
           data[prop],
           run_log
         );
-        console.log("successful_agg");
-        console.log(successful_agg);
+        /* console.log("successful_agg");
+        console.log(successful_agg); */
         if (successful_agg === false) break;
       }
     } else {
@@ -80,8 +79,8 @@ async function insertDisplayData(
         if (successful_agg === false) break;
       }
     }
-    console.log("successful_agg");
-        console.log(successful_agg);
+    /* console.log("successful_agg");
+        console.log(successful_agg); */
     return successful_agg;
   } catch (error) {
     console.log(error);

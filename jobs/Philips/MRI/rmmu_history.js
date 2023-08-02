@@ -84,7 +84,6 @@ async function phil_rmmu_history(file_config, System) {
     // Loops through each file in the dir
     // Change to loop backwards
     for await (const file of System.files_in_dir) {
-      console.log(file)
       const complete_file_path = `${System.directory_path}/${file}`;
 
       const fileData = (await fsp.readFile(complete_file_path)).toString();
