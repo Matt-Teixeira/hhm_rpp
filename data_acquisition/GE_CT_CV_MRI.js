@@ -255,8 +255,16 @@ class GE_CT_CV_MRI extends System {
           this.complete_file_path
         );
 
-        this.file_data = tailDelta.toString();
-        return;
+        if (type === "read_stream") {
+          // Place file data back into a format in which it can be read line by line. In this case, an array
+          this.file_data = tailDelta.toString().split(/(?:\r\n|\r|\n)/g);
+          return;
+        }
+
+        if (type === "read_file") {
+          this.file_data = tailDelta.toString();
+          return;
+        }
       }
     } catch (error) {
       await this.addLogEvent(
