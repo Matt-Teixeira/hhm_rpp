@@ -13,13 +13,13 @@ const {
 // File to parse is read line by line for regEx to match
 async function ge_cv_sys_error(System) {
   // an array in each config accossiated with a file
-  const parsers = System.fileToParse.parsers;
+  const parsers = System.file_config.parsers;
   const data = [];
 
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: System.fileToParse.file_name,
+    file: System.file_config.file_name,
   };
 
   try {
@@ -37,6 +37,8 @@ async function ge_cv_sys_error(System) {
     await System.getRedisFileSize();
 
     await System.getCurrentFileSize();
+
+    if (!System.current_file_size) return;
 
     await System.getFileData("read_stream");
     if (System.file_data === null) return;
@@ -76,7 +78,7 @@ async function ge_cv_sys_error(System) {
         const dtObject = await generateDateTime(
           System.job_id,
           matches.groups.system_id,
-          System.fileToParse.pg_table,
+          System.file_config.pg_table,
           matches.groups.host_date,
           matches.groups.host_time
         );

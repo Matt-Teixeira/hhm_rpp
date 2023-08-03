@@ -71,6 +71,18 @@ class GE_CT_CV_MRI extends System {
         this.file_config.file_name
       );
       note.current_file_size = this.current_file_size;
+      if (!this.current_file_size) {
+        note.message = "File not present";
+        await this.addLogEvent(
+          this.W,
+          this.run_log,
+          "GE_CT_CV_MRI: getCurrentFileSize",
+          this.det,
+          note
+        );
+        return;
+      }
+
       await this.addLogEvent(
         this.I,
         this.run_log,

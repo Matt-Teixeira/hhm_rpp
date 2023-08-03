@@ -11,7 +11,7 @@ const {
 
 async function ge_mri_gesys(System) {
   // an array in each config accossiated with a file
-  const parsers = System.fileToParse.parsers;
+  const parsers = System.file_config.parsers;
   const data = [];
 
   let note = {
@@ -33,6 +33,8 @@ async function ge_mri_gesys(System) {
     await System.getRedisFileSize();
 
     await System.getCurrentFileSize();
+
+    if (!System.current_file_size) return;
 
     await System.getFileData("read_file");
 
@@ -77,7 +79,7 @@ async function ge_mri_gesys(System) {
       const dtObject = await generateDateTime(
         System.job_id,
         matchGroups.groups.system_id,
-        System.fileToParse.pg_table,
+        System.file_config.pg_table,
         matchGroups.groups.host_date,
         matchGroups.groups.host_time
       );
