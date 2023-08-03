@@ -4,9 +4,9 @@ const readline = require("readline");
 const { updateRedisLine, getRedisLine } = require("../redis/redisHelpers");
 
 class Siemens_10 extends System {
-  constructor(sysConfigData, fileToParse, job_id, run_log) {
-    super(sysConfigData, fileToParse, job_id, run_log);
-    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
+  constructor(sysConfigData, file_config, job_id, run_log) {
+    super(sysConfigData, file_config, job_id, run_log);
+    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${file_config.file_name}`;
   }
   lastModPath = "./read/sh/get_file_last_mod.sh";
   redis_line;
@@ -16,12 +16,12 @@ class Siemens_10 extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse,
+      file: this.file_config,
     };
     try {
       this.redis_line = await getRedisLine(
         this.sme,
-        this.fileToParse.file_name
+        this.file_config.file_name
       );
       await this.addLogEvent(
         this.I,
@@ -108,7 +108,7 @@ class Siemens_10 extends System {
         this.cal,
         note
       );
-      await updateRedisLine(this.sme, this.fileToParse.file_name, first_line);
+      await updateRedisLine(this.sme, this.file_config.file_name, first_line);
     } catch (error) {
       await this.addLogEvent(
         this.E,
