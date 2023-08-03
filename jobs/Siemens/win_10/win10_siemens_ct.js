@@ -30,7 +30,7 @@ const win10_siemens_ct = async (System) => {
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: System.fileToParse,
+    file: System.file_config,
   };
 
   try {
@@ -60,7 +60,7 @@ const win10_siemens_ct = async (System) => {
         let note = {
           job_id: System.job_id,
           sme: System.sme,
-          file: System.fileToParse,
+          file: System.file_config,
           message: `End of new data`,
         };
         // Log file's last mod datetime
@@ -89,7 +89,7 @@ const win10_siemens_ct = async (System) => {
           let note = {
             job_id: System.job_id,
             sme: System.sme,
-            file: System.fileToParse,
+            file: System.file_config,
             message: "This is not a blank new line - Bad Match",
             line: line,
           };
@@ -109,7 +109,7 @@ const win10_siemens_ct = async (System) => {
       const dtObject = await generateDateTime(
         System.job_id,
         matches.groups.system_id,
-        System.fileToParse.pg_table,
+        System.file_config.pg_table,
         matches.groups.host_date,
         matches.groups.host_time
       );

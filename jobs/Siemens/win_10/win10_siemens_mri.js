@@ -26,7 +26,7 @@ const win10_siemens_mri = async (System) => {
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: System.fileToParse,
+    file: System.file_config,
   };
 
   try {
@@ -80,7 +80,7 @@ const win10_siemens_mri = async (System) => {
           let note = {
             job_id: System.job_id,
             sme: System.sme,
-            file: System.fileToParse,
+            file: System.file_config,
             message: "This is not a blank new line - Bad Match",
             line: line,
           };
@@ -101,7 +101,7 @@ const win10_siemens_mri = async (System) => {
       const dtObject = await generateDateTime(
         System.jobId,
         matches.groups.system_id,
-        System.fileToParse.pg_table,
+        System.file_config.pg_table,
         matches.groups.host_date,
         matches.groups.host_time
       );
