@@ -26,10 +26,10 @@ const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
-async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
+async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
   const sme = sysConfigData.id;
   // an array in each config accossiated with a file
-  const parsers = fileToParse.parsers;
+  const parsers = file_config.parsers;
 
   const updateSizePath = "./read/sh/readFileSize.sh";
   const fileSizePath = "./read/sh/readFileSize.sh";
@@ -40,12 +40,12 @@ async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
   // Extract 'Power-On hours' and 'Commercial Version'
   const memo_data = [];
 
-  const complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
+  const complete_file_path = `${sysConfigData.hhm_config.file_path}/${file_config.file_name}`;
 
   let note = {
     job_id,
     sme,
-    file: fileToParse.file_name,
+    file: file_config.file_name,
     path: complete_file_path,
   };
 
@@ -61,7 +61,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
       let note = {
         job_id,
         sme,
-        file: fileToParse.file_name,
+        file: file_config.file_name,
         path: complete_file_path,
         last_mod: file_mod_datetime + sysConfigData.hhm_config.file_path,
       };
@@ -79,14 +79,14 @@ async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
       file: complete_file_path,
     });
 
-    const prevFileSize = await getRedisFileSize(sme, fileToParse.file_name);
+    const prevFileSize = await getRedisFileSize(sme, file_config.file_name);
 
     // START: Check Redis delta. Delta === 0 if file not rotated (previously parsed data)
     const currentFileSize = await getCurrentFileSize(
       sme,
       fileSizePath,
       sysConfigData.hhm_config.file_path,
-      fileToParse.file_name
+      file_config.file_name
     );
 
     const delta = currentFileSize - prevFileSize;
@@ -100,7 +100,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
       let note = {
         job_id,
         sme,
-        file: fileToParse.file_name,
+        file: file_config.file_name,
         delta: delta,
         message: "Same file size. Do not parse",
       };
@@ -132,7 +132,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
         sme,
         fileSizePath,
         sysConfigData.hhm_config.file_path,
-        fileToParse.file_name
+        file_config.file_name
     );
 
       const delta = currentFileSize - prevFileSize;
@@ -159,7 +159,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
           let note = {
             job_id,
             sme: sme,
-            file: fileToParse,
+            file: file_config,
             message: "This is not a blank new line - Bad Match",
             line,
           };
@@ -175,7 +175,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
         const dtObject = await generateDateTime(
           job_id,
           matches.groups.system_id,
-          fileToParse.pg_table,
+          file_config.pg_table,
           matches.groups.host_date,
           matches.groups.host_time
         );
@@ -236,7 +236,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
       sme,
       updateSizePath,
       sysConfigData.hhm_config.file_path,
-      fileToParse.file_name
+      file_config.file_name
     );
     // insert metadata
     if (memo_data.length > 0) await extract(job_id, memo_data, run_log);
@@ -246,7 +246,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, fileToParse, run_log) {
     await log("error", job_id, sme, "phil_cv_eventlog", "FN CALL", {
       sme: sme,
       error: error.message,
-      file: fileToParse,
+      file: file_config,
     });
   }
 }

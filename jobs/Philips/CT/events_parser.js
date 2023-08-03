@@ -13,7 +13,7 @@ async function phil_ct_events(System) {
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: System.fileToParse.file_name,
+    file: System.file_config.file_name,
   };
 
   try {
@@ -60,7 +60,7 @@ async function phil_ct_events(System) {
       const dtObject = await generateDateTime(
         System.job_id,
         match.groups.system_id,
-        System.fileToParse.pg_table,
+        System.file_config.pg_table,
         match.groups.host_date,
         match.groups.host_time
       );
