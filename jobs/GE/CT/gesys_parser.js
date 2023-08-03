@@ -1,4 +1,3 @@
-const { log } = require("../../../logger");
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
 const { ge_re } = require("../../../parse/parsers");
@@ -6,20 +5,12 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { ge_ct_gesys_schema } = require("../../../persist/pg-schemas");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const extract = require("../../../processing/date_processing/ge_ct/extract_metadata");
-const [addLogEvent] = require("../../../utils/logger/log");
-const {
-  type: { I, W, E },
-  tag: { cal, det, cat },
-} = require("../../../utils/logger/enums");
 
 const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function ge_ct_gesys(System) {
-  
-  console.log(System.sme);
-  console.log("\n")
   // an array in each parser accossiated with a file
   const parsers = System.fileToParse.parsers;
   const data = [];
@@ -34,8 +25,14 @@ async function ge_ct_gesys(System) {
   };
 
   try {
-    await addLogEvent(I, System.run_log, "ge_ct_gesys", cal, note, null);
-    await log("info", System.job_id, System.sme, "ge_ct_gesys", "FN CALL");
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
+      "ge_ct_gesys",
+      System.cal,
+      note,
+      null
+    );
 
     // ** Start Data Acquisition
 
@@ -43,7 +40,7 @@ async function ge_ct_gesys(System) {
 
     await System.getCurrentFileSize();
 
-    await System.getFileData();
+    await System.getFileData("read_file");
 
     if (System.file_data === null) return;
 
@@ -65,12 +62,14 @@ async function ge_ct_gesys(System) {
           sr_group: data[data.length - 1].sr,
           message: "Failed match",
         };
-        await addLogEvent(W, System.run_log, "ge_ct_gesys", det, note, null);
-        await log("error", System.sme, "ge_ct_gesys", "FN CALL", {
-          message: "Failed match",
-          prev_epoch: data[data.length - 1].epoch,
-          sr_group: data[data.length - 1].sr,
-        });
+        await System.addLogEvent(
+          System.W,
+          System.run_log,
+          "ge_ct_gesys",
+          System.det,
+          note,
+          null
+        );
         continue;
       }
 
@@ -97,10 +96,14 @@ async function ge_ct_gesys(System) {
           time: matchGroups.groups.host_time,
           message: "date_time object null",
         };
-        await addLogEvent(W, System.run_log, "ge_ct_gesys", det, note, null);
-        await log("warn", System.job_id, System.sme, "date_time", "FN CALL", {
-          message: "date_time object null",
-        });
+        await System.addLogEvent(
+          System.W,
+          System.run_log,
+          "ge_ct_gesys",
+          System.det,
+          note,
+          null
+        );
       }
 
       matchGroups.groups.host_datetime = dtObject;
@@ -133,7 +136,14 @@ async function ge_ct_gesys(System) {
     note.last_row = mappedData[mappedData.length - 1];
     note.message = "Successful Insert";
 
-    await addLogEvent(I, System.run_log, "ge_ct_gesys", det, note, null);
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
+      "ge_ct_gesys",
+      System.det,
+      note,
+      null
+    );
 
     // ** End Persist
 
@@ -145,10 +155,14 @@ async function ge_ct_gesys(System) {
     await System.updateRedisFileSize();
   } catch (error) {
     console.log(error);
-    await addLogEvent(E, System.run_log, "ge_ct_gesys", cat, note, error);
-    await log("error", System.job_id, System.sme, "ge_ct_gesys", "FN CALL", {
-      error: error.message,
-    });
+    await System.addLogEvent(
+      System.E,
+      System.run_log,
+      "ge_ct_gesys",
+      System.cat,
+      note,
+      error
+    );
   }
 }
 

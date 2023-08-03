@@ -1,8 +1,6 @@
-("use strict");
-require("dotenv").config();
 const { log } = require("../../../logger");
 const ge_mri_gesys = require("./gesys_parser");
-const GE_CT_MRI = require("../../../data_acquisition/GE_CT_MRI");
+const GE_CT_CV_MRI = require("../../../data_acquisition/GE_CT_CV_MRI");
 const [
   addLogEvent,
 ] = require("../../../utils/logger/log");
@@ -22,7 +20,7 @@ const ge_mri_parsers = async (job_id, sysConfigData, run_log) => {
     for await (const file of sysConfigData.hhm_file_config) {
       switch (file.query) {
         case "gesys":
-          const System = new GE_CT_MRI(sysConfigData, file, job_id, run_log);
+          const System = new GE_CT_CV_MRI(sysConfigData, file, job_id, run_log);
           await ge_mri_gesys(System);
           break;
         default:

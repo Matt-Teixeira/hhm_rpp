@@ -1,4 +1,3 @@
-const { log } = require("../../../logger");
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
 const { ge_re } = require("../../../parse/parsers");
@@ -7,12 +6,6 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const { remove_dub_quotes } = require("../../../util/regExHelpers");
-const [addLogEvent] = require("../../../utils/logger/log");
-const {
-  type: { I, W, E },
-  tag: { cal, det, cat },
-} = require("../../../utils/logger/enums");
-
 const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
@@ -30,13 +23,13 @@ async function ge_cv_sys_error(System) {
   };
 
   try {
-    await addLogEvent(I, System.run_log, "ge_cv_sys_error", cal, note, null);
-    await log(
-      "info",
-      System.job_id,
-      System.sysConfigData.id,
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
       "ge_cv_sys_error",
-      "FN CALL"
+      System.cal,
+      note,
+      null
     );
 
     // ** Start Data Acquisition
@@ -45,8 +38,7 @@ async function ge_cv_sys_error(System) {
 
     await System.getCurrentFileSize();
 
-    await System.getFileData();
-
+    await System.getFileData("read_stream");
     if (System.file_data === null) return;
 
     // ** End Data Acquisition
@@ -66,24 +58,13 @@ async function ge_cv_sys_error(System) {
             message: "This is not a blank new line - Bad Match",
             line: line,
           };
-          await addLogEvent(
-            W,
+          await System.addLogEvent(
+            System.W,
             System.run_log,
             "ge_cv_sys_error",
-            det,
+            System.det,
             note,
             null
-          );
-          await log(
-            "error",
-            System.job_id,
-            System.sysConfigData.id,
-            "Not_New_Line",
-            "FN CALL",
-            {
-              message: "This is not a blank new line - Bad Match",
-              line: line,
-            }
           );
         }
       } else {
@@ -108,23 +89,13 @@ async function ge_cv_sys_error(System) {
             match_group: matches.groups,
             message: "date_time object null",
           };
-          await addLogEvent(
-            W,
+          await System.addLogEvent(
+            System.W,
             System.run_log,
             "ge_cv_sys_error",
-            det,
+            System.det,
             note,
             null
-          );
-          await log(
-            "warn",
-            System.job_id,
-            System.sysConfigData.id,
-            "date_time",
-            "FN CALL",
-            {
-              message: "date_time object null",
-            }
           );
         }
 
@@ -157,7 +128,14 @@ async function ge_cv_sys_error(System) {
     note.last_row = mappedData[mappedData.length - 1];
     note.message = "Successful Insert";
 
-    await addLogEvent(I, System.run_log, "ge_cv_sys_error", det, note, null);
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
+      "ge_cv_sys_error",
+      System.det,
+      note,
+      null
+    );
 
     // ** End Persist
 
@@ -170,16 +148,13 @@ async function ge_cv_sys_error(System) {
       job_id: System.job_id,
       sme: System.sysConfigData.id,
     };
-    await addLogEvent(E, System.run_log, "ge_cv_sys_error", cat, note, error);
-    await log(
-      "error",
-      System.job_id,
-      System.sysConfigData.id,
+    await System.addLogEvent(
+      System.E,
+      System.run_log,
       "ge_cv_sys_error",
-      "FN CALL",
-      {
-        error: error,
-      }
+      System.cat,
+      note,
+      error
     );
   }
 }

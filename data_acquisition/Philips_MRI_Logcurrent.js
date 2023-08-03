@@ -1,6 +1,6 @@
+const System = require("./System");
 const fs = require("node:fs");
 const readline = require("readline");
-const { log } = require("../logger");
 const {
   getRedisFileSize,
   getCurrentFileSize,
@@ -8,22 +8,12 @@ const {
 } = require("../redis/redisHelpers");
 const execTail = require("../read/exec-tail");
 const execLastMod = require("../read/exec-file_last_mod");
-const [addLogEvent] = require("../utils/logger/log");
-const {
-  type: { I, W, E },
-  tag: { cal, det, cat, seq, qaf },
-} = require("../utils/logger/enums");
 
-class PHILIPS_MRI_LOGCURRENT {
+class PHILIPS_MRI_LOGCURRENT extends System {
   constructor(sysConfigData, file_config, job_id, run_log, file_prop_name) {
-    this.sysConfigData = sysConfigData;
-    this.file_config = file_config;
-    this.job_id = job_id;
-    this.run_log = run_log;
-    this.sme = this.sysConfigData.id;
-    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${file_config[file_prop_name].file_name}`;
-    this.parsers = file_config[file_prop_name].parsers;
+    super(sysConfigData, file_config, job_id, run_log);
     this.file_config_prop_name = file_prop_name;
+    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${file_config[file_prop_name].file_name}`;
   }
 
   updateSizePath = "./read/sh/readFileSize.sh";
@@ -49,33 +39,23 @@ class PHILIPS_MRI_LOGCURRENT {
       );
 
       note.prev_file_size = this.prev_file_size;
-      await addLogEvent(
-        I,
+      await this.addLogEvent(
+        this.I,
         this.run_log,
         "PHILIPS_MRI_LOGCURRENT: getRedisFileSize",
-        det,
+        this.det,
         note,
         null
       );
     } catch (error) {
       console.log(error);
-      await addLogEvent(
-        E,
+      await this.addLogEvent(
+        this.E,
         this.run_log,
         "PHILIPS_MRI_LOGCURRENT: getRedisFileSize",
-        cat,
+        this.cat,
         note,
         error
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "getRedisFileSize_Class",
-        "FN CALL",
-        {
-          error,
-        }
       );
     }
   }
@@ -96,33 +76,23 @@ class PHILIPS_MRI_LOGCURRENT {
       );
       note.current_file_size = this.current_file_size;
 
-      await addLogEvent(
-        I,
+      await this.addLogEvent(
+        this.I,
         this.run_log,
         "PHILIPS_MRI_LOGCURRENT: getCurrentFileSize",
-        det,
+        this.det,
         note,
         null
       );
     } catch (error) {
       console.log(error);
-      await addLogEvent(
-        E,
+      await this.addLogEvent(
+        this.E,
         this.run_log,
         "PHILIPS_MRI_LOGCURRENT: getCurrentFileSize",
-        cat,
+        this.cat,
         note,
         error
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "getCurrentFileSize_Class",
-        "FN CALL",
-        {
-          error,
-        }
       );
     }
     this.checkFileExists();
@@ -143,11 +113,11 @@ class PHILIPS_MRI_LOGCURRENT {
       }
     } catch (error) {
       console.log(error);
-      addLogEvent(
-        E,
+      this.addLogEvent(
+        this.E,
         this.run_log,
         "PHILIPS_MRI_LOGCURRENT: checkFileExists",
-        cat,
+        this.cat,
         note,
         error
       );
@@ -164,11 +134,11 @@ class PHILIPS_MRI_LOGCURRENT {
     this.delta = this.current_file_size - this.prev_file_size;
     note.delta = this.delta;
 
-    addLogEvent(
-      I,
+    this.addLogEvent(
+      this.I,
       this.run_log,
       "PHILIPS_MRI_LOGCURRENT: getFileSizeDelta",
-      det,
+      this.det,
       note,
       null
     );
@@ -189,23 +159,13 @@ class PHILIPS_MRI_LOGCURRENT {
       );
     } catch (error) {
       console.log(error);
-      addLogEvent(
-        I,
+      this.addLogEvent(
+        this.I,
         this.run_log,
         "PHILIPS_MRI_LOGCURRENT: updateRedisFileSize",
-        cat,
+        this.cat,
         note,
         error
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "updateRedisFileSize_Class",
-        "FN CALL",
-        {
-          error,
-        }
       );
     }
   }
@@ -229,35 +189,28 @@ class PHILIPS_MRI_LOGCURRENT {
         });
         if (this.delta < 0) {
           note.message = `Delta was a negative value: ${this.delta}`;
-          await addLogEvent(
-            I,
+          await this.addLogEvent(
+            this.I,
             this.run_log,
             "PHILIPS_MRI_LOGCURRENT: getFileData",
-            det,
+            this.det,
             note,
             null
           );
-          await log("error", this.job_id, this.sme, "getFileData", "FN CALL", {
-            message: `Delta was a negative value: ${this.delta}`,
-            file: this.complete_file_path,
-          });
         }
         return;
       }
 
       if (this.prev_file_size > 0) {
         note.delta = this.delta;
-        await addLogEvent(
-          I,
+        await this.addLogEvent(
+          this.I,
           this.run_log,
           "PHILIPS_MRI_LOGCURRENT: getFileData",
-          det,
+          this.det,
           note,
           null
         );
-        await log("info", this.job_id, this.sme, "getFileData", "FN CALL", {
-          delta: this.delta,
-        });
 
         if (this.delta === 0) {
           // Get file's last mod datetime
@@ -266,18 +219,14 @@ class PHILIPS_MRI_LOGCURRENT {
           ]);
           note.message = `No file data to read. Delta: ${this.delta}`;
           note.last_mod = file_mod_datetime;
-          await addLogEvent(
-            I,
+          await this.addLogEvent(
+            this.I,
             this.run_log,
             "PHILIPS_MRI_LOGCURRENT: getFileData",
-            det,
+            this.det,
             note,
             null
           );
-          await log("warn", this.job_id, this.sme, "getFileData", "FN CALL", {
-            message: `No file data to read. Delta: ${this.delta}`,
-            last_mod: file_mod_datetime,
-          });
           this.file_data = null;
           return;
         }
@@ -294,23 +243,13 @@ class PHILIPS_MRI_LOGCURRENT {
       }
     } catch (error) {
       console.log(error);
-      await addLogEvent(
-        E,
+      await this.addLogEvent(
+        this.E,
         this.run_log,
         "PHILIPS_MRI_LOGCURRENT: getFileData",
-        det,
+        this.det,
         note,
         error
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "getFileData_Class",
-        "FN CALL",
-        {
-          error,
-        }
       );
     }
   }

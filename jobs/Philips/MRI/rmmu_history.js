@@ -1,4 +1,3 @@
-const { log } = require("../../../logger");
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
 const fsp = require("node:fs").promises;
@@ -10,18 +9,12 @@ const execLastMod = require("../../../read/exec-file_last_mod");
 const {
   seconds_past_midnight,
 } = require("../../../processing/date_processing/incoming_date_cleaning");
-const [addLogEvent] = require("../../../utils/logger/log");
-const {
-  type: { I, W, E },
-  tag: { cal, cat, det },
-} = require("../../../utils/logger/enums");
-
 const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
-async function phil_rmmu_history(file_config, System) {
-  const parsers = file_config.parsers;
+async function phil_rmmu_history(System) {
+  const parsers = System.file_config.parsers;
   const data = [];
 
   lastModPath = "./read/sh/get_dir_last_mod.sh";
@@ -29,17 +22,17 @@ async function phil_rmmu_history(file_config, System) {
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: file_config,
+    file: System.file_config,
   };
 
   try {
-    await addLogEvent(I, System.run_log, "phil_rmmu_history", cal, note, null);
-    await log(
-      "info",
-      System.job_id,
-      System.sme,
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
       "phil_rmmu_history",
-      "FN CALL"
+      System.cal,
+      note,
+      null
     );
 
     // ** Start Data Acquisition **
@@ -63,19 +56,14 @@ async function phil_rmmu_history(file_config, System) {
       note.path = System.directory_path;
       note.last_mod = file_mod_datetime;
 
-      await addLogEvent(
-        W,
+      await System.addLogEvent(
+        System.W,
         System.run_log,
         "phil_rmmu_history",
-        det,
+        System.det,
         note,
         null
       );
-      await log("warn", System.job_id, System.sme, "phil_rmmu", "FN CALL", {
-        message: "No new files detected",
-        path: System.directory_path,
-        last_mod: file_mod_datetime,
-      });
       return;
     }
 
@@ -121,23 +109,17 @@ async function phil_rmmu_history(file_config, System) {
           let note = {
             job_id: System.job_id,
             sme: System.sme,
-            file: file_config,
+            file: System.file_config,
             message: "date_time object null",
           };
-          await addLogEvent(
-            W,
+          await System.addLogEvent(
+            System.W,
             System.run_log,
             "phil_rmmu_history",
-            det,
+            System.det,
             note,
             null
           );
-
-          await log("warn", System.job_id, System.sme, "date_time", "FN CALL", {
-            message: "date_time object null",
-            date,
-            time,
-          });
         }
 
         match.groups.host_datetime = dtObject;
@@ -166,11 +148,11 @@ async function phil_rmmu_history(file_config, System) {
       note.last_row = mappedData[mappedData.length - 1];
       note.message = "Successful Insert";
 
-      await addLogEvent(
-        I,
+      await System.addLogEvent(
+        System.I,
         System.run_log,
         "phil_rmmu_history",
-        det,
+        System.det,
         note,
         null
       );
@@ -188,16 +170,13 @@ async function phil_rmmu_history(file_config, System) {
     return;
   } catch (error) {
     console.log(error);
-    await addLogEvent(I, System.run_log, "phil_rmmu_history", cat, note, null);
-    await log(
-      "error",
-      System.job_id,
-      System.sme,
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
       "phil_rmmu_history",
-      "FN CALL",
-      {
-        error,
-      }
+      System.cat,
+      note,
+      null
     );
   }
 }

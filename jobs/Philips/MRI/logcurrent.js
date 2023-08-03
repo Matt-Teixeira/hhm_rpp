@@ -1,4 +1,3 @@
-const { log } = require("../../../logger");
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
 const { philips_re } = require("../../../parse/parsers");
@@ -6,11 +5,6 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { phil_mri_logcurrent_schema } = require("../../../persist/pg-schemas");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
-const [addLogEvent] = require("../../../utils/logger/log");
-const {
-  type: { I, W, E },
-  tag: { cal, cat, det },
-} = require("../../../utils/logger/enums");
 
 const {
   pg_column_sets: pg_cs,
@@ -27,7 +21,14 @@ async function phil_mri_logcurrent(file_config, System) {
   };
 
   try {
-    await addLogEvent(I, System.run_log, "phil_mri_logcurrent", cal, note, null);
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
+      "phil_mri_logcurrent",
+      System.cal,
+      note,
+      null
+    );
 
     // ** Start Data Acquisition
 
@@ -62,7 +63,14 @@ async function phil_mri_logcurrent(file_config, System) {
             line,
             line_number,
           };
-          await addLogEvent(I, System.run_log, "phil_mri_logcurrent", cal, note, null);
+          await System.addLogEvent(
+            System.I,
+            System.run_log,
+            "phil_mri_logcurrent",
+            System.cal,
+            note,
+            null
+          );
           line_number++;
         }
       } else {
@@ -97,14 +105,14 @@ async function phil_mri_logcurrent(file_config, System) {
             match_group: matches.groups,
             message: "date_time object null",
           };
-          await addLogEvent(W, System.run_log, "phil_mri_logcurrent", det, note, null);
-          await log("warn", System.job_id, System.sme, "date_time", "FN CALL", {
-            message: "date_time object null",
-            date: matches.groups.host_date,
-            time: matches.groups.host_time,
-            line,
-            line_number,
-          });
+          await System.addLogEvent(
+            System.W,
+            System.run_log,
+            "phil_mri_logcurrent",
+            System.det,
+            note,
+            null
+          );
         }
 
         matches.groups.host_datetime = dtObject;
@@ -131,17 +139,28 @@ async function phil_mri_logcurrent(file_config, System) {
     note.last_row = mappedData[mappedData.length - 1];
     note.message = "Successful Insert";
 
-    await addLogEvent(I, System.run_log, "phil_mri_logcurrent", det, note, null);
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
+      "phil_mri_logcurrent",
+      System.det,
+      note,
+      null
+    );
 
     // Update Redis Cache
 
     await System.updateRedisFileSize();
   } catch (error) {
     console.log(error);
-    await addLogEvent(E, System.run_log, "phil_mri_logcurrent", cat, note, error);
-    await log("error", System.job_id, System.sme, "phil_mri_logcurrent", "FN CALL", {
-      error: error,
-    });
+    await System.addLogEvent(
+      System.E,
+      System.run_log,
+      "phil_mri_logcurrent",
+      System.cat,
+      note,
+      error
+    );
   }
 }
 

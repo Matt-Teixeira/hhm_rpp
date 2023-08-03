@@ -1,4 +1,3 @@
-const { log } = require("../../../logger");
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
 const { win_10_re } = require("../../../parse/parsers");
@@ -8,12 +7,6 @@ const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
 const extract = require("../../../processing/date_processing/siemens_ct/extract_metadata");
-const [addLogEvent] = require("../../../utils/logger/log");
-const {
-  type: { I, W, E },
-  tag: { cal, det, cat },
-} = require("../../../utils/logger/enums");
-
 const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
@@ -41,8 +34,14 @@ const win10_siemens_ct = async (System) => {
   };
 
   try {
-    await addLogEvent(I, System.run_log, "win10_siemens_ct", cal, note, null);
-    await log("info", System.job_id, System.sme, "win10_siemens_ct", "FN CALL");
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
+      "win10_siemens_ct",
+      System.cal,
+      note,
+      null
+    );
 
     await System.get_redis_line();
 
@@ -69,19 +68,14 @@ const win10_siemens_ct = async (System) => {
           System.complete_file_path,
         ]);
         note.last_mod = file_mod_datetime;
-        await addLogEvent(
-          W,
+        await System.addLogEvent(
+          System.W,
           System.run_log,
           "win10_siemens_ct",
-          cal,
+          System.cal,
           note,
           null
         );
-        await log("warn", System.job_id, System.sme, "getFileData", "FN CALL", {
-          message: `End of new data`,
-          lines: line_num - 1,
-          last_mod: file_mod_datetime,
-        });
         break;
       }
 
@@ -99,24 +93,13 @@ const win10_siemens_ct = async (System) => {
             message: "This is not a blank new line - Bad Match",
             line: line,
           };
-          await addLogEvent(
-            W,
+          await System.addLogEvent(
+            System.W,
             System.run_log,
             "win10_siemens_ct",
-            cal,
+            System.cal,
             note,
             null
-          );
-          await log(
-            "error",
-            System.job_id,
-            System.sme,
-            "Not_New_Line",
-            "FN CALL",
-            {
-              message: "This is not a blank new line - Bad Match",
-              line: line,
-            }
           );
         }
       }
@@ -139,17 +122,14 @@ const win10_siemens_ct = async (System) => {
           match_group: matches.groups,
           message: "date_time object null",
         };
-        await addLogEvent(
-          W,
+        await System.addLogEvent(
+          System.W,
           System.run_log,
           "win10_siemens_ct: date_time",
-          det,
+          System.det,
           note,
           null
         );
-        await log("warn", System.job_id, System.sme, "date_time", "FN CALL", {
-          message: "date_time object null",
-        });
       }
 
       matches.groups.host_datetime = dtObject;
@@ -189,11 +169,11 @@ const win10_siemens_ct = async (System) => {
     note.last_row = mappedData[mappedData.length - 1];
     note.message = "Successful Insert";
 
-    await addLogEvent(
-      I,
+    await System.addLogEvent(
+      System.I,
       System.run_log,
       "win10_siemens_ct",
-      det,
+      System.det,
       note,
       null
     );
@@ -207,17 +187,13 @@ const win10_siemens_ct = async (System) => {
     return true;
   } catch (error) {
     console.log(error);
-    await addLogEvent(E, System.run_log, "win10_siemens_ct", cat, note, error);
-    await log(
-      "error",
-      System.job_id,
-      System.sme,
+    await System.addLogEvent(
+      System.E,
+      System.run_log,
       "win10_siemens_ct",
-      "FN CATCH",
-      {
-        line: line_num,
-        error: error,
-      }
+      System.cat,
+      note,
+      error
     );
   }
 };

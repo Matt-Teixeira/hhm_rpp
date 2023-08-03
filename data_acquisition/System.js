@@ -1,23 +1,17 @@
-const [
-  addLogEvent,
-  writeLogEvents,
-  dbInsertLogEvents,
-  makeAppRunLog,
-] = require("../utils/logger/log");
+const [addLogEvent] = require("../utils/logger/log");
 const {
   type: { I, W, E },
   tag: { cal, det, cat, seq, qaf },
 } = require("../utils/logger/enums");
 
 class System {
-  constructor(sysConfigData, fileToParse, job_id, run_log) {
-    (this.sysConfigData = sysConfigData),
-      (this.fileToParse = fileToParse),
-      (this.job_id = job_id),
-      (this.run_log = run_log);
+  constructor(sysConfigData, file_config, job_id, run_log) {
+    this.sysConfigData = sysConfigData;
+    this.file_config = file_config;
+    this.job_id = job_id;
+    this.run_log = run_log;
     this.sme = this.sysConfigData.id;
-    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
-    this.parsers = fileToParse.parsers;
+    this.parsers = file_config.parsers;
     this.I = I;
     this.W = W;
     this.E = E;
@@ -28,7 +22,7 @@ class System {
     this.qaf = qaf;
   }
 
-  static async addLogEvent(
+  async addLogEvent(
     type,
     run_log,
     name,

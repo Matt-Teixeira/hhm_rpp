@@ -1,13 +1,12 @@
 const System = require("./System");
 const fs = require("node:fs");
 const readline = require("readline");
-const { log } = require("../logger");
 const { updateRedisLine, getRedisLine } = require("../redis/redisHelpers");
-const execLastMod = require("../read/exec-file_last_mod");
 
 class Siemens_10 extends System {
   constructor(sysConfigData, fileToParse, job_id, run_log) {
     super(sysConfigData, fileToParse, job_id, run_log);
+    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${fileToParse.file_name}`;
   }
   lastModPath = "./read/sh/get_file_last_mod.sh";
   redis_line;
@@ -24,7 +23,7 @@ class Siemens_10 extends System {
         this.sme,
         this.fileToParse.file_name
       );
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.I,
         this.run_log,
         "Siemens_10: get_redis_line",
@@ -32,21 +31,13 @@ class Siemens_10 extends System {
         note
       );
     } catch (error) {
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.E,
         this.run_log,
         "Siemens_10: get_redis_line",
         this.cat,
         note,
         error
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "get_redis_line",
-        "CLASS FN CALL",
-        { error }
       );
     }
   }
@@ -59,23 +50,12 @@ class Siemens_10 extends System {
     };
     if (!fs.existsSync(this.complete_file_path)) {
       note.message = "File not found in directory";
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.W,
         this.run_log,
         "Siemens_10: is_file_present",
         this.det,
         note
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "win10_siemens_mri",
-        "FN CALL",
-        {
-          message: "File not found in directory",
-          file: this.complete_file_path,
-        }
       );
       return false;
     }
@@ -88,7 +68,7 @@ class Siemens_10 extends System {
       sme: this.sme,
       file_path: this.complete_file_path,
     };
-    await System.addLogEvent(
+    await this.addLogEvent(
       this.I,
       this.run_log,
       "Siemens_10: get_file_data",
@@ -96,14 +76,13 @@ class Siemens_10 extends System {
       note
     );
     try {
-
       this.file_data = readline.createInterface({
         input: fs.createReadStream(this.complete_file_path),
         crlfDelay: Infinity,
       });
     } catch (error) {
       console.log(error);
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.E,
         this.run_log,
         "Siemens_10: get_file_data",
@@ -122,7 +101,7 @@ class Siemens_10 extends System {
       update_line: first_line,
     };
     try {
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.I,
         this.run_log,
         "Siemens_10: update_redis_line",
@@ -131,7 +110,7 @@ class Siemens_10 extends System {
       );
       await updateRedisLine(this.sme, this.fileToParse.file_name, first_line);
     } catch (error) {
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.E,
         this.run_log,
         "Siemens_10: update_redis_line",

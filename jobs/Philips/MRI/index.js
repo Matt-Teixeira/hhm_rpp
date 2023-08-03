@@ -57,7 +57,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
             dir
           );
 
-          await phil_rmmu_history(directory.rmmu, Rmmu_System);
+          await phil_rmmu_history(Rmmu_System);
           break;
 
         case "rmmu_short":

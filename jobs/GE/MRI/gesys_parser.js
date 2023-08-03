@@ -1,15 +1,9 @@
-const { log } = require("../../../logger");
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
 const { ge_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { ge_mri_gesys_schema } = require("../../../persist/pg-schemas");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
-const [addLogEvent] = require("../../../utils/logger/log");
-const {
-  type: { I, W, E },
-  tag: { cal, det, cat, seq, qaf },
-} = require("../../../utils/logger/enums");
 
 const {
   pg_column_sets: pg_cs,
@@ -25,13 +19,13 @@ async function ge_mri_gesys(System) {
   };
 
   try {
-    await addLogEvent(I, System.run_log, "ge_mri_gesys", cal, note, null);
-    await log(
-      "info",
-      System.job_id,
-      System.sysConfigData.id,
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
       "ge_mri_gesys",
-      "FN CALL"
+      System.cal,
+      note,
+      null
     );
 
     // ** Start Data Acquisition
@@ -40,7 +34,7 @@ async function ge_mri_gesys(System) {
 
     await System.getCurrentFileSize();
 
-    await System.getFileData();
+    await System.getFileData("read_file");
 
     if (System.file_data === null) return;
 
@@ -61,18 +55,13 @@ async function ge_mri_gesys(System) {
           prev_epoch: data[data.length - 1].epoch,
           sr_group: data[data.length - 1].sr,
         };
-        await addLogEvent(W, System.run_log, "ge_mri_gesys", det, note, null);
-        await log(
-          "error",
-          System.job_id,
-          System.sysConfigData.id,
+        await System.addLogEvent(
+          System.W,
+          System.run_log,
           "ge_mri_gesys",
-          "FN CALL",
-          {
-            message: "Failed match",
-            prev_epoch: data[data.length - 1].epoch,
-            sr_group: data[data.length - 1].sr,
-          }
+          System.det,
+          note,
+          null
         );
         continue;
       }
@@ -99,16 +88,13 @@ async function ge_mri_gesys(System) {
           sme: System.sysConfigData.id,
           message: "date_time object null",
         };
-        await addLogEvent(W, System.run_log, "ge_mri_gesys", det, note, null);
-        await log(
-          "warn",
-          System.job_id,
-          System.sysConfigData.id,
-          "date_time",
-          "FN CALL",
-          {
-            message: "date_time object null",
-          }
+        await System.addLogEvent(
+          System.W,
+          System.run_log,
+          "ge_mri_gesys",
+          System.det,
+          note,
+          null
         );
       }
 
@@ -134,27 +120,30 @@ async function ge_mri_gesys(System) {
     note.last_row = mappedData[mappedData.length - 1];
     note.message = "Successful Insert";
 
-    await addLogEvent(I, System.run_log, "ge_mri_gesys", det, note, null);
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
+      "ge_mri_gesys",
+      System.det,
+      note,
+      null
+    );
 
     // Update Redis Cache
 
     await System.updateRedisFileSize();
-    
   } catch (error) {
     let note = {
       job_id: System.job_id,
       sme: System.sysConfigData.id,
     };
-    await addLogEvent(E, System.run_log, "ge_mri_gesys", cat, note, error);
-    await log(
-      "error",
-      System.job_id,
-      System.sysConfigData.id,
+    await System.addLogEvent(
+      System.E,
+      System.run_log,
       "ge_mri_gesys",
-      "FN CALL",
-      {
-        error: error.message,
-      }
+      System.cat,
+      note,
+      error
     );
   }
 }

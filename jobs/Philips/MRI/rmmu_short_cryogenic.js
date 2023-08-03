@@ -6,12 +6,6 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { phil_mri_rmmu_short_schema } = require("../../../persist/pg-schemas");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
-const [addLogEvent] = require("../../../utils/logger/log");
-const {
-  type: { I, W, E },
-  tag: { cal, cat, det },
-} = require("../../../utils/logger/enums");
-
 const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
@@ -28,11 +22,11 @@ async function phil_mri_rmmu_short(System) {
   };
 
   try {
-    await addLogEvent(
-      I,
+    await System.addLogEvent(
+      System.I,
       System.run_log,
       "phil_mri_rmmu_short",
-      cal,
+      System.cal,
       note,
       null
     );
@@ -52,11 +46,11 @@ async function phil_mri_rmmu_short(System) {
       note.last_mod = file_mod_datetime;
       note.message = "No new files detected";
 
-      await addLogEvent(
-        W,
+      await System.addLogEvent(
+        System.W,
         System.run_log,
         "phil_mri_rmmu_short",
-        det,
+        System.det,
         note,
         null
       );
@@ -106,11 +100,11 @@ async function phil_mri_rmmu_short(System) {
           note.file = file;
           note.date = date;
           note.time = time;
-          await addLogEvent(
-            W,
+          await System.addLogEvent(
+            System.W,
             System.run_log,
             "phil_mri_rmmu_short",
-            det,
+            System.det,
             note,
             null
           );
@@ -142,11 +136,11 @@ async function phil_mri_rmmu_short(System) {
       note.last_row = mappedData[mappedData.length - 1];
       note.message = "Successful Insert";
 
-      await addLogEvent(
-        I,
+      await System.addLogEvent(
+        System.I,
         System.run_log,
         "phil_mri_rmmu_short",
-        det,
+        System.det,
         note,
         null
       );
@@ -164,11 +158,11 @@ async function phil_mri_rmmu_short(System) {
     return;
   } catch (error) {
     console.log(error);
-    await addLogEvent(
-      E,
+    await System.addLogEvent(
+      System.E,
       System.run_log,
       "phil_mri_rmmu_short",
-      cat,
+      System.cat,
       note,
       error
     );

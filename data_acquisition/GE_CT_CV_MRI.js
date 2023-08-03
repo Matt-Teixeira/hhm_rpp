@@ -1,7 +1,7 @@
 const System = require("./System");
+const fsp = require("node:fs").promises;
 const fs = require("node:fs");
 const readline = require("readline");
-const { log } = require("../logger");
 const {
   getRedisFileSize,
   getCurrentFileSize,
@@ -10,7 +10,7 @@ const {
 const execTail = require("../read/exec-tail");
 const execLastMod = require("../read/exec-file_last_mod");
 
-class GE_CV extends System {
+class GE_CT_CV_MRI extends System {
   updateSizePath = "./read/sh/readFileSize.sh";
   fileSizePath = "./read/sh/readFileSize.sh";
   tailPath = "./read/sh/tail.sh";
@@ -21,47 +21,38 @@ class GE_CV extends System {
   delta;
   file_data;
 
-  constructor(sysConfigData, fileToParse, job_id, run_log) {
-    super(sysConfigData, fileToParse, job_id, run_log);
+  constructor(sysConfigData, file_config, job_id, run_log) {
+    super(sysConfigData, file_config, job_id, run_log);
+    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${file_config.file_name}`;
   }
 
   async getRedisFileSize() {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config.file_name,
     };
     try {
       this.prev_file_size = await getRedisFileSize(
         this.sme,
-        this.fileToParse.file_name
+        this.file_config.file_name
       );
       note.prev_file_size = this.prev_file_size;
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.I,
         this.run_log,
-        "GE_CV: getRedisFileSize",
+        "GE_CT_CV_MRI: getRedisFileSize",
         this.det,
         note
       );
     } catch (error) {
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.E,
         this.run_log,
-        "GE_CV: getRedisFileSize",
+        "GE_CT_CV_MRI: getRedisFileSize",
         this.cat,
         note,
         error
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "getRedisFileSize_Class",
-        "FN CALL",
-        {
-          error,
-        }
       );
     }
   }
@@ -70,41 +61,31 @@ class GE_CV extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config.file_name,
     };
     try {
       this.current_file_size = await getCurrentFileSize(
         this.sme,
         this.fileSizePath,
         this.sysConfigData.hhm_config.file_path,
-        this.fileToParse.file_name
+        this.file_config.file_name
       );
       note.current_file_size = this.current_file_size;
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.I,
         this.run_log,
-        "GE_CV: getCurrentFileSize",
+        "GE_CT_CV_MRI: getCurrentFileSize",
         this.det,
         note
       );
     } catch (error) {
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.E,
         this.run_log,
-        "GE_CV: getCurrentFileSize",
+        "GE_CT_CV_MRI: getCurrentFileSize",
         this.cat,
         note,
         error
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "updateRedisFileSize_Class",
-        "FN CALL",
-        {
-          error,
-        }
       );
     }
     this.checkFileExists();
@@ -115,7 +96,7 @@ class GE_CV extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config.file_name,
     };
     try {
       if (this.current_file_size === null) {
@@ -124,10 +105,10 @@ class GE_CV extends System {
         );
       }
     } catch (error) {
-      System.addLogEvent(
+      this.addLogEvent(
         this.E,
         this.run_log,
-        "GE_CT_MRI: checkFileExists",
+        "GE_CT_CV_MRI: checkFileExists",
         this.cat,
         note,
         error
@@ -137,32 +118,56 @@ class GE_CV extends System {
 
   getFileSizeDelta() {
     this.delta = this.current_file_size - this.prev_file_size;
-
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config.file_name,
       delta: this.delta,
     };
-    System.addLogEvent(
+    this.addLogEvent(
       this.I,
       this.run_log,
-      "GE_CV: getFileSizeDelta",
+      "GE_CT_CV_MRI: getFileSizeDelta",
       this.det,
       note
     );
   }
 
-  async getFileData() {
+  async updateRedisFileSize() {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config.file_name,
     };
-    await System.addLogEvent(
+    try {
+      await updateRedisFileSize(
+        this.sme,
+        this.updateSizePath,
+        this.sysConfigData.hhm_config.file_path,
+        this.file_config.file_name
+      );
+    } catch (error) {
+      this.addLogEvent(
+        this.E,
+        this.run_log,
+        "GE_CT_CV_MRI: updateRedisFileSize",
+        this.cat,
+        note,
+        error
+      );
+    }
+  }
+
+  async getFileData(type) {
+    let note = {
+      job_id: this.job_id,
+      sme: this.sme,
+      file: this.file_config.file_name,
+    };
+    await this.addLogEvent(
       this.I,
       this.run_log,
-      "GE_CV: getFileData",
+      "GE_CT_CV_MRI: getFileData",
       this.cal,
       note
     );
@@ -175,41 +180,45 @@ class GE_CV extends System {
         this.prev_file_size === 0 ||
         this.delta < 0
       ) {
-        this.file_data = readline.createInterface({
-          input: fs.createReadStream(this.complete_file_path),
-          crlfDelay: Infinity,
-        });
+        // Used by GE CT & MRI
+        if (type === "read_file") {
+          this.file_data = (
+            await fsp.readFile(this.complete_file_path)
+          ).toString();
+        }
+        // Used by GE CV
+        if (type === "read_stream") {
+          this.file_data = readline.createInterface({
+            input: fs.createReadStream(this.complete_file_path),
+            crlfDelay: Infinity,
+          });
+        }
+
         if (this.delta < 0) {
           note.message = `Delta is negative value: ${this.delta}. Reading entire file.`;
           note.file = this.complete_file_path;
-          await System.addLogEvent(
+          await this.addLogEvent(
             this.W,
             this.run_log,
-            "GE_CV: getFileData",
+            "GE_CT_CV_MRI: getFileData",
             this.det,
             note
           );
-          await log("error", this.job_id, this.sme, "getFileData", "FN CALL", {
-            message: `Delta was a negative value: ${this.delta}`,
-            file: this.complete_file_path,
-          });
         }
         return;
       }
 
       if (this.prev_file_size > 0) {
         note.delta = this.delta;
-        await System.addLogEvent(
+        await this.addLogEvent(
           this.I,
           this.run_log,
-          "GE_CV: getFileData",
+          "GE_CT_CV_MRI: getFileData",
           this.det,
           note
         );
-        await log("info", this.job_id, this.sme, "getFileData", "FN CALL", {
-          delta: this.delta,
-        });
 
+        // No change in file size measured: don't tail file
         if (this.delta === 0) {
           // Get file's last mod datetime
           const file_mod_datetime = await execLastMod(this.lastModPath, [
@@ -217,17 +226,13 @@ class GE_CV extends System {
           ]);
           note.message = `No new file data. Delta: ${this.delta}`;
           note.last_mod = file_mod_datetime;
-          await System.addLogEvent(
+          await this.addLogEvent(
             this.W,
             this.run_log,
-            "GE_CV: getFileData",
+            "GE_CT_CV_MRI: getFileData",
             this.det,
             note
           );
-          await log("warn", this.job_id, this.sme, "getFileData", "FN CALL", {
-            message: `No file data to read. Delta: ${this.delta}`,
-            last_mod: file_mod_datetime,
-          });
           this.file_data = null;
           return;
         }
@@ -238,66 +243,20 @@ class GE_CV extends System {
           this.complete_file_path
         );
 
-        // Place file data back into a format in which it can be read line by line. In this case, an array
-        this.file_data = tailDelta.toString().split(/(?:\r\n|\r|\n)/g);
+        this.file_data = tailDelta.toString();
         return;
       }
     } catch (error) {
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.E,
         this.run_log,
-        "GE_CV: getFileData",
+        "GE_CT_CV_MRI: getFileData",
         this.cat,
         note,
         error
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "getFileData_Class",
-        "FN CALL",
-        {
-          error,
-        }
-      );
-    }
-  }
-
-  async updateRedisFileSize() {
-    let note = {
-      job_id: this.job_id,
-      sme: this.sme,
-      file: this.fileToParse.file_name,
-    };
-    try {
-      await updateRedisFileSize(
-        this.sme,
-        this.updateSizePath,
-        this.sysConfigData.hhm_config.file_path,
-        this.fileToParse.file_name
-      );
-    } catch (error) {
-      System.addLogEvent(
-        this.E,
-        this.run_log,
-        "GE_CV: updateRedisFileSize",
-        this.cat,
-        note,
-        error
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "updateRedisFileSize_Class",
-        "FN CALL",
-        {
-          error,
-        }
       );
     }
   }
 }
 
-module.exports = GE_CV;
+module.exports = GE_CT_CV_MRI;

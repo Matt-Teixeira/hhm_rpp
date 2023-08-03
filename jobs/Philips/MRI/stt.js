@@ -5,12 +5,6 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { stt_magnet } = require("../../../persist/pg-schemas");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
-const [addLogEvent] = require("../../../utils/logger/log");
-const {
-  type: { I, W, E },
-  tag: { cal, cat, det },
-} = require("../../../utils/logger/enums");
-
 const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
@@ -26,11 +20,11 @@ async function stt_parser(file_config, System) {
   };
 
   try {
-    await addLogEvent(
-      I,
+    await System.addLogEvent(
+      System.I,
       System.run_log,
       "phil_mri_logcurrent",
-      cal,
+      System.cal,
       note,
       null
     );
@@ -61,7 +55,14 @@ async function stt_parser(file_config, System) {
             line,
             line_number,
           };
-          await addLogEvent(I, System.run_log, "stt_parser", cal, note, null);
+          await System.addLogEvent(
+            System.I,
+            System.run_log,
+            "stt_parser",
+            System.cal,
+            note,
+            null
+          );
           line_number++;
           continue;
         }
@@ -92,11 +93,11 @@ async function stt_parser(file_config, System) {
             match_group: matches.groups,
             message: "date_time object null",
           };
-          await addLogEvent(
-            W,
+          await System.addLogEvent(
+            System.W,
             System.run_log,
             "phil_mri_logcurrent",
-            det,
+            System.det,
             note,
             null
           );
@@ -131,14 +132,13 @@ async function stt_parser(file_config, System) {
     // Update Redis Cache
 
     await System.updateRedisFileSize();
-
   } catch (error) {
     console.log(error);
-    await addLogEvent(
-      E,
+    await System.addLogEvent(
+      System.E,
       System.run_log,
       "phil_mri_logcurrent",
-      cat,
+      System.cat,
       note,
       error
     );

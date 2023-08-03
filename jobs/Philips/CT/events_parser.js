@@ -1,15 +1,8 @@
-const { log } = require("../../../logger");
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_ct_events_schema } = require("../../../persist/pg-schemas");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
-const [addLogEvent] = require("../../../utils/logger/log");
-const {
-  type: { I, W, E },
-  tag: { cal, det, cat },
-} = require("../../../utils/logger/enums");
-
 const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
@@ -24,13 +17,13 @@ async function phil_ct_events(System) {
   };
 
   try {
-    await addLogEvent(I, System.run_log, "phil_ct_events", cal, note, null);
-    await log(
-      "info",
-      System.job_id,
-      System.sysConfigData.id,
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
       "phil_ct_events",
-      "FN CALL"
+      System.cal,
+      note,
+      null
     );
 
     // ** Start Data Acquisition
@@ -41,16 +34,13 @@ async function phil_ct_events(System) {
     // Break out of function if no file found
     if (System.current_file_size === null) {
       note.message = "File not found in dir";
-      await addLogEvent(I, System.run_log, "phil_ct_events", det, note, null);
-      await log(
-        "warn",
-        System.job_id,
-        System.sme,
+      await System.addLogEvent(
+        System.I,
+        System.run_log,
         "phil_ct_events",
-        "FN CALL",
-        {
-          message: "File not found in dir",
-        }
+        System.det,
+        note,
+        null
       );
       return;
     }
@@ -82,10 +72,14 @@ async function phil_ct_events(System) {
           match_group: matches.groups,
           message: "date_time object null",
         };
-        await addLogEvent(W, System.run_log, "phil_ct_events", det, note, null);
-        await log("warn", System.job_id, System.sme, "date_time", "FN CALL", {
-          message: "date_time object null",
-        });
+        await System.addLogEvent(
+          System.W,
+          System.run_log,
+          "phil_ct_events",
+          System.det,
+          note,
+          null
+        );
       }
 
       match.groups.host_datetime = dtObject;
@@ -113,22 +107,26 @@ async function phil_ct_events(System) {
     note.last_row = mappedData[mappedData.length - 1];
     note.message = "Successful Insert";
 
-    await addLogEvent(I, System.run_log, "phil_ct_events", det, note, null);
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
+      "phil_ct_events",
+      System.det,
+      note,
+      null
+    );
 
     // Update Redis Cache
 
     await System.updateRedisFileSize();
   } catch (error) {
-    await addLogEvent(E, System.run_log, "phil_ct_events", cat, note, error);
-    await log(
-      "error",
-      System.job_id,
-      System.sysConfigData.id,
+    await System.addLogEvent(
+      System.E,
+      System.run_log,
       "phil_ct_events",
-      "FN CALL",
-      {
-        error,
-      }
+      System.cat,
+      note,
+      error
     );
   }
 }

@@ -21,23 +21,24 @@ class Philips_CT extends System {
   delta;
   file_data;
 
-  constructor(sysConfigData, fileToParse, job_id, run_log) {
-    super(sysConfigData, fileToParse, job_id, run_log);
+  constructor(sysConfigData, file_config, job_id, run_log) {
+    super(sysConfigData, file_config, job_id, run_log);
+    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${file_config.file_name}`;
   }
 
   async getRedisFileSize() {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config.file_name,
     };
     try {
       this.prev_file_size = await getRedisFileSize(
         this.sme,
-        this.fileToParse.file_name
+        this.file_config.file_name
       );
       note.prev_file_size = this.prev_file_size;
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.I,
         this.run_log,
         "Philips_CT: getRedisFileSize",
@@ -45,7 +46,7 @@ class Philips_CT extends System {
         note
       );
     } catch (error) {
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.E,
         this.run_log,
         "Philips_CT: getRedisFileSize",
@@ -70,17 +71,17 @@ class Philips_CT extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config.file_name,
     };
     try {
       this.current_file_size = await getCurrentFileSize(
         this.sme,
         this.fileSizePath,
         this.sysConfigData.hhm_config.file_path,
-        this.fileToParse.file_name
+        this.file_config.file_name
       );
       note.current_file_size = this.current_file_size;
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.I,
         this.run_log,
         "Philips_CT: getCurrentFileSize",
@@ -88,7 +89,7 @@ class Philips_CT extends System {
         note
       );
     } catch (error) {
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.E,
         this.run_log,
         "Philips_CT: getCurrentFileSize",
@@ -115,10 +116,10 @@ class Philips_CT extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config.file_name,
       delta: this.delta,
     };
-    System.addLogEvent(
+    this.addLogEvent(
       this.I,
       this.run_log,
       "Philips_CT: getFileSizeDelta",
@@ -131,17 +132,17 @@ class Philips_CT extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config.file_name,
     };
     try {
       await updateRedisFileSize(
         this.sme,
         this.updateSizePath,
         this.sysConfigData.hhm_config.file_path,
-        this.fileToParse.file_name
+        this.file_config.file_name
       );
     } catch (error) {
-      System.addLogEvent(
+      this.addLogEvent(
         this.E,
         this.run_log,
         "Philips_CT: updateRedisFileSize",
@@ -166,9 +167,9 @@ class Philips_CT extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.fileToParse.file_name,
+      file: this.file_config.file_name,
     };
-    await System.addLogEvent(
+    await this.addLogEvent(
       this.I,
       this.run_log,
       "Philips_CT: getFileData",
@@ -190,7 +191,7 @@ class Philips_CT extends System {
         if (this.delta < 0) {
           note.message = `Delta is negative value: ${this.delta}. Reading entire file.`;
           note.file = this.complete_file_path;
-          await System.addLogEvent(
+          await this.addLogEvent(
             this.W,
             this.run_log,
             "Philips_CT: getFileData",
@@ -207,7 +208,7 @@ class Philips_CT extends System {
 
       if (this.prev_file_size > 0) {
         note.delta = this.delta;
-        await System.addLogEvent(
+        await this.addLogEvent(
           this.I,
           this.run_log,
           "Philips_CT: getFileData",
@@ -225,7 +226,7 @@ class Philips_CT extends System {
           ]);
           note.message = `No new file data. Delta: ${this.delta}`;
           note.last_mod = file_mod_datetime;
-          await System.addLogEvent(
+          await this.addLogEvent(
             this.W,
             this.run_log,
             "Philips_CT: getFileData",
@@ -250,7 +251,7 @@ class Philips_CT extends System {
         return;
       }
     } catch (error) {
-      await System.addLogEvent(
+      await this.addLogEvent(
         this.E,
         this.run_log,
         "Philips_CT: getFileData",

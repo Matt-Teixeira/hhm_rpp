@@ -1,26 +1,16 @@
+const System = require("./System");
 const fsp = require("node:fs").promises;
 const exec_move_to_archive = require("../read/exec-move_to_archive");
 const {
   update_redis_last_file,
   get_last_cached_file,
 } = require("../redis/philips_monitoring");
-const execLastMod = require("../read/exec-file_last_mod");
-const [addLogEvent] = require("../utils/logger/log");
-const {
-  type: { I, W, E },
-  tag: { cal, det, cat, seq, qaf },
-} = require("../utils/logger/enums");
 
 // sysConfigData, file_config, job_id, run_log, file_prop_name
-class PHILIPS_MRI_RMMU {
+class PHILIPS_MRI_RMMU extends System {
   constructor(sysConfigData, file_config, job_id, run_log, file_prop_name) {
-    this.sysConfigData = sysConfigData;
-    this.file_config = file_config;
-    this.job_id = job_id;
-    this.run_log = run_log;
-    this.sme = this.sysConfigData.id;
+    super(sysConfigData, file_config, job_id, run_log);
     this.directory_path = `${sysConfigData.hhm_config.file_path}/${file_config.query}`;
-    this.parsers = file_config.parsers;
     this.file_config_prop_name = file_prop_name;
   }
 
@@ -36,11 +26,11 @@ class PHILIPS_MRI_RMMU {
       sme: this.sme,
       file: this.file_config,
     };
-    await addLogEvent(
-      I,
+    await this.addLogEvent(
+      this.I,
       this.run_log,
       "PHILIPS_MRI_RMMU: get_directory_files",
-      cal,
+      this.cal,
       note,
       null
     );
@@ -48,11 +38,11 @@ class PHILIPS_MRI_RMMU {
       // Ex directory_path: Files in  /opt/hhm-files/C0137/SHIP013/SME01138/rmmu_long
       this.files_in_dir = await fsp.readdir(this.directory_path);
     } catch (error) {
-      await addLogEvent(
-        E,
+      await this.addLogEvent(
+        this.E,
         this.run_log,
         "PHILIPS_MRI_RMMU: get_directory_files",
-        cat,
+        this.cat,
         note,
         error
       );
@@ -65,11 +55,11 @@ async read_files() {
       job_id: this.job_id,
       sme: this.sme,
     };
-    await addLogEvent(
-      I,
+    await this.addLogEvent(
+      this.I,
       this.run_log,
       "PHILIPS_MRI_RMMU: read_files",
-      cal,
+      this.cal,
       note,
       null
     );
@@ -79,16 +69,7 @@ async read_files() {
 
         const fileData = (await fsp.readFile(complete_file_path)).toString();
       }
-    } catch (error) {
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "rmmu_class_read_files",
-        "FN CALL",
-        { error }
-      );
-    }
+    } catch (error) {}
   } */
 
   /*  No longer use with new data acquisition 
@@ -115,20 +96,20 @@ async archive_file(complete_file_path) {
       this.files_in_dir = this.files_in_dir.slice(index + 1);
       this.last_file_in_dir = this.files_in_dir[this.files_in_dir.length - 1];
       note.last_file_in_dir = this.last_file_in_dir;
-      await addLogEvent(
-        I,
+      await this.addLogEvent(
+        this.I,
         this.run_log,
         "PHILIPS_MRI_RMMU: update_files_to_process",
-        det,
+        this.det,
         note,
         null
       );
     } catch (error) {
-      await addLogEvent(
-        E,
+      await this.addLogEvent(
+        this.E,
         this.run_log,
         "PHILIPS_MRI_RMMU: update_files_to_process",
-        cat,
+        this.cat,
         note,
         error
       );
@@ -142,22 +123,22 @@ async archive_file(complete_file_path) {
       file,
       rmmu_file_type,
     };
-    await addLogEvent(
-      I,
+    await this.addLogEvent(
+      this.I,
       this.run_log,
       "PHILIPS_MRI_RMMU: cache_last_file_name",
-      cal,
+      this.cal,
       note,
       null
     );
     try {
       await update_redis_last_file(this.sme, file, rmmu_file_type);
     } catch (error) {
-      await addLogEvent(
-        E,
+      await this.addLogEvent(
+        this.E,
         this.run_log,
         "PHILIPS_MRI_RMMU: cache_last_file_name",
-        cat,
+        this.cat,
         note,
         error
       );
@@ -171,11 +152,11 @@ async archive_file(complete_file_path) {
       rmmu_file_type,
       last_file_parsed: this.last_file_parsed,
     };
-    await addLogEvent(
-      I,
+    await this.addLogEvent(
+      this.I,
       this.run_log,
       "PHILIPS_MRI_RMMU: get_last_file_parsed",
-      cal,
+      this.cal,
       note,
       null
     );
@@ -185,11 +166,11 @@ async archive_file(complete_file_path) {
         rmmu_file_type
       );
     } catch (error) {
-      await addLogEvent(
-        E,
+      await this.addLogEvent(
+        this.E,
         this.run_log,
         "PHILIPS_MRI_RMMU: get_last_file_parsed",
-        cat,
+        this.cat,
         note,
         error
       );
