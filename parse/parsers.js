@@ -13,6 +13,9 @@ const win_10_re = {
 };
 
 const siemens = {
+  cv_bulk:
+    /(?<entry_1>[A-Z]\s+\d{2}-\w+-\d{2}\s\d{2}:\d{2}:\d{2}.*\n\s+?\w+.*(\n\s+?\w+.*)?)/g,
+  cv_groups: /(?<state>[A-Z])\s+?(?<date>\d{2}-\w+-\d{2})\s(?<time>\d{2}:\d{2}:\d{2})\s(?<id>\d+)\s(?<source>.*?)\s+(?<message>.*)\n\s+(?<text>.*(\n\s.*)?)/g,
   cv_1: /(?<start>[A-Z]?)\s+(?<day>\d{2})-(?<month>[A-Z][a-z]+)-(?<year>\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2}).*?\)">(?<id>\d+)<\/\w+>\s(?<source>.+?)\s+(?<sequence>\d+|n\/a)?\s+(<\w+>)?(?<message>.+?)(<\/\w>)?\n/g,
 };
 
