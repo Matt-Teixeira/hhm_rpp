@@ -124,6 +124,24 @@ async function phil_mri_logcurrent(file_config, System) {
     // Homogenize data to prep for insert to db
     const mappedData = mapDataToSchema(data, phil_mri_logcurrent_schema);
 
+    if (mappedData.length > 1_000_000) {
+      const mappedData_2 = mappedData.splice(
+        0,
+        Math.floor(mappedData.length / 2)
+      );
+
+      console.log("\nmappedData.length");
+      console.log(mappedData.length);
+      console.log("mappedData_2.length");
+      console.log(mappedData_2.length);
+      const query = pgp.helpers.insert(
+        mappedData_2,
+        pg_cs.log.philips.logcurrent
+      );
+
+      await db.any(query);
+    }
+
     // ** End Parse
 
     // ** Begin Persist
