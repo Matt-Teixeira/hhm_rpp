@@ -8,6 +8,9 @@ const {
 } = require("../redis/redisHelpers");
 const execTail = require("../read/exec-tail");
 const execLastMod = require("../read/exec-file_last_mod");
+const execFileLineRange = require("../read/exec-line_range");
+const util = require("node:util");
+const exec = util.promisify(require("node:child_process").exec);
 
 class PHILIPS_MRI_LOGCURRENT extends System {
   constructor(sysConfigData, file_config, job_id, run_log, file_prop_name) {
@@ -20,10 +23,12 @@ class PHILIPS_MRI_LOGCURRENT extends System {
   fileSizePath = "./read/sh/readFileSize.sh";
   tailPath = "./read/sh/tail.sh";
   lastModPath = "./read/sh/get_file_last_mod.sh";
+  line_range_path = "./read/sh/get_line_range.sh";
 
   prev_file_size;
   current_file_size;
   delta;
+  file_data_type;
   file_data;
 
   async getRedisFileSize() {
@@ -170,76 +175,31 @@ class PHILIPS_MRI_LOGCURRENT extends System {
     }
   }
 
+  async getFileLineCount() {
+    const { stdout, stderr } = await exec(
+      `grep -c "" ${this.complete_file_path}`
+    );
+
+    return parseInt(stdout.trim());
+  }
+
   async getFileData() {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
       file: this.file_config[this.file_config_prop_name].file_name,
     };
-
     try {
       if (
         this.prev_file_size === null ||
         this.prev_file_size === 0 ||
         this.delta < 0
       ) {
-        this.file_data = readline.createInterface({
-          input: fs.createReadStream(this.complete_file_path),
-          crlfDelay: Infinity,
-        });
-        if (this.delta < 0) {
-          note.message = `Delta was a negative value: ${this.delta}`;
-          await this.addLogEvent(
-            this.I,
-            this.run_log,
-            "PHILIPS_MRI_LOGCURRENT: getFileData",
-            this.det,
-            note,
-            null
-          );
-        }
-        return;
+        // Reads entire file if redis reference is null or 0. Delt will be negative if new file on system.
+        await this.readEntireFile(note);
       }
-
       if (this.prev_file_size > 0) {
-        note.delta = this.delta;
-        await this.addLogEvent(
-          this.I,
-          this.run_log,
-          "PHILIPS_MRI_LOGCURRENT: getFileData",
-          this.det,
-          note,
-          null
-        );
-
-        if (this.delta === 0) {
-          // Get file's last mod datetime
-          const file_mod_datetime = await execLastMod(this.lastModPath, [
-            this.complete_file_path,
-          ]);
-          note.message = `No file data to read. Delta: ${this.delta}`;
-          note.last_mod = file_mod_datetime;
-          await this.addLogEvent(
-            this.I,
-            this.run_log,
-            "PHILIPS_MRI_LOGCURRENT: getFileData",
-            this.det,
-            note,
-            null
-          );
-          this.file_data = null;
-          return;
-        }
-
-        const tailDelta = await execTail(
-          this.tailPath,
-          this.delta,
-          this.complete_file_path
-        );
-
-        // Place file data back into a format in which it can be read line by line. In this case, an array
-        this.file_data = tailDelta.toString().split(/(?:\r\n|\r|\n)/g);
-        return;
+        await this.readFileDelta(note);
       }
     } catch (error) {
       console.log(error);
@@ -253,6 +213,116 @@ class PHILIPS_MRI_LOGCURRENT extends System {
       );
     }
   }
+
+  async readEntireFile(note) {
+    try {
+      // CHECK: Delta will be negative number if file turned over. Log event
+      if (this.delta < 0) {
+        note.message = `Delta was a negative value: ${this.delta}. Reading entire file.`;
+        await this.addLogEvent(
+          this.I,
+          this.run_log,
+          "PHILIPS_MRI_LOGCURRENT: readEntireFile",
+          this.det,
+          note,
+          null
+        );
+      }
+      this.file_data = readline.createInterface({
+        input: fs.createReadStream(this.complete_file_path),
+        crlfDelay: Infinity,
+      });
+
+      return;
+    } catch (error) {
+      console.log(error);
+      await this.addLogEvent(
+        this.E,
+        this.run_log,
+        "PHILIPS_MRI_LOGCURRENT: readEntireFile",
+        this.det,
+        note,
+        error
+      );
+    }
+  }
+
+  async readFileDelta(note) {
+    note.delta = this.delta;
+    await this.addLogEvent(
+      this.I,
+      this.run_log,
+      "PHILIPS_MRI_LOGCURRENT: readFileDelta",
+      this.det,
+      note,
+      null
+    );
+
+    if (this.delta === 0) {
+      // Get file's last mod datetime
+      const file_mod_datetime = await execLastMod(this.lastModPath, [
+        this.complete_file_path,
+      ]);
+      note.message = `No file data to read. Delta: ${this.delta}`;
+      note.last_mod = file_mod_datetime;
+      await this.addLogEvent(
+        this.I,
+        this.run_log,
+        "PHILIPS_MRI_LOGCURRENT: readFileDelta",
+        this.det,
+        note,
+        null
+      );
+      this.file_data = null;
+      return;
+    }
+
+    const tailDelta = await execTail(
+      this.tailPath,
+      this.delta,
+      this.complete_file_path
+    );
+
+    // Place file data back into a format in which it can be read line by line. In this case, an array
+    this.file_data = tailDelta.toString().split(/(?:\r\n|\r|\n)/g);
+    return;
+  }
 }
 
 module.exports = PHILIPS_MRI_LOGCURRENT;
+
+/* 
+async readEntireFile(note) {
+    const file_line_count = await this.getFileLineCount();
+    try {
+      // CHECK: Delta will be negative number if file turned over. Log event
+      if (this.delta < 0) {
+        note.message = `Delta was a negative value: ${this.delta}. Reading entire file.`;
+        await this.addLogEvent(
+          this.I,
+          this.run_log,
+          "PHILIPS_MRI_LOGCURRENT: readEntireFile",
+          this.det,
+          note,
+          null
+        );
+      }
+      this.file_data = readline.createInterface({
+        input: fs.createReadStream(this.complete_file_path),
+        crlfDelay: Infinity,
+      });
+
+      return;
+    } catch (error) {
+      console.log(error);
+      await this.addLogEvent(
+        this.E,
+        this.run_log,
+        "PHILIPS_MRI_LOGCURRENT: readEntireFile",
+        this.det,
+        note,
+        error
+      );
+    }
+  }
+*/

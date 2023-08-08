@@ -9,7 +9,7 @@
     "read_log": "node logReader/index.js",
     "ct": "node index.js CT",
     "cv": "node index.js CV",
-    "mri": "node index.js MRI",
+    "mri": "node --max-old-space-size=6144 index.js MRI",
     "phil_cv_hr_24": "node index phil_cv_hr_24"
   },
   "keywords": [],
