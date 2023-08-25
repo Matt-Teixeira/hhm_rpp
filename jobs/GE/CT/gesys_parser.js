@@ -10,6 +10,7 @@ const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
+// File data parsed in bulk. One regex to group array of data blocks. Second regex to parse blocks.
 async function ge_ct_gesys(System) {
   // an array in each parser accossiated with a file
   const parsers = System.file_config.parsers;
@@ -50,7 +51,27 @@ async function ge_ct_gesys(System) {
 
     // ** Begin Parse
 
+    // An array of matches
     let matches = System.file_data.match(ge_re.ct.gesys[parsers[0]]);
+
+    if (matches === null) {
+      let note = {
+        job_id: System.job_id,
+        sme: System.sme,
+        file: System.file_config.file_name,
+        re: `${ge_re.ct.gesys[parsers[0]]}`,
+        message: "NO MATCH FOUND",
+      };
+      await System.addLogEvent(
+        System.W,
+        System.run_log,
+        "ge_ct_gesys",
+        System.det,
+        note,
+        null
+      );
+      return;
+    }
 
     for await (let match of matches) {
       const matchGroups = match.match(ge_re.ct.gesys[parsers[1]]);
@@ -62,7 +83,8 @@ async function ge_ct_gesys(System) {
           sme: System.sme,
           prev_epoch: data[data.length - 1].epoch,
           sr_group: data[data.length - 1].sr,
-          message: "Failed match",
+          re: `${ge_re.ct.gesys[parsers[1]]}`,
+          message: "NO MATCH FOUND",
         };
         await System.addLogEvent(
           System.W,
@@ -96,7 +118,9 @@ async function ge_ct_gesys(System) {
           sme: System.sme,
           date: matchGroups.groups.host_date,
           time: matchGroups.groups.host_time,
-          message: "date_time object null",
+          prev_epoch: data[data.length - 1].epoch,
+          sr_group: data[data.length - 1].sr,
+          message: "datetime object null",
         };
         await System.addLogEvent(
           System.W,
@@ -124,6 +148,8 @@ async function ge_ct_gesys(System) {
     }
 
     const mappedData = mapDataToSchema(data, ge_ct_gesys_schema);
+
+    console.log(mappedData);
 
     // ** End Parse
 

@@ -59,9 +59,9 @@ async function phil_mri_logcurrent(file_config, System) {
             job_id: System.job_id,
             sme: System.sme,
             file: file_config,
-            message: "This is not a blank or new line - Bad Match",
             line,
             line_number,
+            message: "NO MATCH FOUND",
           };
           await System.addLogEvent(
             System.I,
@@ -103,7 +103,7 @@ async function phil_mri_logcurrent(file_config, System) {
             file: file_config,
             line,
             match_group: matches.groups,
-            message: "date_time object null",
+            message: "datetime object null",
           };
           await System.addLogEvent(
             System.W,
@@ -130,10 +130,6 @@ async function phil_mri_logcurrent(file_config, System) {
         Math.floor(mappedData.length / 2)
       );
 
-      console.log("\nmappedData.length");
-      console.log(mappedData.length);
-      console.log("mappedData_2.length");
-      console.log(mappedData_2.length);
       const query = pgp.helpers.insert(
         mappedData_2,
         pg_cs.log.philips.logcurrent

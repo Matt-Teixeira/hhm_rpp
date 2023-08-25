@@ -34,7 +34,7 @@ async function phil_ct_eal(System) {
 
     // Break out of function if no file found
     if (System.current_file_size === null) {
-      note.message = "File not found in dir";
+      note.message = "File not found";
       await System.addLogEvent(
         System.I,
         System.run_log,
@@ -56,6 +56,25 @@ async function phil_ct_eal(System) {
 
     const matches = System.getMatchBlocks();
 
+    if (matches === null) {
+      let note = {
+        job_id: System.job_id,
+        sme: System.sme,
+        file: System.file_config.file_name,
+        message: "NO MATCH FOUND",
+      };
+
+      await System.addLogEvent(
+        System.W,
+        System.run_log,
+        "phil_ct_eal",
+        System.det,
+        note,
+        null
+      );
+      return;
+    }
+
     for await (const match of matches) {
       match.groups.system_id = System.sme;
       const dtObject = await generateDateTime(
@@ -71,7 +90,7 @@ async function phil_ct_eal(System) {
           job_id: System.job_id,
           sme: System.sme,
           match_group: matches.groups,
-          message: "date_time object null",
+          message: "datetime object null",
         };
         await System.addLogEvent(
           System.W,

@@ -1,4 +1,3 @@
-const { log } = require("../../../logger");
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
 const fs = require("node:fs");
@@ -66,18 +65,8 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
         last_mod: file_mod_datetime + sysConfigData.hhm_config.file_path,
       };
       await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
-      await log("warn", job_id, sme, "phil_cv_eventlog", "FN CALL", {
-        message: "File not found in directory",
-        file: sysConfigData.hhm_config.file_path + "/archive",
-        last_mod:
-          file_mod_datetime + sysConfigData.hhm_config.file_path + "/archive",
-      });
       return;
     }
-
-    await log("info", job_id, sme, "phil_cv_eventlog", "FN CALL", {
-      file: complete_file_path,
-    });
 
     const prevFileSize = await getRedisFileSize(sme, file_config.file_name);
 
@@ -105,10 +94,6 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
         message: "Same file size. Do not parse",
       };
       await addLogEvent(I, run_log, "phil_cv_eventlog", det, note, null);
-      await log("info", job_id, sme, "phil_cv_eventlog", "FN CALL", {
-        delta: delta,
-        message: "Same file size. Do not parse",
-      });
       return;
     }
 
@@ -160,14 +145,10 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
             job_id,
             sme: sme,
             file: file_config,
-            message: "This is not a blank new line - Bad Match",
             line,
+            message: "NO MATCH FOUND",
           };
           await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
-          await log("error", job_id, sme, "Not_New_Line", "FN CALL", {
-            message: "This is not a blank new line - Bad Match",
-            line,
-          });
         }
       } else {
         matches.groups.system_id = sme;
@@ -186,12 +167,9 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
             sme: sme,
             line,
             match_group: matches.groups,
-            message: "date_time object null",
+            message: "datetime object null",
           };
           await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
-          await log("warn", job_id, sme, "date_time", "FN CALL", {
-            message: "date_time object null",
-          });
         }
 
         matches.groups.host_datetime = dtObject;
@@ -243,11 +221,6 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
   } catch (error) {
     console.log(error);
     await addLogEvent(E, run_log, "phil_cv_eventlog", cat, note, error);
-    await log("error", job_id, sme, "phil_cv_eventlog", "FN CALL", {
-      sme: sme,
-      error: error.message,
-      file: file_config,
-    });
   }
 }
 

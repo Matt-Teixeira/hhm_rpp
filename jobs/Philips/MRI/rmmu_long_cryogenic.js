@@ -22,7 +22,14 @@ async function phil_mri_rmmu_long(System) {
   };
 
   try {
-    await System.addLogEvent(System.I, System.run_log, "phil_mri_rmmu_long", System.cal, note, null);
+    await System.addLogEvent(
+      System.I,
+      System.run_log,
+      "phil_mri_rmmu_long",
+      System.cal,
+      note,
+      null
+    );
 
     // ** Start Data Acquisition
 
@@ -66,10 +73,49 @@ async function phil_mri_rmmu_long(System) {
       // ** Begin Parse
 
       let matches = fileData.matchAll(philips_re.mri[parsers[0]]);
+
+      if (!matches) {
+        let note = {
+          job_id: System.job_id,
+          sme: System.sme,
+          file: System.file_config,
+          re: `${philips_re.mri[parsers[0]]}`,
+          message: "NO MATCH FOUND",
+        };
+
+        await System.addLogEvent(
+          System.W,
+          System.run_log,
+          "phil_mri_rmmu_long",
+          System.det,
+          note,
+          null
+        );
+      }
+
       let metaData = fileData.match(philips_re.mri[parsers[1]]);
 
       // Loops through each match in 1 file in dir
       for await (const match of matches) {
+        if (!match) {
+          let note = {
+            job_id: System.job_id,
+            sme: System.sme,
+            file: System.file_config,
+            message: "NO MATCH FOUND",
+          };
+
+          await System.addLogEvent(
+            System.W,
+            System.run_log,
+            "phil_mri_rmmu_long",
+            System.det,
+            note,
+            null
+          );
+          continue;
+        }
+
         match.groups.system_id = System.sme;
         match.groups.system_reference_number =
           metaData.groups.system_reference_number;

@@ -51,15 +51,15 @@ async function stt_parser(file_config, System) {
             job_id: System.job_id,
             sme: System.sme,
             file: file_config,
-            message: "This is not a blank or new line - Bad Match",
             line,
             line_number,
+            message: "NO MATCH FOUND",
           };
           await System.addLogEvent(
             System.I,
             System.run_log,
             "stt_parser",
-            System.cal,
+            System.det,
             note,
             null
           );
@@ -102,11 +102,11 @@ async function stt_parser(file_config, System) {
             null
           );
           await log("warn", System.job_id, System.sme, "date_time", "FN CALL", {
-            message: "date_time object null",
             date: matches.groups.host_date,
             time: matches.groups.host_time,
             line,
             line_number,
+            message: "datetime object null",
           });
         }
 

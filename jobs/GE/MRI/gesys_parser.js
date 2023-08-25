@@ -46,6 +46,25 @@ async function ge_mri_gesys(System) {
 
     let matches = System.file_data.match(ge_re.mri.gesys[parsers[0]]);
 
+    if (matches === null) {
+      let note = {
+        job_id: System.job_id,
+        sme: System.sme,
+        file: System.file_config.file_name,
+        re: `${ge_re.mri.gesys[parsers[0]]}`,
+        message: "NO MATCH FOUND",
+      };
+      await System.addLogEvent(
+        System.W,
+        System.run_log,
+        "ge_mri_gesys",
+        System.det,
+        note,
+        null
+      );
+      return;
+    }
+
     for await (let match of matches) {
       const matchGroups = match.match(ge_re.mri.gesys[parsers[1]]);
       // matchGroups will be null if no match
@@ -53,9 +72,10 @@ async function ge_mri_gesys(System) {
         let note = {
           job_id: System.job_id,
           sme: System.sysConfigData.id,
-          message: "Failed match",
           prev_epoch: data[data.length - 1].epoch,
           sr_group: data[data.length - 1].sr,
+          re: `${ge_re.mri.gesys[parsers[1]]}`,
+          message: "NO MATCH FOUND",
         };
         await System.addLogEvent(
           System.W,
@@ -88,7 +108,7 @@ async function ge_mri_gesys(System) {
         let note = {
           job_id: System.job_id,
           sme: System.sysConfigData.id,
-          message: "date_time object null",
+          message: "datetime object null",
         };
         await System.addLogEvent(
           System.W,

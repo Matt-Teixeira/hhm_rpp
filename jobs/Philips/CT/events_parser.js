@@ -55,6 +55,25 @@ async function phil_ct_events(System) {
 
     const matches = System.getMatchBlocks();
 
+    if (matches === null) {
+      let note = {
+        job_id: System.job_id,
+        sme: System.sme,
+        file: System.file_config.file_name,
+        message: "NO MATCH FOUND",
+      };
+
+      await System.addLogEvent(
+        System.W,
+        System.run_log,
+        "phil_ct_events",
+        System.det,
+        note,
+        null
+      );
+      return;
+    }
+
     for await (const match of matches) {
       match.groups.system_id = System.sme;
       const dtObject = await generateDateTime(

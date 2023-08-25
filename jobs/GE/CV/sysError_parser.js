@@ -10,7 +10,7 @@ const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
-// File to parse is read line by line for regEx to match
+// File data streamed line by line
 async function ge_cv_sys_error(System) {
   // an array in each config accossiated with a file
   const parsers = System.file_config.parsers;
@@ -57,8 +57,9 @@ async function ge_cv_sys_error(System) {
           let note = {
             job_id: System.job_id,
             sme: System.sysConfigData.id,
-            message: "This is not a blank new line - Bad Match",
             line: line,
+            re: `${ge_re.cv[parsers[0]]}`,
+            message: "NO MATCH FOUND",
           };
           await System.addLogEvent(
             System.W,
@@ -72,9 +73,10 @@ async function ge_cv_sys_error(System) {
       } else {
         matches.groups.system_id = System.sysConfigData.id;
 
-        // Remove colen ":" from millisecond delimiter and change to period "."
+        // Removes colen ":" from millisecond delimiter and change to period "."
         let splitColens = matches.groups.host_time.split(":");
         matches.groups.host_time = `${splitColens[0]}:${splitColens[1]}:${splitColens[2]}.${splitColens[3]}`;
+
         const dtObject = await generateDateTime(
           System.job_id,
           matches.groups.system_id,
@@ -89,7 +91,7 @@ async function ge_cv_sys_error(System) {
             sme: System.sme,
             line: line,
             match_group: matches.groups,
-            message: "date_time object null",
+            message: "datetime object null",
           };
           await System.addLogEvent(
             System.W,
