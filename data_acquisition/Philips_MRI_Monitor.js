@@ -1,4 +1,3 @@
-const { log } = require("../logger");
 const fs = require("node:fs").promises;
 const {
   getRedisLine,
@@ -50,14 +49,6 @@ class PHILIPS_MRI_MONITORING {
         cat,
         note,
         error
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "get_all_monitor_data",
-        "FN CALL",
-        { error }
       );
     }
   }
@@ -114,12 +105,6 @@ class PHILIPS_MRI_MONITORING {
         note,
         null
       );
-      await log("error", this.job_id, this.sme, "get_redis_line", "FN CALL", {
-        message: "last_line is null. Need to mod regex",
-        re: /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+/,
-        last_line,
-        matched_last_line,
-      });
     }
 
     return matched_last_line;
@@ -132,7 +117,7 @@ class PHILIPS_MRI_MONITORING {
       file: file_name,
     };
     console.log("\\note");
-    console.log(note)
+    console.log(note);
     try {
       const last_line = await exec_tail_last_line(
         this.exec_tail_path,
@@ -152,11 +137,11 @@ class PHILIPS_MRI_MONITORING {
         null
       );
 
-      console.log("\nfile_name")
-      console.log(file_name)
+      console.log("\nfile_name");
+      console.log(file_name);
       await this.update_redis_monitor_line(file_name, last_line);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       await addLogEvent(
         E,
         this.run_log,
@@ -184,7 +169,7 @@ class PHILIPS_MRI_MONITORING {
         note,
         null
       );
-      
+
       await updateRedisLine(this.sme, file_name, line);
     } catch (error) {
       await addLogEvent(
@@ -240,17 +225,6 @@ class PHILIPS_MRI_MONITORING {
           null
         );
 
-        await log(
-          "warn",
-          this.job_id,
-          this.sme,
-          "get_monitor_delta",
-          "FN CALL",
-          {
-            message: "File does not have new data",
-            last_mod: file_mod_datetime,
-          }
-        );
         return null;
       }
 

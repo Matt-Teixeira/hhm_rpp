@@ -1,4 +1,3 @@
-const { log } = require("../../../logger");
 const ge_ct_gesys = require("./gesys_parser");
 const GE_CT_CV_MRI = require("../../../data_acquisition/GE_CT_CV_MRI");
 const [addLogEvent] = require("../../../utils/logger/log");
@@ -14,7 +13,6 @@ const ge_ct_parsers = async (job_id, sysConfigData, run_log) => {
   };
   try {
     await addLogEvent(I, run_log, "ge_ct_parsers", cal, note, null);
-    await log("info", job_id, "NA", "ge_ct_parsers", "FN CALL");
 
     for await (const file of sysConfigData.hhm_file_config) {
       switch (file.query) {
@@ -30,9 +28,6 @@ const ge_ct_parsers = async (job_id, sysConfigData, run_log) => {
   } catch (error) {
     console.log(error);
     await addLogEvent(E, run_log, "ge_ct_parsers", cat, note, error);
-    await log("error", job_id, "NA", "ge_ct_parsers", "FN CATCH", {
-      error: error,
-    });
   }
 };
 

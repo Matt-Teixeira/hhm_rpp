@@ -1,17 +1,19 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
-const { log } = require("../../../logger");
 const {
   getExistingDates,
   updateTable,
   insertData,
 } = require("../../../util/phil_mri_monitor_helpers"); //cryo_comp_comm_error
-const {convertDT} = require("../../../util/dates");
+const { convertDT } = require("../../../util/dates");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, cat, det },
+} = require("../../../utils/logger/enums");
 
-async function booleanValue(jobId, sme, data, column) {
+async function booleanValue(run_log, sme, data, column) {
   try {
     // Get all rows/dates for this sme
-    const systemDates = await getExistingDates(jobId, sme);
+    const systemDates = await getExistingDates(run_log, sme);
 
     let bucket = [];
     let prevData = data[0].host_date; //Set to first date in file data(file capture groups)
@@ -36,14 +38,14 @@ async function booleanValue(jobId, sme, data, column) {
 
         if (systemDates.includes(prevData)) {
           // If date exists for sme: UPDATE row
-          await updateTable(jobId, column, [maxValue, sme, prevData]);
+          await updateTable(run_log, column, [maxValue, sme, prevData]);
           bucket = [];
           prevData = obs.host_date;
           bucket.push(obs[column]);
         } else {
           // If date dose not exist: INSERT new row
           let dtObj = await convertDT(prevData);
-          await insertData(jobId, column, [sme, dtObj, prevData, maxValue]);
+          await insertData(run_log, column, [sme, dtObj, prevData, maxValue]);
           bucket = [];
           prevData = obs.host_date;
           bucket.push(obs[column]);
@@ -62,7 +64,7 @@ async function booleanValue(jobId, sme, data, column) {
         maxValue = 0;
       }
 
-      await updateTable(jobId, column, [
+      await updateTable(run_log, column, [
         maxValue,
         sme,
         data[data.length - 1].host_date,
@@ -78,7 +80,7 @@ async function booleanValue(jobId, sme, data, column) {
       }
 
       let dtObj = await convertDT(data[data.length - 1].host_date);
-      await insertData(jobId, column, [
+      await insertData(run_log, column, [
         sme,
         dtObj,
         data[data.length - 1].host_date,
@@ -87,11 +89,11 @@ async function booleanValue(jobId, sme, data, column) {
     }
     return true;
   } catch (error) {
-    await log("error", jobId, sme, "booleanValue", "FN CALL", {
+    let note = {
       sme: sme,
       column: column,
-      error: error,
-    });
+    };
+    await addLogEvent(E, run_log, "initUpdate: booleanValue", cat, note, error);
     return false;
   }
 }

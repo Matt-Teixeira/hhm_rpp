@@ -1,6 +1,3 @@
-("use strict");
-require("dotenv").config();
-const { log } = require("../logger");
 const redis = require("redis");
 
 async function initRedis() {
@@ -14,14 +11,7 @@ async function initRedis() {
 
   const redisClient = redis.createClient(clienConfig);
 
-  redisClient.on(
-    "error",
-    async (error) =>
-      await log("error", "NA", "NA", "redisClient", `ON ERROR`, {
-        // TODO: KILL APP?
-        error: error,
-      })
-  );
+  redisClient.on("error", async (error) => console.log(error));
 
   await redisClient.connect();
 

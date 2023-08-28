@@ -1,5 +1,4 @@
 const util = require("util");
-const { log } = require("../logger");
 const execFile = util.promisify(require("node:child_process").execFile);
 
 // /home/matt-teixeira/hep3/hhm_rpp/read/sh/getLineNumber.sh

@@ -1,21 +1,19 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
-const { log } = require("../../../logger");
 const {
   get_captured_datetime_entry,
   insert_into_secondary_table,
   update_secondary_table,
 } = require("../../../util/phil_mri_monitor_helpers"); //cryo_comp_malf_minutes
 const { convertDT } = require("../../../util/dates");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, cat, det },
+} = require("../../../utils/logger/enums");
 
-async function maxValue(jobId, sme, data, column, capture_datetime) {
+async function maxValue(run_log, sme, data, column, capture_datetime) {
   try {
-    await log("info", jobId, sme, "maxValue", "FN CALL", {
-      sme: sme,
-    });
-
     // Get date ranges for smaller query and loop
-    let previous_entries = await get_captured_datetime_entry(jobId, sme, [
+    let previous_entries = await get_captured_datetime_entry(run_log, sme, [
       capture_datetime,
     ]);
 
@@ -24,7 +22,6 @@ async function maxValue(jobId, sme, data, column, capture_datetime) {
 
     let current_largest_value = -9999;
     for (const data_entry of data) {
-
       if (parseInt(data_entry[column]) > current_largest_value) {
         max_value = data_entry;
         current_largest_value = parseInt(data_entry[column]);
@@ -34,7 +31,7 @@ async function maxValue(jobId, sme, data, column, capture_datetime) {
     if (previous_entries.length < 1) {
       const host_datetime = await convertDT(max_value.host_date);
 
-      await insert_into_secondary_table(jobId, sme, column, [
+      await insert_into_secondary_table(run_log, sme, column, [
         sme,
         capture_datetime,
         host_datetime,
@@ -42,7 +39,7 @@ async function maxValue(jobId, sme, data, column, capture_datetime) {
         max_value[column],
       ]);
     } else {
-      await update_secondary_table(jobId, sme, column, [
+      await update_secondary_table(run_log, sme, column, [
         max_value[column],
         sme,
         capture_datetime,
@@ -50,11 +47,15 @@ async function maxValue(jobId, sme, data, column, capture_datetime) {
     }
     return true;
   } catch (error) {
-    await log("error", jobId, sme, "maxValue", "FN CALL", {
-      sme: sme,
-      column: column,
-      error: error,
-    });
+    let note = { sme: sme, column: column };
+    await addLogEvent(
+      E,
+      run_log,
+      "update_secondary: maxValue",
+      cat,
+      note,
+      error
+    );
     return false;
   }
 }

@@ -1,17 +1,22 @@
-const { log } = require("../../logger");
 const {
   dateTimeTemplate,
   date_minus_one_template,
 } = require("./dateTimeTemplate");
 const { remove__ } = require("./incoming_date_cleaning");
 
-async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
+const [addLogEvent] = require("../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, det, cat, seq, qaf },
+} = require("../../utils/logger/enums");
+
+async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
   try {
     let date;
     switch (pgTable) {
       case "stt_magnet":
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "dd-MMM-yyyyHH:mm:ss.SSS",
@@ -20,7 +25,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "philips_mri_rmmu_history":
         date = await date_minus_one_template(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "yyyy-MM-ddHH:mm:ss",
@@ -30,7 +35,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "philips_mri_rmmu_magnet":
         date = await date_minus_one_template(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime + "0"}`,
           "yyyy-MM-ddHH:mm:ss.SSS",
@@ -39,7 +44,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "philips_mri_rmmu_short":
         date = await date_minus_one_template(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime + "0"}`,
           "yyyy-MM-ddHH:mm:ss.SSS",
@@ -48,7 +53,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "philips_mri_rmmu_long":
         date = await date_minus_one_template(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime + "0"}`,
           "yyyy-MM-ddHH:mm:ss.SSS",
@@ -57,7 +62,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "philips_mri_logcurrent":
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime + "0"}`,
           "yyyy-MM-ddHH:mm:ss.SSS",
@@ -67,7 +72,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
       case "philips_ct_events":
         hostTime = remove__(hostTime);
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "yyyy/MM/ddHH:mm:ss.SSS",
@@ -77,7 +82,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
       case "philips_ct_eal":
         hostTime = remove__(hostTime);
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "yyyy/MM/ddHH:mm:ss.SSS",
@@ -86,7 +91,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "ge_ct_gesys":
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "dd-MMM-yyyyHH:mm:ss",
@@ -95,7 +100,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "mmb.ge_mm3":
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "dd-MMM-yyHH:mm",
@@ -105,7 +110,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
       //HHM
       case "log.ge_ct_gesys":
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "dd-MMM-yyyyHH:mm:ss",
@@ -114,7 +119,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "ge_mri_gesys":
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "dd-MMM-yyyyHH:mm:ss",
@@ -123,7 +128,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "ge_cv_syserror":
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "yyyy-MM-ddHH:mm:ss.SSS",
@@ -132,7 +137,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "philips_cv_eventlog":
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "yyyy-MM-ddHH:mm:ss",
@@ -141,7 +146,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "siemens_ct":
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "yyyy-MM-ddHH:mm:ss",
@@ -150,7 +155,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "siemens_cv":
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "dd-MMM-yyyyHH:mm:ss",
@@ -159,7 +164,7 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
         break;
       case "siemens_mri":
         date = await dateTimeTemplate(
-          jobId,
+          run_log,
           sme,
           `${hostDate}${hostTime}`,
           "yyyy-MM-ddHH:mm:ss",
@@ -171,9 +176,14 @@ async function generateDateTime(jobId, sme, pgTable, hostDate, hostTime) {
     }
     return date;
   } catch (error) {
-    await log("error", jobId, sme, "generateDateTime", "FN CATCH", {
-      error: error,
-    });
+    console.log(error);
+    let note = {
+      sme,
+      pgTable,
+      hostDate,
+      hostTime,
+    };
+    await addLogEvent(E, run_log, "determineManufacturer", cat, note, error);
   }
 }
 

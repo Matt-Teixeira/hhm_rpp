@@ -21,7 +21,8 @@ class Siemens_10 extends System {
     try {
       this.redis_line = await getRedisLine(
         this.sme,
-        this.file_config.file_name
+        this.file_config.file_name,
+        this.run_log
       );
       await this.addLogEvent(
         this.I,

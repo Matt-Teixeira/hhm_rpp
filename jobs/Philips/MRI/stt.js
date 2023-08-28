@@ -101,13 +101,6 @@ async function stt_parser(file_config, System) {
             note,
             null
           );
-          await log("warn", System.job_id, System.sme, "date_time", "FN CALL", {
-            date: matches.groups.host_date,
-            time: matches.groups.host_time,
-            line,
-            line_number,
-            message: "datetime object null",
-          });
         }
 
         matches.groups.host_datetime = dtObject;

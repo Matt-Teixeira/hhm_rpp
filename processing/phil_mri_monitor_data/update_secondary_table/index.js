@@ -1,6 +1,3 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
-const { log } = require("../../../logger");
 const maxValue = require("./maxValue");
 const booleanValue = require("./booleanValue");
 const minValue = require("./minValue");
@@ -28,7 +25,7 @@ async function philMonitorTableUpdate(
     process_type: processType,
   };
   try {
-    await addLogEvent(I, run_log, "philMonitorTableUpdate", cal, note, null);
+    await addLogEvent(I, run_log, "update_secondary: philMonitorTableUpdate", cal, note, null);
 
     switch (processType) {
       case "max":
@@ -62,14 +59,10 @@ async function philMonitorTableUpdate(
         break;
     }
     note.successful_agg = successful_agg;
-    await addLogEvent(I, run_log, "philMonitorTableUpdate", det, note, null);
+    await addLogEvent(I, run_log, "update_secondary: philMonitorTableUpdate", det, note, null);
     return successful_agg;
   } catch (error) {
-    await addLogEvent(E, run_log, "philMonitorTableUpdate", cat, note, error);
-    await log("error", job_id, sme, "philMonitorTableUpdate", "FN CALL", {
-      sme: sme,
-      error: error,
-    });
+    await addLogEvent(E, run_log, "update_secondary: philMonitorTableUpdate", cat, note, error);
     return false;
   }
 }

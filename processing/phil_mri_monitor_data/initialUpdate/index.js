@@ -1,4 +1,3 @@
-const { log } = require("../../../logger");
 const maxValue = require("./maxValue");
 const booleanValue = require("./booleanValue");
 const minValue = require("./minValue");
@@ -45,10 +44,6 @@ async function initialUpdate(job_id, sme, file_config, data, run_log) {
   } catch (error) {
     console.log(error);
     await addLogEvent(E, run_log, "initialUpdate", cat, note, error);
-    await log("error", job_id, sme, "initialUpdate", "FN CALL", {
-      file: file_config.file_name,
-      error: error,
-    });
     return false;
   }
 }

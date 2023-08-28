@@ -1,6 +1,3 @@
-("use strict");
-require("dotenv").config();
-const { log } = require("../../../logger");
 const win10_siemens_ct = require("./win10_siemens_ct");
 const win10_siemens_mri = require("./win10_siemens_mri");
 const Siemens_10 = require("../../../data_acquisition/Siemens_10");
@@ -14,10 +11,9 @@ const win_10_parsers = async (job_id, sysConfigData, fileConfig, run_log) => {
   let note = {
     job_id,
     sme: sysConfigData.id,
-    file_config: fileConfig
-  }
+    file_config: fileConfig,
+  };
   await addLogEvent(I, run_log, "win_10_parsers", cal, note, null);
-  await log("info", job_id, sysConfigData.id, "win_10_parsers", "FN CALL");
 
   switch (sysConfigData.hhm_config.modality) {
     case "CT":
@@ -48,9 +44,6 @@ const win_10_parsers = async (job_id, sysConfigData, fileConfig, run_log) => {
   try {
   } catch (error) {
     await addLogEvent(E, run_log, "win_10_parsers", cat, note, error);
-    await log("error", job_id, sysConfigData.id, "win_10_parsers", "FN CATCH", {
-      error: error,
-    });
   }
 };
 

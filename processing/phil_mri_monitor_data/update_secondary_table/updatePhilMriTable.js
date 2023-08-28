@@ -1,4 +1,3 @@
-const { log } = require("../../../logger");
 const philMonitorTableUpdate = require("./index");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
@@ -38,11 +37,6 @@ async function updatePhilMriTable(
   } catch (error) {
     console.log(error);
     await addLogEvent(E, run_log, "updatePhilMriTable", cat, note, error);
-    await log("error", job_id, sme, "updatePhilMriTable", "FN CALL", {
-      sme: sme,
-      file: file_config,
-      error: error,
-    });
   }
 }
 

@@ -1,4 +1,3 @@
-const { log } = require("../../../logger");
 const phil_mri_logcurrent = require("./logcurrent");
 const phil_mri_rmmu_short = require("./rmmu_short_cryogenic");
 const phil_mri_rmmu_long = require("./rmmu_long_cryogenic");
@@ -23,13 +22,6 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
 
   try {
     await addLogEvent(I, run_log, "philips_mri_parsers", cal, note, null);
-    await log(
-      "info",
-      job_id,
-      sysConfigData.id,
-      "philips_mri_parsers",
-      "FN CALL"
-    );
 
     for await (const directory of sysConfigData.hhm_file_config) {
       let dir = Object.keys(directory)[0];
@@ -84,7 +76,6 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
           break;
 
         case "rmmu_magnet":
-          console.log("IN RMMU_MAGNET");
           const Rmmu_Magnet_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory.rmmu_magnet,
@@ -123,16 +114,6 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
   } catch (error) {
     console.log(error);
     await addLogEvent(E, run_log, "philips_mri_parsers", cat, note, error);
-    await log(
-      "error",
-      job_id,
-      sysConfigData,
-      "philips_mri_parsers",
-      "FN CATCH",
-      {
-        error: error.message,
-      }
-    );
   }
 };
 

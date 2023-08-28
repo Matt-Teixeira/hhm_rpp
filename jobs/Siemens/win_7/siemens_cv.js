@@ -1,4 +1,3 @@
-const { log } = require("../../../logger");
 const fs = require("node:fs").promises;
 const { win_7_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
@@ -10,13 +9,9 @@ const win_7_siemens_ct = async (jobId, sysConfigData, fileConfig, file) => {
   const sme = sysConfigData.id;
   const dirPath = sysConfigData.hhm_config.file_path;
 
-  console.log(sme);
-  console.log(dirPath);
-
   const data = [];
 
   try {
-    await log("info", jobId, sme, "win_7_siemens_ct", "FN CALL");
 
     const complete_file_path = `${dirPath}/${file}`;
 
@@ -66,9 +61,7 @@ const win_7_siemens_ct = async (jobId, sysConfigData, fileConfig, file) => {
 
     return true;
   } catch (error) {
-    await log("error", jobId, sme, "win_7_siemens_ct", "FN CATCH", {
-      error: error,
-    });
+    console.log(error);
   }
 };
 

@@ -1,12 +1,14 @@
-("use strict");
-require("dotenv").config({ path: "../../.env" });
-const { log } = require("../../../logger");
 const {
   getExistingDates,
   updateTable,
   insertData,
 } = require("../../../util/phil_mri_monitor_helpers"); //cryo_comp_malf_minutes
 const { convertDT } = require("../../../util/dates");
+const [addLogEvent] = require("../../../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, cat, det },
+} = require("../../../utils/logger/enums");
 
 async function maxValue(job_id, sme, data, column) {
   try {
@@ -69,12 +71,12 @@ async function maxValue(job_id, sme, data, column) {
 
     return true;
   } catch (error) {
-    console.log(error);
-    await log("error", job_id, sme, "maxValue", "FN CALL", {
+    let note = {
       sme: sme,
       column: column,
-      error: error,
-    });
+    };
+    console.log(error);
+    await addLogEvent(E, run_log, "initUpdate: maxValue", cat, note, error);
     return false;
   }
 }

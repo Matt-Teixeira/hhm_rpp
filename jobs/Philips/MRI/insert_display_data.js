@@ -1,4 +1,3 @@
-const { log } = require("../../../logger");
 const initialUpdate = require("../../../processing/phil_mri_monitor_data/initialUpdate");
 const updatePhilMriTable = require("../../../processing/phil_mri_monitor_data/update_secondary_table/updatePhilMriTable");
 const { getSystemDbData } = require("../../../util/phil_mri_monitor_helpers");
@@ -46,7 +45,6 @@ async function insertDisplayData(
     if (has_prev_data.length === 0 || hours_diff >= 48) {
       // Create entry for new SME
       for (const prop in data) {
-
         const file_config = monitoring_configs.find(
           (monitor_object) => monitor_object.file_name.split(".")[0] === prop
         );
@@ -57,8 +55,7 @@ async function insertDisplayData(
           data[prop],
           run_log
         );
-        /* console.log("successful_agg");
-        console.log(successful_agg); */
+
         if (successful_agg === false) break;
       }
     } else {
@@ -79,17 +76,11 @@ async function insertDisplayData(
         if (successful_agg === false) break;
       }
     }
-    /* console.log("successful_agg");
-        console.log(successful_agg); */
+
     return successful_agg;
   } catch (error) {
     console.log(error);
     await addLogEvent(E, run_log, "insertDisplayData", cat, note, error);
-    await log("error", job_id, sme, "insertDisplayData", "FN CALL", {
-      sme: sme,
-      modality,
-      error,
-    });
   }
 }
 

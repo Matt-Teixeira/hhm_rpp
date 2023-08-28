@@ -1,6 +1,5 @@
 ("use strict");
 require("dotenv").config();
-const { log } = require("./logger");
 const pgPool = require("./utils/db/pg-pool");
 const siemens_parser = require("./jobs/Siemens");
 const philips_parser = require("./jobs/Philips");
@@ -24,9 +23,6 @@ const determineManufacturer = async (job_id, system, run_log) => {
   };
   try {
     await addLogEvent(I, run_log, "determineManufacturer", cal, note, null);
-    await log("info", job_id, system.id, "determineManufacturer", "FN CALL", {
-      mod: process.argv[2],
-    });
 
     switch (system.manufacturer) {
       case "Siemens":
@@ -43,9 +39,6 @@ const determineManufacturer = async (job_id, system, run_log) => {
     }
   } catch (error) {
     await addLogEvent(E, run_log, "determineManufacturer", cat, note, error);
-    await log("error", job_id, system.id, "determineManufacturer", "FN CATCH", {
-      error: error,
-    });
   }
 };
 
@@ -62,7 +55,6 @@ const onBoot = async () => {
 
   try {
     await addLogEvent(I, run_log, "onBoot", cal, note, null);
-    await log("info", "NA", "NA", "onBoot", `FN CALL`);
     console.time();
 
     let shell_value = [process.argv[2]];
@@ -111,9 +103,6 @@ const onBoot = async () => {
   } catch (error) {
     console.log(error);
     await addLogEvent(E, run_log, "onBoot", cat, null, error);
-    await log("error", "NA", "NA", "onBoot", "FN CATCH", {
-      error: error,
-    });
   }
 };
 

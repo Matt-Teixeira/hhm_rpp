@@ -1,4 +1,3 @@
-const { log } = require("../logger");
 const db = require("../utils/db/pg-pool");
 const [addLogEvent] = require("../utils/logger/log");
 const {
@@ -23,7 +22,7 @@ async function getSystemDbData(job_id, run_log, sme) {
   }
 }
 
-async function getExistingDates(jobId, sme) {
+async function getExistingDates(run_log, sme) {
   try {
     const queryStr =
       "SELECT date FROM mag.philips_mri_monitoring_data WHERE system_id = $1";
@@ -37,105 +36,122 @@ async function getExistingDates(jobId, sme) {
     return systemDatesToArray;
   } catch (error) {
     console.log(error);
-    await log("error", jobId, sme, "getExistingDates", "FN CALL", {
-      sme: sme,
-      error: error,
-    });
+    await addLogEvent(E, run_log, "getExistingDates", cat, { sme }, error);
   }
 }
 
-async function updateTable(jobId, col_name, arr) {
+async function updateTable(run_log, col_name, arr) {
   try {
     if (arr[0] === -Infinity) return;
     const queryStr = `UPDATE mag.philips_mri_monitoring_data SET ${col_name} = $1 WHERE system_id = $2 AND date = $3`;
     await db.none(queryStr, arr);
   } catch (error) {
     console.log(error);
-    await log("error", jobId, arr[1], "updateTable", "FN CALL", {
-      values: arr,
-      error: error,
-    });
+    await addLogEvent(E, run_log, "updateTable", cat, { col_name, arr }, error);
   }
 }
 
-async function insertData(jobId, col_name, arr) {
+async function insertData(run_log, col_name, arr) {
   try {
     if (arr[3] === -Infinity) return;
     const queryStr = `INSERT INTO mag.philips_mri_monitoring_data(system_id, host_datetime, date, ${col_name}) VALUES($1, $2, $3, $4)`;
     await db.none(queryStr, arr);
   } catch (error) {
     console.log(error);
-    await log("error", jobId, arr[0], "insertData", "FN CALL", {
-      values: arr,
-      error: error,
-    });
+    await addLogEvent(E, run_log, "insertData", cat, { col_name, arr }, error);
   }
 }
 
-async function update_jsonb_state(jobId, sme, values) {
+async function update_jsonb_state(run_log, sme, values) {
+  let note = {
+    sme,
+    values,
+  };
   try {
-    await log("info", jobId, sme, "update_jsonb_state", "FN CALL", {
-      values,
-    });
+    await addLogEvent(I, run_log, "update_jsonb_state", det, note, null);
     const queryStr = `UPDATE mag.philips_mri_json SET process_success = true WHERE capture_time = $1`;
     await db.none(queryStr, values);
   } catch (error) {
     console.log(error);
-    await log("error", jobId, sme, "update_jsonb_state", "FN CALL", {
-      values,
-      error: error,
-    });
+    await addLogEvent(E, run_log, "update_jsonb_state", cat, note, error);
   }
 }
 
-async function get_captured_datetime_entry(jobId, sme, values) {
+async function get_captured_datetime_entry(run_log, sme, values) {
+  let note = {
+    sme,
+    values,
+  };
   try {
-    await log("info", jobId, sme, "get_captured_datetime_entry", "FN CALL", {
-      values,
-    });
+    await addLogEvent(
+      I,
+      run_log,
+      "get_captured_datetime_entry",
+      cat,
+      note,
+      null
+    );
     const queryStr = `SELECT * FROM mag.philips_mri_monitoring_data_agg WHERE capture_datetime = $1`;
     const entry = await db.any(queryStr, values);
     return entry;
   } catch (error) {
     console.log(error);
-    await log("error", jobId, sme, "get_captured_datetime_entry", "FN CALL", {
-      values,
-      error: error,
-    });
+    await addLogEvent(
+      E,
+      run_log,
+      "get_captured_datetime_entry",
+      cat,
+      note,
+      error
+    );
   }
 }
 
-async function insert_into_secondary_table(jobId, sme, col_name, values) {
+async function insert_into_secondary_table(run_log, sme, col_name, values) {
+  let note = {
+    sme,
+    col_name,
+    values,
+  };
   try {
-    await log("info", jobId, sme, "insert_into_secondary_table", "FN CALL", {
-      values,
-    });
+    await addLogEvent(
+      I,
+      run_log,
+      "insert_into_secondary_table",
+      det,
+      note,
+      null
+    );
     const queryStr = `INSERT INTO mag.philips_mri_monitoring_data_agg(system_id, capture_datetime, host_datetime, date, ${col_name}) VALUES($1, $2, $3, $4, $5)`;
     await db.none(queryStr, values);
     return;
   } catch (error) {
     console.log(error);
-    await log("error", jobId, sme, "insert_into_secondary_table", "FN CALL", {
-      values,
-      error: error,
-    });
+    await addLogEvent(
+      E,
+      run_log,
+      "insert_into_secondary_table",
+      cat,
+      note,
+      error
+    );
   }
 }
 
-async function update_secondary_table(jobId, sme, col_name, values) {
+async function update_secondary_table(run_log, sme, col_name, values) {
+  let note = {
+    sme,
+    col_name,
+    values,
+  };
   try {
-    await log("info", jobId, sme, "update_secondary_table", "FN CALL", {
-      values,
-    });
+    await addLogEvent(I, run_log, "update_secondary_table", det, note, null);
     const queryStr = `UPDATE mag.philips_mri_monitoring_data_agg SET ${col_name} = $1 WHERE system_id = $2 AND capture_datetime = $3`;
     await db.none(queryStr, values);
     return;
   } catch (error) {
     console.log(error);
-    await log("error", jobId, sme, "update_secondary_table", "FN CALL", {
-      values,
-      error: error,
-    });
+    await addLogEvent(E, run_log, "update_secondary_table", cat, note, error);
   }
 }
 

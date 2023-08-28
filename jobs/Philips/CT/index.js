@@ -1,6 +1,5 @@
 ("use strict");
 require("dotenv").config();
-const { log } = require("../../../logger");
 const phil_ct_eal = require("./eal_parser");
 const phil_ct_events = require("./events_parser");
 const { Philips_CT } = require("../../../data_acquisition/Philips_CT");
@@ -18,9 +17,6 @@ const philips_ct_parsers = async (job_id, sysConfigData, run_log) => {
 
   try {
     await addLogEvent(I, run_log, "philips_ct_parsers", cal, note, null);
-    await log("info", job_id, sysConfigData.id, "philips_ct_parsers", "FN CALL", {
-      sysConfigData,
-    });
 
     for await (const file of sysConfigData.hhm_file_config) {
       switch (file.query) {
@@ -38,9 +34,6 @@ const philips_ct_parsers = async (job_id, sysConfigData, run_log) => {
     }
   } catch (error) {
     await addLogEvent(E, run_log, "philips_ct_parsers", cat, note, error);
-    await log("error", job_id, sysConfigData.id, "philips_ct_parsers", "FN CATCH", {
-      error: error,
-    });
   }
 };
 

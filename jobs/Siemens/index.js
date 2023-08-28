@@ -1,6 +1,3 @@
-("use strict");
-require("dotenv").config();
-const { log } = require("../../logger");
 const win_10_parsers = require("./win_10/index.js");
 const win_7_parsers = require("./win_7/index");
 const [addLogEvent] = require("../../utils/logger/log");
@@ -15,7 +12,6 @@ const determineOsVersion = async (job_id, sysConfigData, run_log) => {
     sme: sysConfigData.id,
   };
   await addLogEvent(I, run_log, "determineOsVersion", cal, note, null);
-  await log("info", job_id, sysConfigData.id, "determineOsVersion", "FN CALL");
 
   // Check for windows OS version
 
@@ -39,16 +35,6 @@ const determineOsVersion = async (job_id, sysConfigData, run_log) => {
   try {
   } catch (error) {
     await addLogEvent(E, run_log, "determineOsVersion", cat, note, error);
-    await log(
-      "error",
-      job_id,
-      sysConfigData.id,
-      "determineOsVersion",
-      "FN CATCH",
-      {
-        error: error,
-      }
-    );
   }
 };
 

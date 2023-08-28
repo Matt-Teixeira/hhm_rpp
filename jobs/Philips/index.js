@@ -1,4 +1,3 @@
-const { log } = require("../../logger");
 const philips_ct_parsers = require("./CT");
 const philips_mri_parsers = require("./MRI");
 const philips_cv_parsers = require("./CV");
@@ -16,7 +15,6 @@ const philipsModalities = async (job_id, sysConfigData, run_log) => {
 
   try {
     await addLogEvent(I, run_log, "philipsModalities", cal, note, null);
-    await log("info", job_id, sysConfigData.id, "philipsModalities", "FN CALL");
     const modality = sysConfigData.hhm_config.modality;
 
     switch (modality) {
@@ -34,16 +32,6 @@ const philipsModalities = async (job_id, sysConfigData, run_log) => {
     }
   } catch (error) {
     await addLogEvent(E, run_log, "philipsModalities", cat, note, error);
-    await log(
-      "error",
-      job_id,
-      sysConfigData.id,
-      "philipsModalities",
-      "FN CATCH",
-      {
-        error: error,
-      }
-    );
   }
 };
 

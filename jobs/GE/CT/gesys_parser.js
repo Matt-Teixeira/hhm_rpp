@@ -149,8 +149,6 @@ async function ge_ct_gesys(System) {
 
     const mappedData = mapDataToSchema(data, ge_ct_gesys_schema);
 
-    console.log(mappedData);
-
     // ** End Parse
 
     // ** Begin Persist

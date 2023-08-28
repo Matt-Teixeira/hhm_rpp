@@ -121,10 +121,10 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     );
 
       const delta = currentFileSize - prevFileSize;
-      await log("info", job_id, sme, "delta", "FN CALL", { delta: delta });
+      
 
       if (delta === 0) {
-        await log("warn", job_id, sme, "delta-0", "FN CALL");
+        
         return;
       }
 

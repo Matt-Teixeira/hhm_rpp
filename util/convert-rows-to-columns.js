@@ -1,4 +1,3 @@
-const { log } = require("../logger");
 const [addLogEvent] = require("../utils/logger/log");
 const {
   type: { I, W, E },
@@ -7,7 +6,7 @@ const {
 
 const convertRowsToColumns = async (job_id, sme, rows, run_log) => {
   // PG INSERT PAYLOADS ARE 2D ARRAYS, EACH SUB ARRAY REPRESENTS A COLUMN OF DATA
-  //await log('info', job_id, sme, 'convertRowsToColumns', 'FN CALLED', null);
+
   let note = { job_id };
 
   const firstRow = rows[0];
@@ -19,11 +18,6 @@ const convertRowsToColumns = async (job_id, sme, rows, run_log) => {
   note.db_column_count = dbColumnCount;
 
   await addLogEvent(I, run_log, "convertRowsToColumns", cal, note, null);
-  await log("info", job_id, sme, "convertRowsToColumns", "FN DETAILS", {
-    "FIRST ROW": firstRow,
-    "LAST ROW": lastRow,
-    "COLUMN COUNT": dbColumnCount,
-  });
 
   const dbPayload = Array.from(new Array(dbColumnCount), () => []);
 

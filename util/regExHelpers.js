@@ -1,5 +1,3 @@
-const { log } = require("../logger");
-
 async function testTabs(matches, SME, count) {
   const tabRe = /\t/g;
   if (
@@ -7,9 +5,6 @@ async function testTabs(matches, SME, count) {
     tabRe.test(matches.groups.host_col_2) ||
     tabRe.test(matches.groups.host_info)
   ) {
-    log("info", "55", `${SME}`, "runJob", "Failed Regex", {
-      group: matches[0],
-    });
   }
 }
 

@@ -1,6 +1,5 @@
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
-const { log } = require("../../../logger");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
@@ -47,12 +46,8 @@ async function extract(job_id, extraction_data, run_log) {
       job_id,
       sme: data[0].system_id,
     };
-    console.log("\nMETADATA ERROR");
     console.log(error);
     await addLogEvent(E, run_log, "extract", cat, note, error);
-    await log("error", job_id, "ge_ct_metadata", "FN CATCH", {
-      error: error,
-    });
   }
 }
 

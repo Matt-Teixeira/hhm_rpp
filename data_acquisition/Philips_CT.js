@@ -1,6 +1,5 @@
 const System = require("./System");
 const fs = require("node:fs").promises;
-const { log } = require("../logger");
 const {
   getRedisFileSize,
   getCurrentFileSize,
@@ -54,16 +53,6 @@ class Philips_CT extends System {
         note,
         error
       );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "getRedisFileSize_Class",
-        "FN CALL",
-        {
-          error,
-        }
-      );
     }
   }
 
@@ -96,16 +85,6 @@ class Philips_CT extends System {
         this.cat,
         note,
         error
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "updateRedisFileSize_Class",
-        "FN CALL",
-        {
-          error,
-        }
       );
     }
   }
@@ -150,16 +129,6 @@ class Philips_CT extends System {
         note,
         error
       );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "updateRedisFileSize_Class",
-        "FN CALL",
-        {
-          error,
-        }
-      );
     }
   }
 
@@ -198,10 +167,6 @@ class Philips_CT extends System {
             this.det,
             note
           );
-          await log("error", this.job_id, this.sme, "getFileData", "FN CALL", {
-            message: `Delta was a negative value: ${this.delta}`,
-            file: this.complete_file_path,
-          });
         }
         return;
       }
@@ -215,9 +180,6 @@ class Philips_CT extends System {
           this.det,
           note
         );
-        await log("info", this.job_id, this.sme, "getFileData", "FN CALL", {
-          delta: this.delta,
-        });
 
         if (this.delta === 0) {
           // Get file's last mod datetime
@@ -233,10 +195,6 @@ class Philips_CT extends System {
             this.det,
             note
           );
-          await log("warn", this.job_id, this.sme, "getFileData", "FN CALL", {
-            message: `No file data to read. Delta: ${this.delta}`,
-            last_mod: file_mod_datetime,
-          });
           this.file_data = null;
           return;
         }
@@ -258,16 +216,6 @@ class Philips_CT extends System {
         this.cat,
         note,
         error
-      );
-      await log(
-        "error",
-        this.job_id,
-        this.sme,
-        "getFileData_Class",
-        "FN CALL",
-        {
-          error,
-        }
       );
     }
   }
