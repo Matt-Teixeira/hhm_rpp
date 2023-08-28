@@ -35,7 +35,8 @@ class GE_CT_CV_MRI extends System {
     try {
       this.prev_file_size = await getRedisFileSize(
         this.sme,
-        this.file_config.file_name
+        this.file_config.file_name,
+        this.run_log
       );
       note.prev_file_size = this.prev_file_size;
       await this.addLogEvent(
@@ -68,7 +69,8 @@ class GE_CT_CV_MRI extends System {
         this.sme,
         this.fileSizePath,
         this.sysConfigData.hhm_config.file_path,
-        this.file_config.file_name
+        this.file_config.file_name,
+        this.run_log
       );
       note.current_file_size = this.current_file_size;
       if (!this.current_file_size) {
@@ -156,7 +158,8 @@ class GE_CT_CV_MRI extends System {
         this.sme,
         this.updateSizePath,
         this.sysConfigData.hhm_config.file_path,
-        this.file_config.file_name
+        this.file_config.file_name,
+        this.run_log
       );
     } catch (error) {
       this.addLogEvent(

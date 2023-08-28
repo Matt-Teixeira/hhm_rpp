@@ -132,7 +132,12 @@ async archive_file(complete_file_path) {
       null
     );
     try {
-      await update_redis_last_file(this.sme, file, rmmu_file_type);
+      await update_redis_last_file(
+        this.sme,
+        file,
+        rmmu_file_type,
+        this.run_log
+      );
     } catch (error) {
       await this.addLogEvent(
         this.E,
@@ -163,7 +168,8 @@ async archive_file(complete_file_path) {
     try {
       this.last_file_parsed = await get_last_cached_file(
         this.sme,
-        rmmu_file_type
+        rmmu_file_type,
+        this.run_log
       );
     } catch (error) {
       await this.addLogEvent(

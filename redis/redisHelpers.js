@@ -6,7 +6,7 @@ const {
   tag: { cal, det, cat, seq, qaf },
 } = require("../utils/logger/enums");
 
-async function updateRedisFileSize(sme, exec_path, file_path, file) {
+async function updateRedisFileSize(sme, exec_path, file_path, file, run_log) {
   let note = { sme, exec_path, file_path, file };
   const redisClient = await initRedis();
   try {
@@ -26,7 +26,7 @@ async function updateRedisFileSize(sme, exec_path, file_path, file) {
   }
 }
 
-async function getRedisFileSize(sme, file) {
+async function getRedisFileSize(sme, file, run_log) {
   try {
     const redisClient = await initRedis();
 
@@ -45,7 +45,7 @@ async function getRedisFileSize(sme, file) {
   }
 }
 
-async function getCurrentFileSize(sme, exec_path, file_path, file) {
+async function getCurrentFileSize(sme, exec_path, file_path, file, run_log) {
   let note = { sme, exec_path, file_path, file };
   try {
     const redisClient = await initRedis();
@@ -70,7 +70,7 @@ async function getCurrentFileSize(sme, exec_path, file_path, file) {
   }
 }
 
-async function passForProcessing(sme, array) {
+async function passForProcessing(sme, array, run_log) {
   let note = { sme, array };
   try {
     const redisClient = await initRedis();
@@ -105,7 +105,7 @@ async function getRedisLine(sme, file, run_log) {
   }
 }
 
-async function updateRedisLine(sme, file, first_line) {
+async function updateRedisLine(sme, file, first_line, run_log) {
   let note = { sme, file, first_line };
   const redisClient = await initRedis();
   try {
@@ -119,7 +119,7 @@ async function updateRedisLine(sme, file, first_line) {
   }
 }
 
-async function getRedisLinePositions(sme, file) {
+async function getRedisLinePositions(sme, file, run_log) {
   let note = { sme, file };
   const redisClient = await initRedis();
   try {

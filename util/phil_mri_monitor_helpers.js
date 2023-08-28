@@ -57,8 +57,9 @@ async function insertData(run_log, col_name, arr) {
     const queryStr = `INSERT INTO mag.philips_mri_monitoring_data(system_id, host_datetime, date, ${col_name}) VALUES($1, $2, $3, $4)`;
     await db.none(queryStr, arr);
   } catch (error) {
+    let note = { col_name, arr };
     console.log(error);
-    await addLogEvent(E, run_log, "insertData", cat, { col_name, arr }, error);
+    await addLogEvent(E, run_log, "insertData", cat, note, error);
   }
 }
 

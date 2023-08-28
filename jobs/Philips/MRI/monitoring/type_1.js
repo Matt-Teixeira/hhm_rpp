@@ -49,7 +49,7 @@ async function type_1(System, directory) {
             file_data.file_name
           );
         }
-        await update_jsonb_state(System.job_id, System.sysConfigData.id, [
+        await update_jsonb_state(System.run_log, System.sysConfigData.id, [
           date,
         ]);
       }

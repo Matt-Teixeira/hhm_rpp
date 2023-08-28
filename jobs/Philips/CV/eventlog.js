@@ -68,14 +68,19 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
       return;
     }
 
-    const prevFileSize = await getRedisFileSize(sme, file_config.file_name);
+    const prevFileSize = await getRedisFileSize(
+      sme,
+      file_config.file_name,
+      run_log
+    );
 
     // START: Check Redis delta. Delta === 0 if file not rotated (previously parsed data)
     const currentFileSize = await getCurrentFileSize(
       sme,
       fileSizePath,
       sysConfigData.hhm_config.file_path,
-      file_config.file_name
+      file_config.file_name,
+      run_log
     );
 
     const delta = currentFileSize - prevFileSize;
@@ -214,7 +219,8 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
       sme,
       updateSizePath,
       sysConfigData.hhm_config.file_path,
-      file_config.file_name
+      file_config.file_name,
+      run_log
     );
     // insert metadata
     if (memo_data.length > 0) await extract(job_id, memo_data, run_log);

@@ -22,14 +22,14 @@ async function initialUpdate(job_id, sme, file_config, data, run_log) {
     switch (process_type) {
       case "max":
 
-        successful_agg = await maxValue(job_id, sme, data, file_config.column);
+        successful_agg = await maxValue(run_log, sme, data, file_config.column);
         break;
       case "min":
-        successful_agg = await minValue(job_id, sme, data, file_config.column);
+        successful_agg = await minValue(run_log, sme, data, file_config.column);
         break;
       case "bool":
         successful_agg = await booleanValue(
-          job_id,
+          run_log,
           sme,
           data,
           file_config.column

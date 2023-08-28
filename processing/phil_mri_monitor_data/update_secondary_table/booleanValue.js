@@ -52,6 +52,7 @@ async function boolValue(run_log, sme, data, column, capture_datetime) {
     }
     return true;
   } catch (error) {
+    console.log(error);
     let note = { sme: sme, column: column };
     await addLogEvent(E, run_log, "update_secondary: boolValue", cat, note, error);
     return false;

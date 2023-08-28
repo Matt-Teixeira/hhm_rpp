@@ -30,7 +30,7 @@ async function philMonitorTableUpdate(
     switch (processType) {
       case "max":
         successful_agg = await maxValue(
-          job_id,
+          run_log,
           sme,
           data,
           col_name,
@@ -39,7 +39,7 @@ async function philMonitorTableUpdate(
         break;
       case "min":
         successful_agg = await minValue(
-          job_id,
+          run_log,
           sme,
           data,
           col_name,
@@ -48,7 +48,7 @@ async function philMonitorTableUpdate(
         break;
       case "bool":
         successful_agg = await booleanValue(
-          job_id,
+          run_log,
           sme,
           data,
           col_name,

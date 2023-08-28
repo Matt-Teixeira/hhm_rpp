@@ -10,10 +10,10 @@ const {
   tag: { cal, cat, det },
 } = require("../../../utils/logger/enums");
 
-async function maxValue(job_id, sme, data, column) {
+async function maxValue(run_log, sme, data, column) {
   try {
     // Get all rows/dates for this sme
-    const systemDates = await getExistingDates(job_id, sme);
+    const systemDates = await getExistingDates(run_log, sme);
 
     let bucket = [];
     let prevData = data[0].host_date; //Set to first date in file data(file capture groups)
@@ -32,7 +32,7 @@ async function maxValue(job_id, sme, data, column) {
 
         if (systemDates.includes(prevData)) {
           // If date exists for sme: UPDATE row
-          await updateTable(job_id, column, [maxValue, sme, prevData]);
+          await updateTable(run_log, column, [maxValue, sme, prevData]);
           bucket = [];
           prevData = obs.host_date;
           bucket.push(obs[column]);
@@ -40,7 +40,7 @@ async function maxValue(job_id, sme, data, column) {
           // If date dose not exist: INSERT new row
           let dtObj = await convertDT(prevData);
 
-          await insertData(job_id, column, [sme, dtObj, prevData, maxValue]);
+          await insertData(run_log, column, [sme, dtObj, prevData, maxValue]);
           bucket = [];
           prevData = obs.host_date;
           bucket.push(obs[column]);
@@ -52,7 +52,7 @@ async function maxValue(job_id, sme, data, column) {
     if (systemDates.includes(prevData)) {
       // If date exists for sme: UPDATE row
       const maxValue = Math.max(...bucket);
-      await updateTable(job_id, column, [
+      await updateTable(run_log, column, [
         maxValue,
         sme,
         data[data.length - 1].host_date,
@@ -61,7 +61,7 @@ async function maxValue(job_id, sme, data, column) {
       // If date dose not exist: INSERT new row
       const maxValue = Math.max(...bucket);
       let dtObj = await convertDT(data[data.length - 1].host_date);
-      await insertData(job_id, column, [
+      await insertData(run_log, column, [
         sme,
         dtObj,
         data[data.length - 1].host_date,

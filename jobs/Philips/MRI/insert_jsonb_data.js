@@ -95,7 +95,11 @@ async function phil_mri_monitor(System, directory) {
 
     // Skip db insert step if no new data was pushed into jsonData{}
     if (Object.keys(jsonData).length === 0) {
-      note.message = "No new monitoring data found.";
+      let note = {
+        job_id: System.job_id,
+        sme: System.sme,
+        message: "No new monitoring data found.",
+      };
       await addLogEvent(W, System.run_log, "phil_mri_monitor", det, note, null);
       return [null, null, null];
     }

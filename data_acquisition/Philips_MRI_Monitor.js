@@ -69,7 +69,7 @@ class PHILIPS_MRI_MONITORING {
       null
     );
 
-    let last_line = await getRedisLine(this.sme, file.file_name);
+    let last_line = await getRedisLine(this.sme, file.file_name, this.run_log);
 
     note.last_line = last_line;
     await addLogEvent(
@@ -170,7 +170,7 @@ class PHILIPS_MRI_MONITORING {
         null
       );
 
-      await updateRedisLine(this.sme, file_name, line);
+      await updateRedisLine(this.sme, file_name, line, this.run_log);
     } catch (error) {
       await addLogEvent(
         E,

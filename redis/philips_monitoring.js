@@ -5,7 +5,7 @@ const {
   tag: { cal, det, cat, seq, qaf },
 } = require("../utils/logger/enums");
 
-async function getRedisLine(sme, file) {
+async function getRedisLine(sme, file, run_log) {
   const redisClient = await initRedis();
   let note = {
     sme,
@@ -27,7 +27,7 @@ async function getRedisLine(sme, file) {
   }
 }
 
-async function updateRedisLine(sme, file, first_line) {
+async function updateRedisLine(sme, file, first_line, run_log) {
   let note = {
     sme,
     file,
@@ -48,7 +48,7 @@ async function updateRedisLine(sme, file, first_line) {
   }
 }
 
-async function update_redis_last_file(sme, file, rmmu_file_type) {
+async function update_redis_last_file(sme, file, rmmu_file_type, run_log) {
   let note = {
     sme,
     file,
@@ -66,7 +66,7 @@ async function update_redis_last_file(sme, file, rmmu_file_type) {
   }
 }
 
-async function get_last_cached_file(sme, rmmu_file_type) {
+async function get_last_cached_file(sme, rmmu_file_type, run_log) {
   let note = {
     sme,
     rmmu_file_type,

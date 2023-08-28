@@ -40,7 +40,8 @@ class PHILIPS_MRI_LOGCURRENT extends System {
     try {
       this.prev_file_size = await getRedisFileSize(
         this.sme,
-        this.file_config[this.file_config_prop_name].file_name
+        this.file_config[this.file_config_prop_name].file_name,
+        this.run_log
       );
 
       note.prev_file_size = this.prev_file_size;
@@ -77,7 +78,8 @@ class PHILIPS_MRI_LOGCURRENT extends System {
         this.sme,
         this.fileSizePath,
         this.sysConfigData.hhm_config.file_path,
-        this.file_config[this.file_config_prop_name].file_name
+        this.file_config[this.file_config_prop_name].file_name,
+        this.run_log
       );
       note.current_file_size = this.current_file_size;
 
@@ -160,7 +162,8 @@ class PHILIPS_MRI_LOGCURRENT extends System {
         this.sme,
         this.updateSizePath,
         this.sysConfigData.hhm_config.file_path,
-        this.file_config[this.file_config_prop_name].file_name
+        this.file_config[this.file_config_prop_name].file_name,
+        this.run_log
       );
     } catch (error) {
       console.log(error);

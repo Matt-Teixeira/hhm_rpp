@@ -47,6 +47,7 @@ async function maxValue(run_log, sme, data, column, capture_datetime) {
     }
     return true;
   } catch (error) {
+    console.log(error);
     let note = { sme: sme, column: column };
     await addLogEvent(
       E,

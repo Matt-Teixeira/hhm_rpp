@@ -109,7 +109,12 @@ class Siemens_10 extends System {
         this.cal,
         note
       );
-      await updateRedisLine(this.sme, this.file_config.file_name, first_line);
+      await updateRedisLine(
+        this.sme,
+        this.file_config.file_name,
+        first_line,
+        this.run_log
+      );
     } catch (error) {
       await this.addLogEvent(
         this.E,
