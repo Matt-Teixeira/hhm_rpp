@@ -102,7 +102,8 @@ class PHILIPS_MRI_LOGCURRENT extends System {
         error
       );
     }
-    this.checkFileExists();
+    let isFile = this.checkFileExists();
+    if (!isFile) return null;
     this.getFileSizeDelta();
   }
 
@@ -113,11 +114,19 @@ class PHILIPS_MRI_LOGCURRENT extends System {
       file: this.file_config[this.file_config_prop_name].file_name,
     };
     try {
-      if (this.current_file_size === null) {
-        throw new Error(
-          "File not found in directory: " + this.complete_file_path
+      if (!this.current_file_size) {
+        note.message = "no such file or directory";
+        this.addLogEvent(
+          this.W,
+          this.run_log,
+          "PHILIPS_MRI_LOGCURRENT: checkFileExists",
+          this.cat,
+          note,
+          null
         );
+        return false;
       }
+      return true;
     } catch (error) {
       console.log(error);
       this.addLogEvent(

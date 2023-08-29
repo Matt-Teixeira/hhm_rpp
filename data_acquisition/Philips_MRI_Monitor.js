@@ -124,7 +124,7 @@ class PHILIPS_MRI_MONITORING {
         complete_file_path
       );
 
-      console.log("\nLAST LINE");
+      console.log("\nLAST LINE IN FILE TO SAVE TO REDIS");
       console.log(last_line);
 
       note.last_line = last_line;
