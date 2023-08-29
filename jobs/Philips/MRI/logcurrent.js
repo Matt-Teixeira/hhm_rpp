@@ -38,7 +38,7 @@ async function phil_mri_logcurrent(file_config, System) {
 
     await System.getFileData();
 
-    if (System.file_data === null) return;
+    if (!System.file_data) return;
 
     // ** End Data Acquisition
 

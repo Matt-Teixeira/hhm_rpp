@@ -33,6 +33,7 @@ async function updateRedisLine(sme, file, first_line, run_log) {
     file,
     first_line,
   };
+  if (!first_line) return;
   try {
     const redisClient = await initRedis();
 

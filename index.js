@@ -62,7 +62,12 @@ const onBoot = async () => {
     const queries = {
       CT: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality LIKE '%CT' AND hhm_config->'run_group' = '1'",
       CV: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND hhm_config->'run_group' = '1'",
-      MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1'",
+      MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1' AND manufacturer != 'Philips'",
+      PHILIPS_MRI_1: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1' AND manufacturer = 'Philips'",
+      PHILIPS_MRI_2: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '2' AND manufacturer = 'Philips'",
+      PHILIPS_MRI_3: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '3' AND manufacturer = 'Philips'",
+      PHILIPS_MRI_4: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '4' AND manufacturer = 'Philips'",
+      PHILIPS_MRI_5: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '5' AND manufacturer = 'Philips'",
       phil_cv_hr_24:
         "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND manufacturer = 'Philips' AND hhm_config->'run_group' = '2'",
       all: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL",
@@ -72,6 +77,8 @@ const onBoot = async () => {
 
     const system_array = await pgPool.any(queryString);
     console.log(system_array);
+
+    return
     /* 
     const child_processes = [];
     for await (const system of system_array) {

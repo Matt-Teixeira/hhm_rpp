@@ -9,7 +9,12 @@
     "read_log": "node logReader/index.js",
     "ct": "node index.js CT",
     "cv": "node index.js CV",
-    "mri": "node --max-old-space-size=6144 index.js MRI",
+    "mri": "node index.js MRI",
+    "philips_mri_1": "node --max-old-space-size=6144 index.js PHILIPS_MRI_1",
+    "philips_mri_2": "node --max-old-space-size=6144 index.js PHILIPS_MRI_2",
+    "philips_mri_3": "node --max-old-space-size=6144 index.js PHILIPS_MRI_3",
+    "philips_mri_4": "node --max-old-space-size=6144 index.js PHILIPS_MRI_4",
+    "philips_mri_5": "node --max-old-space-size=6144 index.js PHILIPS_MRI_5",
     "phil_cv_hr_24": "node index phil_cv_hr_24"
   },
   "keywords": [],
