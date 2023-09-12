@@ -76,9 +76,7 @@ const onBoot = async () => {
     let queryString = queries[shell_value];
 
     const system_array = await pgPool.any(queryString);
-    console.log(system_array);
 
-    return
     /* 
     const child_processes = [];
     for await (const system of system_array) {
