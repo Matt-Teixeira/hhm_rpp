@@ -119,6 +119,10 @@ async function ge_cv_sys_error(System) {
 
     const mappedData = mapDataToSchema(data, ge_cv_syserror_schema);
 
+    console.log("\nmappedData - ge_cv");
+    console.log(System.sme)
+    console.log(mappedData[mappedData.length - 1]);
+
     // ** End Parse
 
     // ** Begin Persist

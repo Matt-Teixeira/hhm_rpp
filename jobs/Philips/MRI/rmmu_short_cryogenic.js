@@ -153,6 +153,10 @@ async function phil_mri_rmmu_short(System) {
 
       const mappedData = mapDataToSchema(data, phil_mri_rmmu_short_schema);
 
+      console.log("\nmappedData - rmmu_short");
+      console.log(System.sme);
+      console.log(mappedData[mappedData.length - 1]);
+
       // ** End Parse
 
       // ** Begin Persist

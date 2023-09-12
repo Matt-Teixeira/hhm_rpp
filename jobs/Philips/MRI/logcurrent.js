@@ -124,6 +124,10 @@ async function phil_mri_logcurrent(file_config, System) {
     // Homogenize data to prep for insert to db
     const mappedData = mapDataToSchema(data, phil_mri_logcurrent_schema);
 
+    console.log("\nmappedData - logcurrent.log");
+    console.log(System.sme)
+    console.log(mappedData[mappedData.length - 1]);
+
     if (mappedData.length > 1_000_000) {
       const mappedData_2 = mappedData.splice(
         0,

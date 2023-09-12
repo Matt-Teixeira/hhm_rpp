@@ -117,6 +117,10 @@ async function phil_ct_eal(System) {
 
     const mappedData = mapDataToSchema(data, philips_ct_eal_schema);
 
+    console.log("\nmappedData - philips_ct - eal");
+    console.log(System.sme)
+    console.log(mappedData[mappedData.length - 1]);
+
     // ** End Parse
 
     // ** Begin Persist

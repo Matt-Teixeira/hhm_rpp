@@ -79,7 +79,7 @@ async function phil_rmmu_history(System) {
       // ** Begin Parse **
 
       let matches = fileData.matchAll(philips_re.mri[parsers[0]]);
-      if(!matches) {
+      if (!matches) {
         let note = {
           job_id: System.job_id,
           sme: System.sme,
@@ -96,7 +96,6 @@ async function phil_rmmu_history(System) {
           note,
           null
         );
-
       }
       let metaData = fileData.match(philips_re.mri[parsers[1]]);
 
@@ -108,14 +107,14 @@ async function phil_rmmu_history(System) {
 
       // Loops through each match in 1 file in dir
       for await (const match of matches) {
-        if(!match) {
+        if (!match) {
           let note = {
             job_id: System.job_id,
             sme: System.sme,
             file: System.file_config,
             message: "NO MATCH FOUND",
           };
-  
+
           await System.addLogEvent(
             System.W,
             System.run_log,
@@ -165,6 +164,10 @@ async function phil_rmmu_history(System) {
       }
 
       const mappedData = mapDataToSchema(data, philips_mri_rmmu_history);
+
+      console.log("\nmappedData - rmmu_history");
+      console.log(System.sme);
+      console.log(mappedData[mappedData.length - 1]);
 
       // ** End Parse **
 

@@ -127,6 +127,10 @@ async function ge_mri_gesys(System) {
 
     const mappedData = mapDataToSchema(data, ge_mri_gesys_schema);
 
+    console.log("\nmappedData - ge_mri");
+    console.log(System.sme)
+    console.log(mappedData[mappedData.length - 1]);
+
     // ** End Parse
 
     // ** Begin Persist

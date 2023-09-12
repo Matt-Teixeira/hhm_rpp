@@ -135,6 +135,10 @@ const win10_siemens_mri = async (System) => {
 
     const mappedData = mapDataToSchema(data, siemens_ct_mri);
 
+    console.log("\nmappedData - siemens_mri");
+    console.log(System.sme);
+    console.log(mappedData[mappedData.length - 1]);
+
     // ** End Parse
 
     // ** Begin Persist

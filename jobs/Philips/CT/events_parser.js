@@ -108,6 +108,10 @@ async function phil_ct_events(System) {
 
     const mappedData = mapDataToSchema(data, philips_ct_events_schema);
 
+    console.log("\nmappedData - philips_ct - events");
+    console.log(System.sme)
+    console.log(mappedData[mappedData.length - 1]);
+
     // ** End Parse
 
     // ** Begin Persist

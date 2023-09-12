@@ -155,6 +155,10 @@ async function phil_mri_rmmu_magnet(System) {
 
       const mappedData = mapDataToSchema(data, philips_mri_rmmu_magnet_schema);
 
+      console.log("\nmappedData - rmmu_magnet");
+      console.log(System.sme);
+      console.log(mappedData[mappedData.length - 1]);
+
       // ** End Parse
 
       // ** Begin Persist

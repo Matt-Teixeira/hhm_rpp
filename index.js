@@ -60,22 +60,36 @@ const onBoot = async () => {
     let shell_value = [process.argv[2]];
 
     const queries = {
-      CT: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality LIKE '%CT' AND hhm_config->'run_group' = '1'",
-      CV: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND hhm_config->'run_group' = '1'",
-      MRI: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1' AND manufacturer != 'Philips'",
-      PHILIPS_MRI_1: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1' AND manufacturer = 'Philips'",
-      PHILIPS_MRI_2: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '2' AND manufacturer = 'Philips'",
-      PHILIPS_MRI_3: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '3' AND manufacturer = 'Philips'",
-      PHILIPS_MRI_4: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '4' AND manufacturer = 'Philips'",
-      PHILIPS_MRI_5: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '5' AND manufacturer = 'Philips'",
-      phil_cv_hr_24:
+      GE_CT:
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT null AND manufacturer = 'GE' AND modality LIKE '%CT' AND hhm_config->'run_group' = '1'",
+      GE_CV:
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND manufacturer = 'GE' AND modality = 'CV/IR' AND hhm_config->'run_group' = '1'",
+      GE_MRI:
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND manufacturer = 'GE' AND modality = 'MRI' AND hhm_config->'run_group' = '1'",
+      PHILIPS_CT:
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND manufacturer = 'Philips' AND modality LIKE '%CT' AND hhm_config->'run_group' = '1'",
+      PHILIPS_CV:
         "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'CV/IR' AND manufacturer = 'Philips' AND hhm_config->'run_group' = '2'",
-      all: "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL",
+      PHILIPS_MRI_1:
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '1' AND manufacturer = 'Philips'",
+      PHILIPS_MRI_2:
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '2' AND manufacturer = 'Philips'",
+      PHILIPS_MRI_3:
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '3' AND manufacturer = 'Philips'",
+      PHILIPS_MRI_4:
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '4' AND manufacturer = 'Philips'",
+      PHILIPS_MRI_5:
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND modality = 'MRI' AND hhm_config->'run_group' = '5' AND manufacturer = 'Philips'",
+      SIEMENS_CT:
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND manufacturer = 'Siemens' AND modality LIKE '%CT' AND hhm_config->'run_group' = '1'",
+      SIEMENS_MRI:
+        "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND manufacturer = 'Siemens' AND modality = 'MRI' AND hhm_config->'run_group' = '1'",
     };
 
     let queryString = queries[shell_value];
 
     const system_array = await pgPool.any(queryString);
+    console.log(system_array);
 
     /* 
     const child_processes = [];
