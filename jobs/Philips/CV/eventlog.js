@@ -15,6 +15,7 @@ const {
 const execHead = require("../../../read/exec-head");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const extract = require("../../../processing/date_processing/phil_cv/extract_memo_data");
+const { dt_now } = require("../../../util/dates");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
@@ -26,6 +27,7 @@ const {
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
+  const capture_datetime = dt_now();
   const sme = sysConfigData.id;
   // an array in each config accossiated with a file
   const parsers = file_config.parsers;
@@ -177,6 +179,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
           await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
         }
 
+        matches.groups.capture_datetime = capture_datetime;
         matches.groups.host_datetime = dtObject;
 
         data.push(matches.groups);

@@ -58,7 +58,6 @@ const onBoot = async () => {
     console.time();
 
     let shell_value = [process.argv[2]];
-
     const queries = {
       GE_CT:
         "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT null AND manufacturer = 'GE' AND modality LIKE '%CT' AND hhm_config->'run_group' = '1'",
@@ -84,12 +83,17 @@ const onBoot = async () => {
         "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND manufacturer = 'Siemens' AND modality LIKE '%CT' AND hhm_config->'run_group' = '1'",
       SIEMENS_MRI:
         "SELECT id, manufacturer, hhm_config, hhm_file_config from systems WHERE hhm_config IS NOT NULL AND manufacturer = 'Siemens' AND modality = 'MRI' AND hhm_config->'run_group' = '1'",
+      NORM: `
+      SELECT *
+      FROM config.process_config pc
+      INNER JOIN config.mag mag
+      ON pc.system_id = mag.system_id
+      `,
     };
 
     let queryString = queries[shell_value];
 
     const system_array = await pgPool.any(queryString);
-    console.log(system_array);
 
     /* 
     const child_processes = [];

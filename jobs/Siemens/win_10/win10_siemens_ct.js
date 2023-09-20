@@ -7,6 +7,7 @@ const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
 const extract = require("../../../processing/date_processing/siemens_ct/extract_metadata");
+const { dt_now } = require("../../../util/dates");
 const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
@@ -18,6 +19,7 @@ New data is added to file head.
 */
 
 const win10_siemens_ct = async (System) => {
+  const capture_datetime = dt_now();
   const data = [];
   const extracted_metadata = [];
 
@@ -132,6 +134,7 @@ const win10_siemens_ct = async (System) => {
         );
       }
 
+      matches.groups.capture_datetime = capture_datetime;
       matches.groups.host_datetime = dtObject;
 
       data.push(matches.groups);

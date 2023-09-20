@@ -7,8 +7,10 @@ const { remove_dub_quotes } = require("../../../util/regExHelpers");
 const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
+const { dt_now } = require("../../../util/dates");
 
 async function phil_ct_eal(System) {
+  const capture_datetime = dt_now();
   const data = [];
 
   let note = {
@@ -102,6 +104,7 @@ async function phil_ct_eal(System) {
         );
       }
 
+      match.groups.capture_datetime = capture_datetime;
       match.groups.host_datetime = dtObject;
 
       // Remove double quotes from strings
@@ -118,7 +121,7 @@ async function phil_ct_eal(System) {
     const mappedData = mapDataToSchema(data, philips_ct_eal_schema);
 
     console.log("\nmappedData - philips_ct - eal");
-    console.log(System.sme)
+    console.log(System.sme);
     console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse

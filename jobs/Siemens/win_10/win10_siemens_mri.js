@@ -6,6 +6,7 @@ const { siemens_ct_mri } = require("../../../persist/pg-schemas");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
+const { dt_now } = require("../../../util/dates");
 const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
@@ -16,6 +17,7 @@ const {
 */
 
 const win10_siemens_mri = async (System) => {
+  const capture_datetime = dt_now();
   const data = [];
   lastModPath = "./read/sh/get_file_last_mod.sh";
 
@@ -123,6 +125,7 @@ const win10_siemens_mri = async (System) => {
         );
       }
 
+      matches.groups.capture_datetime = capture_datetime;
       matches.groups.host_datetime = dtObject;
 
       data.push(matches.groups);

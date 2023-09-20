@@ -5,12 +5,14 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { phil_mri_logcurrent_schema } = require("../../../persist/pg-schemas");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
+const { dt_now } = require("../../../util/dates");
 
 const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function phil_mri_logcurrent(file_config, System) {
+  const capture_datetime = dt_now();
   const parsers = file_config.logcurrent.parsers;
   const data = [];
 
@@ -115,6 +117,7 @@ async function phil_mri_logcurrent(file_config, System) {
           );
         }
 
+        matches.groups.capture_datetime = capture_datetime;
         matches.groups.host_datetime = dtObject;
 
         data.push(matches.groups);
@@ -125,7 +128,7 @@ async function phil_mri_logcurrent(file_config, System) {
     const mappedData = mapDataToSchema(data, phil_mri_logcurrent_schema);
 
     console.log("\nmappedData - logcurrent.log");
-    console.log(System.sme)
+    console.log(System.sme);
     console.log(mappedData[mappedData.length - 1]);
 
     if (mappedData.length > 1_000_000) {

@@ -6,12 +6,14 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const { remove_dub_quotes } = require("../../../util/regExHelpers");
+const { dt_now } = require("../../../util/dates");
 const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 // File data streamed line by line
 async function ge_cv_sys_error(System) {
+  const capture_datetime = dt_now();
   // an array in each config accossiated with a file
   const parsers = System.file_config.parsers;
   const data = [];
@@ -103,6 +105,7 @@ async function ge_cv_sys_error(System) {
           );
         }
 
+        matches.groups.capture_datetime = capture_datetime;
         matches.groups.host_datetime = dtObject;
 
         // Remove double quotes from str

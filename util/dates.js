@@ -30,4 +30,9 @@ async function compare_dates(date) {
   return hours_delta;
 }
 
-module.exports = { convertDT, compare_dates };
+function dt_now() {
+  return  DateTime.now().setZone('America/New_York').toISO();
+}
+
+
+module.exports = { convertDT, compare_dates, dt_now };
