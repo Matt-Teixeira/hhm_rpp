@@ -23,7 +23,7 @@ class GE_CT_CV_MRI extends System {
 
   constructor(sysConfigData, file_config, job_id, run_log) {
     super(sysConfigData, file_config, job_id, run_log);
-    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${file_config.file_name}`;
+    this.complete_file_path = `${sysConfigData.debian_server_path}/${file_config.file_name}`;
   }
 
   async getRedisFileSize() {
@@ -68,7 +68,7 @@ class GE_CT_CV_MRI extends System {
       this.current_file_size = await getCurrentFileSize(
         this.sme,
         this.fileSizePath,
-        this.sysConfigData.hhm_config.file_path,
+        this.sysConfigData.debian_server_path,
         this.file_config.file_name,
         this.run_log
       );
@@ -157,7 +157,7 @@ class GE_CT_CV_MRI extends System {
       await updateRedisFileSize(
         this.sme,
         this.updateSizePath,
-        this.sysConfigData.hhm_config.file_path,
+        this.sysConfigData.debian_server_path,
         this.file_config.file_name,
         this.run_log
       );
@@ -179,6 +179,7 @@ class GE_CT_CV_MRI extends System {
       sme: this.sme,
       file: this.file_config.file_name,
     };
+    console.log(note);
     await this.addLogEvent(
       this.I,
       this.run_log,

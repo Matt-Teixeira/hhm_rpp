@@ -16,7 +16,7 @@ async function philMonitorTableUpdate(
   capture_datetime,
   run_log
 ) {
-  let processType = file_config.aggregation;
+  let processType = file_config.agg;
   let successful_agg = false;
   let note = {
     job_id,

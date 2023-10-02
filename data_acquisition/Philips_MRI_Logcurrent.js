@@ -16,7 +16,7 @@ class PHILIPS_MRI_LOGCURRENT extends System {
   constructor(sysConfigData, file_config, job_id, run_log, file_prop_name) {
     super(sysConfigData, file_config, job_id, run_log);
     this.file_config_prop_name = file_prop_name;
-    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${file_config[file_prop_name].file_name}`;
+    this.complete_file_path = `${sysConfigData.debian_server_path}/${file_config.file_name}`;
   }
 
   updateSizePath = "./read/sh/readFileSize.sh";
@@ -40,7 +40,7 @@ class PHILIPS_MRI_LOGCURRENT extends System {
     try {
       this.prev_file_size = await getRedisFileSize(
         this.sme,
-        this.file_config[this.file_config_prop_name].file_name,
+        this.file_config.file_name,
         this.run_log
       );
 
@@ -77,8 +77,8 @@ class PHILIPS_MRI_LOGCURRENT extends System {
       this.current_file_size = await getCurrentFileSize(
         this.sme,
         this.fileSizePath,
-        this.sysConfigData.hhm_config.file_path,
-        this.file_config[this.file_config_prop_name].file_name,
+        this.sysConfigData.debian_server_path,
+        this.file_config.file_name,
         this.run_log
       );
       note.current_file_size = this.current_file_size;
@@ -111,7 +111,7 @@ class PHILIPS_MRI_LOGCURRENT extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.file_config[this.file_config_prop_name].file_name,
+      file: this.file_config.file_name,
     };
     try {
       if (!this.current_file_size) {
@@ -144,7 +144,7 @@ class PHILIPS_MRI_LOGCURRENT extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.file_config[this.file_config_prop_name].file_name,
+      file: this.file_config.file_name,
     };
 
     this.delta = this.current_file_size - this.prev_file_size;
@@ -164,14 +164,14 @@ class PHILIPS_MRI_LOGCURRENT extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.file_config[this.file_config_prop_name].file_name,
+      file: this.file_config.file_name,
     };
     try {
       await updateRedisFileSize(
         this.sme,
         this.updateSizePath,
-        this.sysConfigData.hhm_config.file_path,
-        this.file_config[this.file_config_prop_name].file_name,
+        this.sysConfigData.debian_server_path,
+        this.file_config.file_name,
         this.run_log
       );
     } catch (error) {
@@ -199,7 +199,7 @@ class PHILIPS_MRI_LOGCURRENT extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.file_config[this.file_config_prop_name].file_name,
+      file: this.file_config.file_name,
     };
     try {
       if (

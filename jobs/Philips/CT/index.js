@@ -6,7 +6,7 @@ const { Philips_CT } = require("../../../data_acquisition/Philips_CT");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, cat, det },
+  tag: { cal, cat, det }
 } = require("../../../utils/logger/enums");
 
 const philips_ct_parsers = async (job_id, sysConfigData, run_log) => {
@@ -18,14 +18,24 @@ const philips_ct_parsers = async (job_id, sysConfigData, run_log) => {
   try {
     await addLogEvent(I, run_log, "philips_ct_parsers", cal, note, null);
 
-    for await (const file of sysConfigData.hhm_file_config) {
-      switch (file.query) {
+    for await (const file of sysConfigData.log_config) {
+      switch (file.dir_name) {
         case "eal":
-          const Eal_System = new Philips_CT(sysConfigData, file, job_id, run_log);
+          const Eal_System = new Philips_CT(
+            sysConfigData,
+            file,
+            job_id,
+            run_log
+          );
           await phil_ct_eal(Eal_System);
           break;
         case "events":
-          const Events_System = new Philips_CT(sysConfigData, file, job_id, run_log);
+          const Events_System = new Philips_CT(
+            sysConfigData,
+            file,
+            job_id,
+            run_log
+          );
           await phil_ct_events(Events_System);
           break;
         default:

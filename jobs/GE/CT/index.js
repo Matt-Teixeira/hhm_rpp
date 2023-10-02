@@ -3,22 +3,22 @@ const GE_CT_CV_MRI = require("../../../data_acquisition/GE_CT_CV_MRI");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, cat, det },
+  tag: { cal, cat, det }
 } = require("../../../utils/logger/enums");
 
 const ge_ct_parsers = async (job_id, sysConfigData, run_log) => {
   let note = {
     job_id: job_id,
-    sme: sysConfigData.id,
+    sme: sysConfigData.id
   };
+
   try {
     await addLogEvent(I, run_log, "ge_ct_parsers", cal, note, null);
 
-    for await (const file of sysConfigData.hhm_file_config) {
-      switch (file.query) {
+    for await (const file of sysConfigData.log_config) {
+      switch (file.dir_name) {
         case "gesys":
           const System = new GE_CT_CV_MRI(sysConfigData, file, job_id, run_log);
-
           await ge_ct_gesys(System);
           break;
         default:

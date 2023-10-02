@@ -6,7 +6,7 @@ const { updateRedisLine, getRedisLine } = require("../redis/redisHelpers");
 class Siemens_10 extends System {
   constructor(sysConfigData, file_config, job_id, run_log) {
     super(sysConfigData, file_config, job_id, run_log);
-    this.complete_file_path = `${sysConfigData.hhm_config.file_path}/${file_config.file_name}`;
+    this.complete_file_path = `${sysConfigData.debian_server_path}/${file_config.file_name}`;
   }
   lastModPath = "./read/sh/get_file_last_mod.sh";
   redis_line;

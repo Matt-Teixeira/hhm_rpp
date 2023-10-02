@@ -101,7 +101,7 @@ async function ge_mri_gesys(System) {
       const dtObject = await generateDateTime(
         System.job_id,
         matchGroups.groups.system_id,
-        System.file_config.pg_table,
+        System.file_config.pg_tables[0],
         matchGroups.groups.host_date,
         matchGroups.groups.host_time
       );

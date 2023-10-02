@@ -12,7 +12,7 @@ async function phil_mri_monitor(System, directory) {
     let redis_cache = [];
 
     // Loop through monitoring files in monitoring directory
-    for await (const file of directory.monitoring) {
+    for await (const file of directory) {
       let note = {
         job_id: System.job_id,
         sme: System.sme,
@@ -21,7 +21,7 @@ async function phil_mri_monitor(System, directory) {
 
       await addLogEvent(I, System.run_log, "phil_mri_monitor", det, note, null);
       //if (file.file_name === "monitor_System_TempTechRoom.dat") {
-      const complete_file_path = `${System.sysConfigData.hhm_config.file_path}/monitoring/${file.file_name}`;
+      const complete_file_path = `${System.sysConfigData.debian_server_path}/monitoring/${file.file_name}`;
 
       let file_data;
 

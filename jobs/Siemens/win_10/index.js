@@ -7,31 +7,31 @@ const {
   tag: { cal, det, cat },
 } = require("../../../utils/logger/enums");
 
-const win_10_parsers = async (job_id, sysConfigData, fileConfig, run_log) => {
+const win_10_parsers = async (job_id, sysConfigData, file_config, run_log) => {
   let note = {
     job_id,
     sme: sysConfigData.id,
-    file_config: fileConfig,
+    file_config: file_config,
   };
   await addLogEvent(I, run_log, "win_10_parsers", cal, note, null);
 
-  switch (sysConfigData.hhm_config.modality) {
+  switch (sysConfigData.modality) {
     case "CT":
       const CT_System = new Siemens_10(
         sysConfigData,
-        fileConfig,
+        file_config,
         job_id,
         run_log
       );
       await win10_siemens_ct(CT_System);
       break;
-    case "CV":
-      //await parse_win_10(job_id, sysConfigData, fileConfig);
+    case "CV/IR":
+      //await parse_win_10(job_id, sysConfigData, file_config);
       break;
     case "MRI":
       const MRI_System = new Siemens_10(
         sysConfigData,
-        fileConfig,
+        file_config,
         job_id,
         run_log
       );

@@ -13,8 +13,8 @@ const ge_mri_parsers = async (job_id, sysConfigData, run_log) => {
   };
   try {
     await addLogEvent(I, run_log, "ge_mri_parsers", cal, note, null);
-    for await (const file of sysConfigData.hhm_file_config) {
-      switch (file.query) {
+    for await (const file of sysConfigData.log_config) {
+      switch (file.dir_name) {
         case "sysError":
           const System = new GE_CT_CV_MRI(sysConfigData, file, job_id, run_log);
           await ge_cv_sysError(System);

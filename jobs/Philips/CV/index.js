@@ -14,8 +14,8 @@ const philips_cv_parsers = async (job_id, sysConfigData, run_log) => {
   };
   try {
     await addLogEvent(I, run_log, "philips_ct_parsers", cal, note, null);
-    for await (const file of sysConfigData.hhm_file_config) {
-      switch (file.query) {
+    for await (const file of sysConfigData.log_config) {
+      switch (file.dir_name) {
         case "EventLog":
           await phil_cv_eventlog(job_id, sysConfigData, file, run_log);
           break;

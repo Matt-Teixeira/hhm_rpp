@@ -4,35 +4,45 @@ const minValue = require("./minValue");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, cat, det },
+  tag: { cal, cat, det }
 } = require("../../../utils/logger/enums");
 
 async function initialUpdate(job_id, sme, file_config, data, run_log) {
-  let process_type = file_config.aggregation;
+  console.log(data);
+  let process_type = file_config.agg;
   let successful_agg = false;
   let note = {
     job_id,
     sme,
     file: file_config.file_name,
-    process_type,
+    process_type
   };
   try {
     await addLogEvent(I, run_log, "initialUpdate", cal, note, null);
 
     switch (process_type) {
       case "max":
-
-        successful_agg = await maxValue(run_log, sme, data, file_config.column);
+        successful_agg = await maxValue(
+          run_log,
+          sme,
+          data,
+          file_config.column_name
+        );
         break;
       case "min":
-        successful_agg = await minValue(run_log, sme, data, file_config.column);
+        successful_agg = await minValue(
+          run_log,
+          sme,
+          data,
+          file_config.column_name
+        );
         break;
       case "bool":
         successful_agg = await booleanValue(
           run_log,
           sme,
           data,
-          file_config.column
+          file_config.column_name
         );
         break;
       default:

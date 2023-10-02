@@ -8,7 +8,7 @@ const extract = require("../../../processing/date_processing/ge_ct/extract_metad
 const { dt_now } = require("../../../util/dates");
 
 const {
-  pg_column_sets: pg_cs,
+  pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 // File data parsed in bulk. One regex to group array of data blocks. Second regex to parse blocks.
@@ -24,7 +24,7 @@ async function ge_ct_gesys(System) {
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: System.file_config.file_name,
+    file: System.file_config.file_name
   };
 
   try {
@@ -62,7 +62,7 @@ async function ge_ct_gesys(System) {
         sme: System.sme,
         file: System.file_config.file_name,
         re: `${ge_re.ct.gesys[parsers[0]]}`,
-        message: "NO MATCH FOUND",
+        message: "NO MATCH FOUND"
       };
       await System.addLogEvent(
         System.W,
@@ -86,7 +86,7 @@ async function ge_ct_gesys(System) {
           prev_epoch: data[data.length - 1].epoch,
           sr_group: data[data.length - 1].sr,
           re: `${ge_re.ct.gesys[parsers[1]]}`,
-          message: "NO MATCH FOUND",
+          message: "NO MATCH FOUND"
         };
         await System.addLogEvent(
           System.W,
@@ -109,7 +109,7 @@ async function ge_ct_gesys(System) {
       const dtObject = await generateDateTime(
         System.job_id,
         matchGroups.groups.system_id,
-        System.file_config.pg_table,
+        System.file_config.pg_tables[0],
         matchGroups.groups.host_date,
         matchGroups.groups.host_time
       );
@@ -122,7 +122,7 @@ async function ge_ct_gesys(System) {
           time: matchGroups.groups.host_time,
           prev_epoch: data[data.length - 1].epoch,
           sr_group: data[data.length - 1].sr,
-          message: "datetime object null",
+          message: "datetime object null"
         };
         await System.addLogEvent(
           System.W,
@@ -145,7 +145,7 @@ async function ge_ct_gesys(System) {
         extraction_data.push({
           system_id: matchGroups.groups.system_id,
           message: matchGroups.groups.message,
-          host_datetime: matchGroups.groups.host_datetime,
+          host_datetime: matchGroups.groups.host_datetime
         });
       }
     }
@@ -155,7 +155,6 @@ async function ge_ct_gesys(System) {
     console.log("\nmappedData - ge_ct");
     console.log(System.sme);
     console.log(mappedData[mappedData.length - 1]);
-
     // ** End Parse
 
     // ** Begin Persist

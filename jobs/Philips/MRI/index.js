@@ -11,39 +11,74 @@ const PHILIPS_MRI_RMMU = require("../../../data_acquisition/Philips_MRI_Rmmu");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, cat, det },
+  tag: { cal, cat, det }
 } = require("../../../utils/logger/enums");
 
 const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
   let note = {
     job_id: job_id,
-    sme: sysConfigData.id,
+    sme: sysConfigData.id
   };
 
   try {
     await addLogEvent(I, run_log, "philips_mri_parsers", cal, note, null);
 
-    for await (const directory of sysConfigData.hhm_file_config) {
-      let dir = Object.keys(directory)[0];
-      note.directory = dir;
-      await addLogEvent(I, run_log, "philips_mri_parsers", det, note, null);
+    if (sysConfigData.monitoring_config) {
+      await addLogEvent(
+        I,
+        run_log,
+        "philips_mri_parsers: monitoring",
+        det,
+        note,
+        null
+      );
+      const System_Monitor = new PHILIPS_MRI_MONITORING(
+        job_id,
+        sysConfigData,
+        run_log
+      );
+      await type_1(System_Monitor, sysConfigData.monitoring_config);
+      return;
+    }
+
+    if (sysConfigData.log_config) {
+      await addLogEvent(
+        I,
+        run_log,
+        "philips_mri_parsers: log",
+        det,
+        note,
+        null
+      );
+      const Logcurrent_System = new PHILIPS_MRI_LOGCURRENT_STT(
+        sysConfigData,
+        sysConfigData.log_config,
+        job_id,
+        run_log,
+        sysConfigData.log_config.dir_name
+      );
+      await phil_mri_logcurrent(sysConfigData.log_config, Logcurrent_System);
+      return;
+    }
+
+    for await (const directory of sysConfigData.rmmu_config) {
+      //let dir = Object.keys(directory)[0];
+      let dir = directory.dir_name;
+      note.dir_name = dir;
+
+      await addLogEvent(
+        I,
+        run_log,
+        "philips_mri_parsers: rmmu",
+        det,
+        note,
+        null
+      );
       switch (dir) {
-        case "logcurrent":
-          const Logcurrent_System = new PHILIPS_MRI_LOGCURRENT_STT(
-            sysConfigData,
-            directory,
-            job_id,
-            run_log,
-            dir
-          );
-
-          await phil_mri_logcurrent(directory, Logcurrent_System);
-          break;
-
-        case "rmmu":
+        case "rmmu": // Needs re-config
           const Rmmu_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
-            directory.rmmu,
+            directory,
             job_id,
             run_log,
             dir
@@ -55,7 +90,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
         case "rmmu_short":
           const Rmmu_Short_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
-            directory.rmmu_short,
+            directory,
             job_id,
             run_log,
             dir
@@ -67,7 +102,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
         case "rmmu_long":
           const Rmmu_Long_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
-            directory.rmmu_long,
+            directory,
             job_id,
             run_log,
             dir
@@ -78,22 +113,12 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
         case "rmmu_magnet":
           const Rmmu_Magnet_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
-            directory.rmmu_magnet,
+            directory,
             job_id,
             run_log,
             dir
           );
           await phil_mri_rmmu_magnet(Rmmu_Magnet_System);
-          break;
-
-        case "monitoring":
-          const System_Monitor = new PHILIPS_MRI_MONITORING(
-            job_id,
-            sysConfigData,
-            run_log
-          );
-
-          await type_1(System_Monitor, directory);
           break;
 
         case "stt_magnet":

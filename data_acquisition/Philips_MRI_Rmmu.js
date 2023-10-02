@@ -10,7 +10,7 @@ const {
 class PHILIPS_MRI_RMMU extends System {
   constructor(sysConfigData, file_config, job_id, run_log, file_prop_name) {
     super(sysConfigData, file_config, job_id, run_log);
-    this.directory_path = `${sysConfigData.hhm_config.file_path}/${file_config.query}`;
+    this.directory_path = `${sysConfigData.debian_server_path}/${file_config.dir_name}`;
     this.file_config_prop_name = file_prop_name;
   }
 

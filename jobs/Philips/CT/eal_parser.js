@@ -82,7 +82,7 @@ async function phil_ct_eal(System) {
       const dtObject = await generateDateTime(
         System.job_id,
         match.groups.system_id,
-        System.file_config.pg_table,
+        System.file_config.pg_tables[0],
         match.groups.host_date,
         match.groups.host_time
       );

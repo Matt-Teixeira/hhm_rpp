@@ -15,7 +15,7 @@ const philipsModalities = async (job_id, sysConfigData, run_log) => {
 
   try {
     await addLogEvent(I, run_log, "philipsModalities", cal, note, null);
-    const modality = sysConfigData.hhm_config.modality;
+    const modality = sysConfigData.modality;
 
     switch (modality) {
       case "MRI":
@@ -24,7 +24,7 @@ const philipsModalities = async (job_id, sysConfigData, run_log) => {
       case "CT":
         await philips_ct_parsers(job_id, sysConfigData, run_log);
         break;
-      case "CV":
+      case "CV/IR":
         await philips_cv_parsers(job_id, sysConfigData, run_log);
         break;
       default:

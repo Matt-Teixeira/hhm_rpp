@@ -103,7 +103,7 @@ const win10_siemens_mri = async (System) => {
       const dtObject = await generateDateTime(
         System.jobId,
         matches.groups.system_id,
-        System.file_config.pg_table,
+        System.file_config.pg_tables[0],
         matches.groups.host_date,
         matches.groups.host_time
       );

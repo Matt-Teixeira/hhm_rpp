@@ -12,17 +12,18 @@ const geModalities = async (job_id, sysConfigData, run_log) => {
     job_id: job_id,
     sme: sysConfigData.id
   };
+
   try {
     await addLogEvent(I, run_log, "geModalities", cal, note, null);
 
-    switch (sysConfigData.hhm_config.modality) {
+    switch (sysConfigData.modality) {
       case "MRI":
         await ge_mri_parsers(job_id, sysConfigData, run_log);
         break;
       case "CT":
         await ge_ct_parsers(job_id, sysConfigData, run_log);
         break;
-      case "CV":
+      case "CV/IR":
         await ge_cv_parsers(job_id, sysConfigData, run_log);
         break;
       default:

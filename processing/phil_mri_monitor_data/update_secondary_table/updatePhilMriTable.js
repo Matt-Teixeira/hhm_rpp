@@ -21,7 +21,7 @@ async function updatePhilMriTable(
   try {
     await addLogEvent(I, run_log, "updatePhilMriTable", cal, note, null);
 
-    const col_name = file_config.column;
+    const col_name = file_config.column_name;
 
     let successful_agg = await philMonitorTableUpdate(
       job_id,

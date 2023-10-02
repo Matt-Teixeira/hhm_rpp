@@ -4,7 +4,7 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_ct_events_schema } = require("../../../persist/pg-schemas");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const {
-  pg_column_sets: pg_cs,
+  pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 const { dt_now } = require("../../../util/dates");
 
@@ -15,7 +15,7 @@ async function phil_ct_events(System) {
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: System.file_config.file_name,
+    file: System.file_config.file_name
   };
 
   try {
@@ -32,6 +32,10 @@ async function phil_ct_events(System) {
     await System.getRedisFileSize();
     await System.getCurrentFileSize();
     System.getFileSizeDelta();
+
+    console.log("\nSystem: " + System.sme);
+    console.log(System.file_config);
+    console.log(System.current_file_size);
 
     // Break out of function if no file found
     if (System.current_file_size === null) {
@@ -62,7 +66,7 @@ async function phil_ct_events(System) {
         job_id: System.job_id,
         sme: System.sme,
         file: System.file_config.file_name,
-        message: "NO MATCH FOUND",
+        message: "NO MATCH FOUND"
       };
 
       await System.addLogEvent(
@@ -81,7 +85,7 @@ async function phil_ct_events(System) {
       const dtObject = await generateDateTime(
         System.job_id,
         match.groups.system_id,
-        System.file_config.pg_table,
+        System.file_config.pg_tables[0],
         match.groups.host_date,
         match.groups.host_time
       );
@@ -91,7 +95,7 @@ async function phil_ct_events(System) {
           job_id: System.job_id,
           sme: System.sme,
           match_group: matches.groups,
-          message: "date_time object null",
+          message: "date_time object null"
         };
         await System.addLogEvent(
           System.W,
@@ -112,7 +116,7 @@ async function phil_ct_events(System) {
     const mappedData = mapDataToSchema(data, philips_ct_events_schema);
 
     console.log("\nmappedData - philips_ct - events");
-    console.log(System.sme)
+    console.log(System.sme);
     console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse

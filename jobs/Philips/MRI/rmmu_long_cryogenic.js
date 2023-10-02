@@ -38,7 +38,7 @@ async function phil_mri_rmmu_long(System) {
     // No files in rmmu_long dir
     if (System.files_in_dir.length === 0) {
       const file_mod_datetime = await execLastMod(lastModPath, [
-        System.sysConfigData.hhm_config.file_path,
+        System.sysConfigData.debian_server_path,
         "rmmu_long",
       ]);
 
@@ -130,7 +130,7 @@ async function phil_mri_rmmu_long(System) {
         const dtObject = await generateDateTime(
           System.jobId,
           match.groups.system_id,
-          System.file_config.pg_table,
+          System.file_config.pg_tables[0],
           date,
           time
         );

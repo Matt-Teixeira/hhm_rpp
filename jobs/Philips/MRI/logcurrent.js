@@ -13,7 +13,7 @@ const {
 
 async function phil_mri_logcurrent(file_config, System) {
   const capture_datetime = dt_now();
-  const parsers = file_config.logcurrent.parsers;
+  const parsers = file_config.parsers;
   const data = [];
 
   let note = {
@@ -81,7 +81,7 @@ async function phil_mri_logcurrent(file_config, System) {
         const dtObject = await generateDateTime(
           System.job_id,
           matches.groups.system_id,
-          System.file_config.logcurrent.pg_table,
+          System.file_config.pg_tables[0],
           matches.groups.host_date,
           matches.groups.host_time
         );
@@ -130,6 +130,7 @@ async function phil_mri_logcurrent(file_config, System) {
     console.log("\nmappedData - logcurrent.log");
     console.log(System.sme);
     console.log(mappedData[mappedData.length - 1]);
+    console.log(mappedData.length);
 
     if (mappedData.length > 1_000_000) {
       const mappedData_2 = mappedData.splice(

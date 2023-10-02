@@ -116,8 +116,6 @@ class PHILIPS_MRI_MONITORING {
       sme: this.sme,
       file: file_name,
     };
-    console.log("\\note");
-    console.log(note);
     try {
       const last_line = await exec_tail_last_line(
         this.exec_tail_path,

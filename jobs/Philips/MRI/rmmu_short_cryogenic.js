@@ -7,7 +7,7 @@ const { phil_mri_rmmu_short_schema } = require("../../../persist/pg-schemas");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
 const {
-  pg_column_sets: pg_cs,
+  pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function phil_mri_rmmu_short(System) {
@@ -18,7 +18,7 @@ async function phil_mri_rmmu_short(System) {
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: System.file_config,
+    file: System.file_config
   };
 
   try {
@@ -38,8 +38,8 @@ async function phil_mri_rmmu_short(System) {
     // No rmmu_short files in directory
     if (System.files_in_dir.length === 0) {
       const file_mod_datetime = await execLastMod(lastModPath, [
-        System.sysConfigData.hhm_config.file_path,
-        "rmmu_short",
+        System.sysConfigData.debian_server_path,
+        "rmmu_short"
       ]);
 
       note.path = System.directory_path;
@@ -79,7 +79,7 @@ async function phil_mri_rmmu_short(System) {
           sme: System.sme,
           file: System.file_config,
           re: `${philips_re.mri[parsers[0]]}`,
-          message: "NO MATCH FOUND",
+          message: "NO MATCH FOUND"
         };
 
         await System.addLogEvent(
@@ -100,7 +100,7 @@ async function phil_mri_rmmu_short(System) {
             job_id: System.job_id,
             sme: System.sme,
             file: System.file_config,
-            message: "NO MATCH FOUND",
+            message: "NO MATCH FOUND"
           };
 
           await System.addLogEvent(
@@ -127,7 +127,7 @@ async function phil_mri_rmmu_short(System) {
         const dtObject = await generateDateTime(
           System.job_id,
           match.groups.system_id,
-          System.file_config.pg_table,
+          System.file_config.pg_tables[0],
           date,
           time
         );

@@ -6,17 +6,17 @@ const { stt_magnet } = require("../../../persist/pg-schemas");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const {
-  pg_column_sets: pg_cs,
+  pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function stt_parser(file_config, System) {
-  const parsers = file_config.stt_magnet.parsers;
+  const parsers = file_config.parsers;
   const data = [];
 
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: file_config,
+    file: file_config
   };
 
   try {
@@ -53,7 +53,7 @@ async function stt_parser(file_config, System) {
             file: file_config,
             line,
             line_number,
-            message: "NO MATCH FOUND",
+            message: "NO MATCH FOUND"
           };
           await System.addLogEvent(
             System.I,
@@ -91,7 +91,7 @@ async function stt_parser(file_config, System) {
             file: file_config,
             line,
             match_group: matches.groups,
-            message: "date_time object null",
+            message: "date_time object null"
           };
           await System.addLogEvent(
             System.W,
@@ -111,6 +111,10 @@ async function stt_parser(file_config, System) {
 
     // Homogenize data to prep for insert to db
     const mappedData = mapDataToSchema(data, stt_magnet);
+
+    console.log("\nmappedData - stt_magnet");
+    console.log(System.sme);
+    console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse **
 

@@ -41,7 +41,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
   // Extract 'Power-On hours' and 'Commercial Version'
   const memo_data = [];
 
-  const complete_file_path = `${sysConfigData.hhm_config.file_path}/${file_config.file_name}`;
+  const complete_file_path = `${sysConfigData.debian_server_path}/${file_config.file_name}`;
 
   let note = {
     job_id,
@@ -54,17 +54,12 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     await addLogEvent(I, run_log, "phil_cv_eventlog", cal, note, null);
 
     if (!fs.existsSync(complete_file_path)) {
-      const file_mod_datetime = await execLastMod(lastModPath, [
-        sysConfigData.hhm_config.file_path,
-        "archive",
-      ]);
-
       let note = {
         job_id,
         sme,
         file: file_config.file_name,
         path: complete_file_path,
-        last_mod: file_mod_datetime + sysConfigData.hhm_config.file_path,
+        message: "File not found"
       };
       await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
       return;
@@ -80,7 +75,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     const currentFileSize = await getCurrentFileSize(
       sme,
       fileSizePath,
-      sysConfigData.hhm_config.file_path,
+      sysConfigData.debian_server_path,
       file_config.file_name,
       run_log
     );
@@ -163,7 +158,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
         const dtObject = await generateDateTime(
           job_id,
           matches.groups.system_id,
-          file_config.pg_table,
+          file_config.pg_tables[0],
           matches.groups.host_date,
           matches.groups.host_time
         );
@@ -225,7 +220,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     await updateRedisFileSize(
       sme,
       updateSizePath,
-      sysConfigData.hhm_config.file_path,
+      sysConfigData.debian_server_path,
       file_config.file_name,
       run_log
     );
