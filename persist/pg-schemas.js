@@ -105,18 +105,18 @@ const siemens_ct_mri = {
 
 const siemens_cv_schema = {
   system_id: null,
-  host_date: null,
-  host_time: null,
-  source_group: null,
-  type_group: null,
-  text_group: null,
-  domain_group: null,
+  source: null,
+  domain: null,
+  type: null,
   id_group: null,
+  dow: null,
   month: null,
   day: null,
   year: null,
-  host_datetime: null,
+  time: null,
+  text: null,
   capture_datetime: null,
+  host_datetime: null
 };
 
 const philips_ct_eal_schema = {

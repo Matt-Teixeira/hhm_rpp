@@ -27,6 +27,7 @@ const determineOsVersion = async (job_id, sysConfigData, run_log) => {
 
       break;
     default:
+      await win_10_parsers(job_id, sysConfigData, file_config, run_log);
       break;
   }
 

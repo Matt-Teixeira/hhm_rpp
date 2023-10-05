@@ -1,17 +1,18 @@
 const win10_siemens_ct = require("./win10_siemens_ct");
 const win10_siemens_mri = require("./win10_siemens_mri");
+const siemens_cv_parser = require("./siemens_cv");
 const Siemens_10 = require("../../../data_acquisition/Siemens_10");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, det, cat },
+  tag: { cal, det, cat }
 } = require("../../../utils/logger/enums");
 
 const win_10_parsers = async (job_id, sysConfigData, file_config, run_log) => {
   let note = {
     job_id,
     sme: sysConfigData.id,
-    file_config: file_config,
+    file_config: file_config
   };
   await addLogEvent(I, run_log, "win_10_parsers", cal, note, null);
 
@@ -26,7 +27,13 @@ const win_10_parsers = async (job_id, sysConfigData, file_config, run_log) => {
       await win10_siemens_ct(CT_System);
       break;
     case "CV/IR":
-      //await parse_win_10(job_id, sysConfigData, file_config);
+      const CV_System = new Siemens_10(
+        sysConfigData,
+        file_config,
+        job_id,
+        run_log
+      );
+      await siemens_cv_parser(CV_System);
       break;
     case "MRI":
       const MRI_System = new Siemens_10(

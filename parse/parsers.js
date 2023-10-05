@@ -2,48 +2,47 @@ const win_7_re = {
   big_group:
     /(?<big_group>Source.*(\r\n)Domain:.*(\r\n)Type:.*(\r\n)ID:.*(\r\n)Date:.*(\r\n)Text:.*)/g,
   small_group:
-    /Source:(?<source_group>.*)(\r\n)Domain:(?<domain_group>.*)(\r\n)Type:(?<type_group>.*)(\r\n)ID:(?<id_group>.*)(\r\n)(Date:.*\s(?<month>\w+)\s(?<day>\d+),\s(?<year>\d+),\s(?<host_time>.*))(\r\n)Text:(?<text_group>.*)\n?/,
+    /Source:(?<source_group>.*)(\r\n)Domain:(?<domain_group>.*)(\r\n)Type:(?<type_group>.*)(\r\n)ID:(?<id_group>.*)(\r\n)(Date:.*\s(?<month>\w+)\s(?<day>\d+),\s(?<year>\d+),\s(?<host_time>.*))(\r\n)Text:(?<text_group>.*)\n?/
 };
 
 const win_10_re = {
   re_v1:
     /(?<host_state>\w+)\t(?<host_date>\d{4}-\d{1,2}-\d{1,2})\t(?<host_time>\d{2}:\d{2}:\d{2})\t(?<source_group>(.*?(\d+)?)(\.\d\.\d)?)\t?\s?(?<type_group>(\d{1,5}))\t(?<text_group>.*)/,
   re_v2:
-    /(?<host_time>\d{2}:\d{2}:\d{2})\t(?<host_state>\w+)\t(?<host_date>\d{4}-\d{1,2}-\d{1,2})\t(?<source_group>(.*?(\d+)?)(\.\d\.\d)?)\t?\s?(?<type_group>(\d{1,5}))\t(?<text_group>.*)/,
+    /(?<host_time>\d{2}:\d{2}:\d{2})\t(?<host_state>\w+)\t(?<host_date>\d{4}-\d{1,2}-\d{1,2})\t(?<source_group>(.*?(\d+)?)(\.\d\.\d)?)\t?\s?(?<type_group>(\d{1,5}))\t(?<text_group>.*)/
 };
 
 const siemens = {
-  cv_bulk:
-    /(?<entry_1>[A-Z]\s+\d{2}-\w+-\d{2}\s\d{2}:\d{2}:\d{2}.*\n\s+?\w+.*(\n\s+?\w+.*)?)/g,
-  cv_groups: /(?<state>[A-Z])\s+?(?<date>\d{2}-\w+-\d{2})\s(?<time>\d{2}:\d{2}:\d{2})\s(?<id>\d+)\s(?<source>.*?)\s+(?<message>.*)\n\s+(?<text>.*(\n\s.*)?)/g,
-  cv_1: /(?<start>[A-Z]?)\s+(?<day>\d{2})-(?<month>[A-Z][a-z]+)-(?<year>\d{2})\s(?<host_time>\d{2}:\d{2}:\d{2}).*?\)">(?<id>\d+)<\/\w+>\s(?<source>.+?)\s+(?<sequence>\d+|n\/a)?\s+(<\w+>)?(?<message>.+?)(<\/\w>)?\n/g,
+  cv_bulk: /(?<data_block>Source.*?Text.*?\n)/gs,
+  cv_groups:
+    /Source:(?<source>.*?)(\r\n)Domain:(?<domain>.*?)(\r\n)Type:(?<type>.*?)(\r\n)ID:(?<id_group>.*?)(\r\n)Date:(?<dow>.*),\s(?<month>.*?)\s(?<day>\d+),\s(?<year>\d+),\s(?<time>.*?)(\r\n)Text:(?<text>.*)(\r\n)/s
 };
 
 const ge_re = {
   test: {
     for_box: /|/,
     for_exception_class: /Exception\sClass\s?:/,
-    for_task_id: /Task\sID:/,
+    for_task_id: /Task\sID:/
   },
   mri: {
     gesys: {
       block: /SR\s(\d+).*?EN\s\1/gs,
       sub_block:
-        /(?:SR\s(?<sr>.+?)[\n\r])(?<epoch>.+?)\s(?<record_number_concurrent>.+?)\s(?<misc_param_1>.+?)\s\w+\s(?<month>.+?)\s+(?<day>.+?)\s(?<host_time>.+?)\s(?<year>.+?)\s(?<message_number>(-)?\d+)\s(?<misc_param_2>(-)?.+?)\s+(?<type>.+?)[\n\r]((?<data_1>.*?)\s?)\s+(?<num_1>(-)?\d+?)[\n\r]\s(?:Server\sName:\s(?<server>.+?)[\n\r])?(?:Task ID: (?<task_id>.+?)\s+Time: (?<task_epoc>.+?)\s+Object: (?<object>.+?)[\n\r])?(?:Exception\s?Class:\s?(?<exception_class>.+?)\s+)?(?:Severity:\s(?<severity>.+?)[\n\r])?(?:Function:\s(?<function>.+?)[\n\r])?(?:PSD:\s(?<psd>.+?)\s+Coil:\s(?<coil>.+?)\s+Scan:\s(?<scan>.+?)[\n\r])?(?<message>.+?)(?:EN\s(?<en>\d+))/s, //(?:SR\s(?<sr>.+?)[\n\r])(?<epoch>.+?)\s(?<record_number_concurrent>.+?)\s(?<misc_param_1>.+?)\s\w+\s(?<month>.+?)\s+(?<day>.+?)\s(?<host_time>.+?)\s(?<year>.+?)\s(?<message_number>(-)?\d+)\s(?<misc_param_2>(-)?.+?)\s+(?<type>.+?)[\n\r]((?<data_1>.*?)\s)\s+(?<num_1>.+?)[\n\r]\s(?:Server\sName:\s(?<server>.+?)[\n\r])?(?:Task ID: (?<task_id>.+?)\s+Time: (?<task_epoc>.+?)\s+Object: (?<object>.+?)[\n\r])?(?:Exception\s?Class:\s?(?<exception_class>.+?)\s+)?(?:Severity:\s(?<severity>.+?)[\n\r])?(?:Function:\s(?<function>.+?)[\n\r])?(?:PSD:\s(?<psd>.+?)\s+Coil:\s(?<coil>.+?)\s+Scan:\s(?<scan>.+?)[\n\r])?(?<message>.+?)(?:EN\s(?<en>\d+))
-    },
+        /(?:SR\s(?<sr>.+?)[\n\r])(?<epoch>.+?)\s(?<record_number_concurrent>.+?)\s(?<misc_param_1>.+?)\s\w+\s(?<month>.+?)\s+(?<day>.+?)\s(?<host_time>.+?)\s(?<year>.+?)\s(?<message_number>(-)?\d+)\s(?<misc_param_2>(-)?.+?)\s+(?<type>.+?)[\n\r]((?<data_1>.*?)\s?)\s+(?<num_1>(-)?\d+?)[\n\r]\s(?:Server\sName:\s(?<server>.+?)[\n\r])?(?:Task ID: (?<task_id>.+?)\s+Time: (?<task_epoc>.+?)\s+Object: (?<object>.+?)[\n\r])?(?:Exception\s?Class:\s?(?<exception_class>.+?)\s+)?(?:Severity:\s(?<severity>.+?)[\n\r])?(?:Function:\s(?<function>.+?)[\n\r])?(?:PSD:\s(?<psd>.+?)\s+Coil:\s(?<coil>.+?)\s+Scan:\s(?<scan>.+?)[\n\r])?(?<message>.+?)(?:EN\s(?<en>\d+))/s //(?:SR\s(?<sr>.+?)[\n\r])(?<epoch>.+?)\s(?<record_number_concurrent>.+?)\s(?<misc_param_1>.+?)\s\w+\s(?<month>.+?)\s+(?<day>.+?)\s(?<host_time>.+?)\s(?<year>.+?)\s(?<message_number>(-)?\d+)\s(?<misc_param_2>(-)?.+?)\s+(?<type>.+?)[\n\r]((?<data_1>.*?)\s)\s+(?<num_1>.+?)[\n\r]\s(?:Server\sName:\s(?<server>.+?)[\n\r])?(?:Task ID: (?<task_id>.+?)\s+Time: (?<task_epoc>.+?)\s+Object: (?<object>.+?)[\n\r])?(?:Exception\s?Class:\s?(?<exception_class>.+?)\s+)?(?:Severity:\s(?<severity>.+?)[\n\r])?(?:Function:\s(?<function>.+?)[\n\r])?(?:PSD:\s(?<psd>.+?)\s+Coil:\s(?<coil>.+?)\s+Scan:\s(?<scan>.+?)[\n\r])?(?<message>.+?)(?:EN\s(?<en>\d+))
+    }
   },
   ct: {
     gesys: {
       block: /SR\s(\d+).*?EN\s\1/gs,
       sub_block:
-        /(?:SR\s(?<sr>.+?)[\n\r])(?<epoch>.+?)\s(?<record_number_concurrent>.+?)\s(?<misc_param_1>.+?)\s\w+\s(?<month>.+?)\s+(?<day>.+?)\s(?<host_time>.+?)\s(?<year>.+?)\s(?<message_number>(-)?\d+)\s(?<misc_param_2>(-)?.+?)\s+(?<type>.+?)[\n\r]((?<data_1>.*?)\s?)\s+(?<num_1>(-)?\d+?)[\n\r]\s(?:(?<date_2>.+\d{2}:\d+\s\d{4}?)\s?[\n\r](?:Host\s:\s(?<host>.+?))?\s+(?:Ermes\s\#\s:\s(?<ermes_number>.+?))?[\n\r](?:Exception Class\s:\s(?<exception_class>.+?)\s+)(?:Severity\s:\s(?<severity>.+?))?[\n\r](?:File\s:\s(?<file>.+?)\s+Line\#\s:\s(?<line_number>\d+))?[\n\r])?(?:Function\s?:\s?(.+?)[\n\r])?(?:Scan\sType\s?:\s?(?<scan_type>.+?)[\n\r])?([A-Z]+\s?:\s?(?<warning>.+?)[\n\r])?(?:End:\s(?<end_msg>.+?)[\n\r])?(?<message>.*?)?\s?(?:EN\s(?<en>\d+))/s,
+        /(?:SR\s(?<sr>.+?)[\n\r])(?<epoch>.+?)\s(?<record_number_concurrent>.+?)\s(?<misc_param_1>.+?)\s\w+\s(?<month>.+?)\s+(?<day>.+?)\s(?<host_time>.+?)\s(?<year>.+?)\s(?<message_number>(-)?\d+)\s(?<misc_param_2>(-)?.+?)\s+(?<type>.+?)[\n\r]((?<data_1>.*?)\s?)\s+(?<num_1>(-)?\d+?)[\n\r]\s(?:(?<date_2>.+\d{2}:\d+\s\d{4}?)\s?[\n\r](?:Host\s:\s(?<host>.+?))?\s+(?:Ermes\s\#\s:\s(?<ermes_number>.+?))?[\n\r](?:Exception Class\s:\s(?<exception_class>.+?)\s+)(?:Severity\s:\s(?<severity>.+?))?[\n\r](?:File\s:\s(?<file>.+?)\s+Line\#\s:\s(?<line_number>\d+))?[\n\r])?(?:Function\s?:\s?(.+?)[\n\r])?(?:Scan\sType\s?:\s?(?<scan_type>.+?)[\n\r])?([A-Z]+\s?:\s?(?<warning>.+?)[\n\r])?(?:End:\s(?<end_msg>.+?)[\n\r])?(?<message>.*?)?\s?(?:EN\s(?<en>\d+))/s
       // add - sign to num_1 filed
-    },
+    }
   },
   cv: {
     sys_error:
-      /(?<sequencenumber>.+?),(?<host_date>.+?),(?<host_time>.+?),(?<subsystem>.+?),(?<errorcode>.+?),(?<errortext>.+?),(?<exam>.+?),(?<exceptioncategory>.+?),(?<application>.+?),(?<majorfunction>.+?),(?<minorfunction>.+?),(?<fru>.+?),(?<viewinglevel>.+?),(?<rootcause>.+?),(?<repeatcount>.+?),(?<debugtext>".+"?|.+?),(?<sourcefile>.+?),(?<sourceline>.+)/,
-  },
+      /(?<sequencenumber>.+?),(?<host_date>.+?),(?<host_time>.+?),(?<subsystem>.+?),(?<errorcode>.+?),(?<errortext>.+?),(?<exam>.+?),(?<exceptioncategory>.+?),(?<application>.+?),(?<majorfunction>.+?),(?<minorfunction>.+?),(?<fru>.+?),(?<viewinglevel>.+?),(?<rootcause>.+?),(?<repeatcount>.+?),(?<debugtext>".+"?|.+?),(?<sourcefile>.+?),(?<sourceline>.+)/
+  }
 };
 
 const philips_re = {
@@ -67,7 +66,7 @@ const philips_re = {
     eventlog:
       /(?<category>[\w\. \-\$&\.]+)�(?<host_date>[\d-]+)�(?<host_time>[\d:]+)�(?<error_type>\w*)�(?<num_1>\d+)�(?:Technical ?Event ?ID: {1,3}(?<technical_event_id>\d+) ?�Description: (?<description>[^�\r\n]+)�Channel Identification: (?<channel_id>[^�]+)�Module: (?<module>[^�]+)�Source [Ff]ile: (?<source>[^�]+)�Line Number: (?<line>\d+) ?�Memo: ?(?<memo>[^\r\n�]*)(?:�SubsystemNumber: (?<subsystem_number>\d+)�ThreadName: ?(?<thread_name>[\w \-]*))?|(?<message>[^\r\n]*))/,
     eventlogsystem:
-      /(?<subject>.*?)�(?<host_date>.*?)�(?<host_time>.*?)�(?<info_1>.*?)�(?<num_1>.*?)�((?<info_2>.*?)[\n|�])?((?<info_3>.*?)[\n|�])?((?<info_4>.*?)[\n|�])?((?<info_5>.*?)[\n|�])?((?<info_6>.*?)[\n|�])?/,
+      /(?<subject>.*?)�(?<host_date>.*?)�(?<host_time>.*?)�(?<info_1>.*?)�(?<num_1>.*?)�((?<info_2>.*?)[\n|�])?((?<info_3>.*?)[\n|�])?((?<info_4>.*?)[\n|�])?((?<info_5>.*?)[\n|�])?((?<info_6>.*?)[\n|�])?/
   },
   mri: {
     rmmu_meta_data:
@@ -184,9 +183,9 @@ const philips_re = {
       HELIUM_LEVEL:
         /(?<host_date>\d{2}-\w+-\d{4})\s+?(?<helium_level_value>(-)?\d+(\.\d+)?)/g,
       monitor_magnet_pressure:
-        /(?<host_date>\d{4}-\d{2}-\d{2})\s+(?<host_time>\d{2}:\d{2}:\d{2})\s+(?<monitor_magnet_pressure_value>(-)?\d+(\.\d+)?)/g,
-    },
-  },
+        /(?<host_date>\d{4}-\d{2}-\d{2})\s+(?<host_time>\d{2}:\d{2}:\d{2})\s+(?<monitor_magnet_pressure_value>(-)?\d+(\.\d+)?)/g
+    }
+  }
 };
 
 module.exports = {
@@ -194,4 +193,5 @@ module.exports = {
   win_10_re,
   ge_re,
   philips_re,
+  siemens
 };

@@ -84,8 +84,8 @@ class PHILIPS_MRI_MONITORING {
     if (last_line === null || last_line === "") return null;
 
     const matched_last_line = last_line.match(
-      /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+/
-    )[0]; // \d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2} 4/21/2023 change
+      /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+|\d{4}-\d{2}-\d{2}\s+\d{2}:\d+/
+    )[0];
 
     if (!matched_last_line) {
       let note = {
@@ -93,7 +93,7 @@ class PHILIPS_MRI_MONITORING {
         sme: this.sme,
         file: file.file_name,
         message: "last_line is null. Need to mod regex",
-        re: /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+/,
+        re: /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+|\d{4}-\d{2}-\d{2}\s+\d{2}:\d+/,
         last_line,
         matched_last_line,
       };

@@ -1,19 +1,28 @@
 const {
   dateTimeTemplate,
-  date_minus_one_template,
+  date_minus_one_template
 } = require("./dateTimeTemplate");
 const { remove__ } = require("./incoming_date_cleaning");
 
 const [addLogEvent] = require("../../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, det, cat, seq, qaf },
+  tag: { cal, det, cat, seq, qaf }
 } = require("../../utils/logger/enums");
 
 async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
   try {
     let date;
     switch (pgTable) {
+      case "siemens_cv":
+        date = await dateTimeTemplate(
+          run_log,
+          sme,
+          `${hostDate}${hostTime}`,
+          "dd-MM-yyyyHH:mm:ss",
+          "America/New_York"
+        );
+        break;
       case "stt_magnet":
         date = await dateTimeTemplate(
           run_log,
@@ -181,7 +190,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
       sme,
       pgTable,
       hostDate,
-      hostTime,
+      hostTime
     };
     await addLogEvent(E, run_log, "determineManufacturer", cat, note, error);
   }

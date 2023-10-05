@@ -431,3 +431,44 @@ VALUES(
 	NULL,
 	NULL
 );
+
+-->
+-->
+
+UPDATE 
+	config.acquisition
+SET 
+	host_ip = '10.0.107.10',
+	debian_server_path = '/home/staging/hhm_data_acquisition/files/SME10571',
+	credentials_group = '5',
+	acquisition_script = 'ge_mri_22.sh',
+	run_group = 1
+WHERE 
+	system_id = 'SME10571';
+	
+/*
+INSERT INTO config.acquisition(system_id, host_ip, mmb_ip, protocal, debian_server_path, credentials_group, acquisition_script, run_group, host, user_id, acqu_point)
+VALUES (
+	'SME10571',
+	'10.0.107.10',
+	NULL,
+	'lftp',
+	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME10571',
+	'5',
+	'ge_mri_22.sh',
+	1,
+	NULL,
+	NULL,
+	NULL
+);
+*/
+INSERT INTO config.log (system_id, file_name, dir_name, regex_models, pg_tables, column_name, agg)
+VALUES(
+	'SME10571',
+	'gesys_GEMR3T.log',
+	'gesys',
+	ARRAY['block', 'sub_block'],
+	ARRAY['ge_mri_gesys'],
+	NULL,
+	NULL
+);
