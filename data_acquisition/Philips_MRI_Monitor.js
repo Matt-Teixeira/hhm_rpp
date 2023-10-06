@@ -85,7 +85,7 @@ class PHILIPS_MRI_MONITORING {
 
     const matched_last_line = last_line.match(
       /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+|\d{4}-\d{2}-\d{2}\s+\d{2}:\d+/
-    )[0];
+    );
 
     if (!matched_last_line) {
       let note = {
@@ -107,7 +107,7 @@ class PHILIPS_MRI_MONITORING {
       );
     }
 
-    return matched_last_line;
+    return matched_last_line[0];
   }
 
   async get_last_monitor_line(complete_file_path, file_name) {
