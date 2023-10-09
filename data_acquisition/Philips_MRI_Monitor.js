@@ -1,7 +1,7 @@
 const fs = require("node:fs").promises;
 const {
   getRedisLine,
-  updateRedisLine,
+  updateRedisLine
 } = require("../redis/philips_monitoring");
 const exec_tail_last_line = require("../read/exec-tail-last-line");
 const exec_monitor_delta = require("../read/exec-monitor_delta");
@@ -9,7 +9,7 @@ const execLastMod = require("../read/exec-file_last_mod");
 const [addLogEvent] = require("../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, det, cat, seq, qaf },
+  tag: { cal, det, cat, seq, qaf }
 } = require("../utils/logger/enums");
 
 class PHILIPS_MRI_MONITORING {
@@ -28,7 +28,7 @@ class PHILIPS_MRI_MONITORING {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: complete_file_path,
+      file: complete_file_path
     };
     try {
       await addLogEvent(
@@ -57,7 +57,7 @@ class PHILIPS_MRI_MONITORING {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: file.file_name,
+      file: file.file_name
     };
 
     await addLogEvent(
@@ -95,7 +95,7 @@ class PHILIPS_MRI_MONITORING {
         message: "last_line is null. Need to mod regex",
         re: /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}|\d+-[A-Z]+-\d{4}\s+(-)?\d+|\d{4}-\d{2}-\d{2}\s+\d{2}:\d+/,
         last_line,
-        matched_last_line,
+        matched_last_line
       };
       await addLogEvent(
         W,
@@ -105,6 +105,7 @@ class PHILIPS_MRI_MONITORING {
         note,
         null
       );
+      return null;
     }
 
     return matched_last_line[0];
@@ -114,7 +115,7 @@ class PHILIPS_MRI_MONITORING {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: file_name,
+      file: file_name
     };
     try {
       const last_line = await exec_tail_last_line(
@@ -156,7 +157,7 @@ class PHILIPS_MRI_MONITORING {
       job_id: this.job_id,
       sme: this.sme,
       file: file_name,
-      line,
+      line
     };
     try {
       await addLogEvent(
@@ -186,7 +187,7 @@ class PHILIPS_MRI_MONITORING {
       job_id: this.job_id,
       sme: this.sme,
       file: complete_file_path,
-      last_line,
+      last_line
     };
 
     try {
@@ -209,7 +210,7 @@ class PHILIPS_MRI_MONITORING {
       if (delta === null) {
         // Get file's last mod datetime
         const file_mod_datetime = await execLastMod(this.lastModPath, [
-          complete_file_path,
+          complete_file_path
         ]);
         note.data = delta;
         note.message = "File does not have new data";

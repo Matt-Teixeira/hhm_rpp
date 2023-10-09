@@ -5,7 +5,7 @@ VALUES (
 	NULL,
 	'172.31.3.39',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME15819',
+	'/home/staging/hhm_data_acquisition/files/SME15819',
 	NULL,
 	NULL,
 	NULL,
@@ -38,14 +38,22 @@ VALUES(
 -->
 -->
 
+UPDATE config.acquisition
+SET 
+mmb_ip = '172.31.2.27',
+protocal = 'rsync',
+host = 'SME10571',
+user_id = 'avante'
+WHERE system_id = 'SME10571';
 
+/*
 INSERT INTO config.acquisition(system_id, host_ip, mmb_ip, protocal, debian_server_path, credentials_group, acquisition_script, run_group, host, user_id, acqu_point)
 VALUES (
 	'SME10571',
 	NULL,
 	'172.31.2.27',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME10571',
+	'/home/staging/hhm_data_acquisition/files/SME10571',
 	NULL,
 	NULL,
 	NULL,
@@ -53,6 +61,7 @@ VALUES (
 	'avante',
 	NULL
 );
+*/
 
 INSERT INTO config.mag (system_id, file_name, dir_name, regex_models, pg_tables, column_name, schedule, agg)
 VALUES(
@@ -117,7 +126,7 @@ VALUES (
 	NULL,
 	'172.31.0.12',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME11246',
+	'/home/staging/hhm_data_acquisition/files/SME11246',
 	NULL,
 	NULL,
 	NULL,
@@ -145,7 +154,7 @@ VALUES (
 	NULL,
 	'172.31.3.38',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME15812',
+	'/home/staging/hhm_data_acquisition/files/SME15812',
 	NULL,
 	NULL,
 	NULL,
@@ -185,7 +194,7 @@ VALUES (
 	NULL,
 	'172.31.0.19',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME15815',
+	'/home/staging/hhm_data_acquisition/files/SME15815',
 	NULL,
 	NULL,
 	NULL,
@@ -225,7 +234,7 @@ VALUES (
 	NULL,
 	'172.31.3.47',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME15820',
+	'/home/staging/hhm_data_acquisition/files/SME15820',
 	NULL,
 	NULL,
 	NULL,
@@ -265,7 +274,7 @@ VALUES (
 	NULL,
 	'25.48.16.48',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME10255',
+	'/home/staging/hhm_data_acquisition/files/SME10255',
 	NULL,
 	NULL,
 	NULL,
@@ -296,7 +305,7 @@ VALUES (
 	NULL,
 	'172.31.2.19',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME01897',
+	'/home/staging/hhm_data_acquisition/files/SME01897',
 	NULL,
 	NULL,
 	NULL,
@@ -336,7 +345,7 @@ VALUES (
 	NULL,
 	'172.31.2.12',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME01107',
+	'/home/staging/hhm_data_acquisition/files/SME01107',
 	NULL,
 	NULL,
 	NULL,
@@ -405,7 +414,7 @@ VALUES (
 	NULL,
 	'10.50.70.11',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME01890',
+	'/home/staging/hhm_data_acquisition/files/SME01890',
 	NULL,
 	NULL,
 	NULL,
@@ -478,7 +487,7 @@ VALUES (
 	NULL,
 	'25.76.110.154',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME13572',
+	'/home/staging/hhm_data_acquisition/files/SME13572',
 	NULL,
 	NULL,
 	NULL,
@@ -538,7 +547,7 @@ VALUES (
 	NULL,
 	'172.31.2.41',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME12029',
+	'/home/staging/hhm_data_acquisition/files/SME12029',
 	NULL,
 	NULL,
 	NULL,
@@ -609,7 +618,7 @@ VALUES (
 	NULL,
 	'172.31.2.24',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME12448',
+	'/home/staging/hhm_data_acquisition/files/SME12448',
 	NULL,
 	NULL,
 	NULL,
@@ -649,7 +658,7 @@ VALUES (
 	NULL,
 	'172.31.3.30',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME13604',
+	'/home/staging/hhm_data_acquisition/files/SME13604',
 	NULL,
 	NULL,
 	NULL,
@@ -710,7 +719,7 @@ VALUES (
 	NULL,
 	'172.31.0.23',
 	'rsync',
-	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME15806',
+	'/home/staging/hhm_data_acquisition/files/SME15806',
 	NULL,
 	NULL,
 	NULL,
@@ -739,3 +748,7 @@ VALUES(
 	ARRAY['mmb_edu2'], -- tables
 	7
 );
+
+--> ******************
+--> CONTINUE FROM HERE
+--> ******************
