@@ -5,15 +5,7 @@
  alt_data_source JSONB
  );
  */
-ALTER TABLE
-	config.acquisition
-ADD
-	COLUMN host_path TEXT;
 
-ALTER TABLE
-	config.acquisition
-ADD
-	COLUMN cerb_file TEXT;
 
 CREATE TABLE IF NOT EXISTS config.acquisition(
 	system_id TEXT PRIMARY KEY,
