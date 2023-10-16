@@ -1716,7 +1716,7 @@ INSERT INTO
 VALUES
 	(
 		'SME17155',
-		'gesys_NBCT1.log',
+		'gesys_ucl1.log',
 		'gesys',
 		ARRAY ['block', 'sub_block'],
 		ARRAY ['ge_ct_gesys'],
@@ -1924,7 +1924,7 @@ INSERT INTO
 VALUES
 	(
 		'SME17159',
-		'gesys_VLCT.log',
+		'gesys_LCCERGECT1.log',
 		'gesys',
 		ARRAY ['block', 'sub_block'],
 		ARRAY ['ge_ct_gesys'],
@@ -2059,6 +2059,7 @@ VALUES
 
 -- >
 -- >
+
 INSERT INTO
 	config.acquisition(
 		system_id,
@@ -2108,3 +2109,4 @@ VALUES
 		NULL,
 		NULL
 	);
+

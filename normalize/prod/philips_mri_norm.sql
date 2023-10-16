@@ -700,7 +700,7 @@ VALUES(
 -- > MONITORING
 INSERT INTO config.mag (system_id, file_name, dir_name, regex_models, pg_tables, column_name, agg)
 VALUES(
-	'SME15811',
+	'SME15816',
 	'HELIUM_LEVEL.DAT',
 	'monitoring',
 	ARRAY['HELIUM_LEVEL'], -- regex

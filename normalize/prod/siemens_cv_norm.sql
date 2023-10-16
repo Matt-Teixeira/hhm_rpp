@@ -46,8 +46,8 @@ VALUES
         'SME01441',
         'Evtlog.txt',
         'Evtlog',
-        ARRAY ['block', 'sub_block'],
-        ARRAY ['ge_mri_gesys'],
+        ARRAY ['cv_bulk', 'cv_groups'],
+        ARRAY ['siemens_cv'],
         NULL,
         NULL
     );
@@ -102,8 +102,8 @@ VALUES
         'SME00817',
         'Evtlog.txt',
         'Evtlog',
-        ARRAY ['block', 'sub_block'],
-        ARRAY ['ge_mri_gesys'],
+        ARRAY ['cv_bulk', 'cv_groups'],
+        ARRAY ['siemens_cv'],
         NULL,
         NULL
     );
@@ -158,8 +158,8 @@ VALUES
         'SME00853',
         'Evtlog.txt',
         'Evtlog',
-        ARRAY ['block', 'sub_block'],
-        ARRAY ['ge_mri_gesys'],
+        ARRAY ['cv_bulk', 'cv_groups'],
+        ARRAY ['siemens_cv'],
         NULL,
         NULL
     );
@@ -214,8 +214,8 @@ VALUES
         'SME01445',
         'Evtlog.txt',
         'Evtlog',
-        ARRAY ['block', 'sub_block'],
-        ARRAY ['ge_mri_gesys'],
+        ARRAY ['cv_bulk', 'cv_groups'],
+        ARRAY ['siemens_cv'],
         NULL,
         NULL
     );
@@ -270,8 +270,8 @@ VALUES
         'SME08929',
         'Evtlog.txt',
         'Evtlog',
-        ARRAY ['block', 'sub_block'],
-        ARRAY ['ge_mri_gesys'],
+        ARRAY ['cv_bulk', 'cv_groups'],
+        ARRAY ['siemens_cv'],
         NULL,
         NULL
     );
@@ -326,8 +326,8 @@ VALUES
         'SME08930',
         'Evtlog.txt',
         'Evtlog',
-        ARRAY ['block', 'sub_block'],
-        ARRAY ['ge_mri_gesys'],
+        ARRAY ['cv_bulk', 'cv_groups'],
+        ARRAY ['siemens_cv'],
         NULL,
         NULL
     );
@@ -382,8 +382,8 @@ VALUES
         'SME08931',
         'Evtlog.txt',
         'Evtlog',
-        ARRAY ['block', 'sub_block'],
-        ARRAY ['ge_mri_gesys'],
+        ARRAY ['cv_bulk', 'cv_groups'],
+        ARRAY ['siemens_cv'],
         NULL,
         NULL
     );
@@ -438,8 +438,8 @@ VALUES
         'SME08932',
         'Evtlog.txt',
         'Evtlog',
-        ARRAY ['block', 'sub_block'],
-        ARRAY ['ge_mri_gesys'],
+        ARRAY ['cv_bulk', 'cv_groups'],
+        ARRAY ['siemens_cv'],
         NULL,
         NULL
     );
@@ -494,8 +494,8 @@ VALUES
         'SME08933',
         'Evtlog.txt',
         'Evtlog',
-        ARRAY ['block', 'sub_block'],
-        ARRAY ['ge_mri_gesys'],
+        ARRAY ['cv_bulk', 'cv_groups'],
+        ARRAY ['siemens_cv'],
         NULL,
         NULL
     );
@@ -550,8 +550,8 @@ VALUES
         'SME08934',
         'Evtlog.txt',
         'Evtlog',
-        ARRAY ['block', 'sub_block'],
-        ARRAY ['ge_mri_gesys'],
+        ARRAY ['cv_bulk', 'cv_groups'],
+        ARRAY ['siemens_cv'],
         NULL,
         NULL
     );

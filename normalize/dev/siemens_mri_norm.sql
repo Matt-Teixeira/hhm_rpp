@@ -1,4 +1,3 @@
-
 INSERT INTO config.acquisition(system_id, host_ip, mmb_ip, protocal, debian_server_path, credentials_group, acquisition_script, run_group, host, user_id, acqu_point, file_version)
 VALUES (
 	'SME01118',

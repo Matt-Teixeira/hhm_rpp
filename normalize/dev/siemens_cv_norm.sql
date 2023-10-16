@@ -42,7 +42,7 @@ INSERT INTO
         agg
     )
 VALUES
-(
+    (
         'SME01441',
         'Evtlog.txt',
         'Evtlog',
@@ -87,6 +87,27 @@ VALUES
         'error.log_A1_'
     );
 
+INSERT INTO
+    config.log (
+        system_id,
+        file_name,
+        dir_name,
+        regex_models,
+        pg_tables,
+        column_name,
+        agg
+    )
+VALUES
+    (
+        'SME00817',
+        'Evtlog.txt',
+        'Evtlog',
+        ARRAY ['block', 'sub_block'],
+        ARRAY ['ge_mri_gesys'],
+        NULL,
+        NULL
+    );
+
 -- >
 -- >
 INSERT INTO
@@ -120,6 +141,27 @@ VALUES
         NULL,
         'C0137/SHIP020/SME00853',
         'Errors_A1_'
+    );
+
+INSERT INTO
+    config.log (
+        system_id,
+        file_name,
+        dir_name,
+        regex_models,
+        pg_tables,
+        column_name,
+        agg
+    )
+VALUES
+    (
+        'SME00853',
+        'Evtlog.txt',
+        'Evtlog',
+        ARRAY ['block', 'sub_block'],
+        ARRAY ['ge_mri_gesys'],
+        NULL,
+        NULL
     );
 
 -- >
@@ -157,6 +199,27 @@ VALUES
         'Error_Log_A1_'
     );
 
+INSERT INTO
+    config.log (
+        system_id,
+        file_name,
+        dir_name,
+        regex_models,
+        pg_tables,
+        column_name,
+        agg
+    )
+VALUES
+    (
+        'SME01445',
+        'Evtlog.txt',
+        'Evtlog',
+        ARRAY ['block', 'sub_block'],
+        ARRAY ['ge_mri_gesys'],
+        NULL,
+        NULL
+    );
+
 -- >
 -- >
 INSERT INTO
@@ -190,6 +253,27 @@ VALUES
         NULL,
         'C0162/SHIP045/SME08929',
         'ERRORS_A1_'
+    );
+
+INSERT INTO
+    config.log (
+        system_id,
+        file_name,
+        dir_name,
+        regex_models,
+        pg_tables,
+        column_name,
+        agg
+    )
+VALUES
+    (
+        'SME08929',
+        'Evtlog.txt',
+        'Evtlog',
+        ARRAY ['block', 'sub_block'],
+        ARRAY ['ge_mri_gesys'],
+        NULL,
+        NULL
     );
 
 -- >
@@ -227,6 +311,27 @@ VALUES
         'ERRORS_A1_'
     );
 
+INSERT INTO
+    config.log (
+        system_id,
+        file_name,
+        dir_name,
+        regex_models,
+        pg_tables,
+        column_name,
+        agg
+    )
+VALUES
+    (
+        'SME08930',
+        'Evtlog.txt',
+        'Evtlog',
+        ARRAY ['block', 'sub_block'],
+        ARRAY ['ge_mri_gesys'],
+        NULL,
+        NULL
+    );
+
 -- >
 -- >
 INSERT INTO
@@ -260,6 +365,27 @@ VALUES
         NULL,
         'C0162/SHIP045/SME08931',
         'ERRORS_A1_'
+    );
+
+INSERT INTO
+    config.log (
+        system_id,
+        file_name,
+        dir_name,
+        regex_models,
+        pg_tables,
+        column_name,
+        agg
+    )
+VALUES
+    (
+        'SME08931',
+        'Evtlog.txt',
+        'Evtlog',
+        ARRAY ['block', 'sub_block'],
+        ARRAY ['ge_mri_gesys'],
+        NULL,
+        NULL
     );
 
 -- >
@@ -297,6 +423,27 @@ VALUES
         'errors_A1_'
     );
 
+INSERT INTO
+    config.log (
+        system_id,
+        file_name,
+        dir_name,
+        regex_models,
+        pg_tables,
+        column_name,
+        agg
+    )
+VALUES
+    (
+        'SME08932',
+        'Evtlog.txt',
+        'Evtlog',
+        ARRAY ['block', 'sub_block'],
+        ARRAY ['ge_mri_gesys'],
+        NULL,
+        NULL
+    );
+
 -- >
 -- >
 INSERT INTO
@@ -332,6 +479,27 @@ VALUES
         'error_A1_'
     );
 
+INSERT INTO
+    config.log (
+        system_id,
+        file_name,
+        dir_name,
+        regex_models,
+        pg_tables,
+        column_name,
+        agg
+    )
+VALUES
+    (
+        'SME08933',
+        'Evtlog.txt',
+        'Evtlog',
+        ARRAY ['block', 'sub_block'],
+        ARRAY ['ge_mri_gesys'],
+        NULL,
+        NULL
+    );
+
 -- >
 -- >
 INSERT INTO
@@ -365,4 +533,25 @@ VALUES
         NULL,
         'C0162/SHIP044/SME08934',
         'error_A1_'
+    );
+
+INSERT INTO
+    config.log (
+        system_id,
+        file_name,
+        dir_name,
+        regex_models,
+        pg_tables,
+        column_name,
+        agg
+    )
+VALUES
+    (
+        'SME08934',
+        'Evtlog.txt',
+        'Evtlog',
+        ARRAY ['block', 'sub_block'],
+        ARRAY ['ge_mri_gesys'],
+        NULL,
+        NULL
     );
