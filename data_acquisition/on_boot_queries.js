@@ -766,7 +766,6 @@ GROUP BY
     sys.manufacturer = 'Siemens'
     AND sys.modality = 'CV/IR'
     AND ac.run_group = 1
-	AND sys.id = 'SME00817'
   GROUP BY
     sys.id,
     ac.system_id,
