@@ -8,7 +8,7 @@ const generateDateTime = require("../../../processing/date_processing/generateDa
 const { remove_dub_quotes } = require("../../../util/regExHelpers");
 const { dt_now } = require("../../../util/dates");
 const {
-  pg_column_sets: pg_cs,
+  pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 // File data streamed line by line
@@ -21,7 +21,7 @@ async function ge_cv_sys_error(System) {
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: System.file_config.file_name,
+    file: System.file_config.file_name
   };
 
   try {
@@ -43,6 +43,23 @@ async function ge_cv_sys_error(System) {
     if (!System.current_file_size) return;
 
     await System.getFileData("read_stream");
+
+    const last_mod = (
+      await System.getLastModifiedTime(System.complete_file_path)
+    ).toISOString();
+
+    const file_metadata = {
+      system_id: System.sme,
+      file_name: System.file_config.file_name,
+      last_mod,
+      source: "hhm"
+    };
+
+    if (System.delta === 0) {
+      await System.push_file_dt_queue(System.run_log, file_metadata);
+      return;
+    }
+
     if (System.file_data === null) return;
 
     // ** End Data Acquisition
@@ -61,7 +78,7 @@ async function ge_cv_sys_error(System) {
             sme: System.sysConfigData.id,
             line: line,
             re: `${ge_re.cv[parsers[0]]}`,
-            message: "NO MATCH FOUND",
+            message: "NO MATCH FOUND"
           };
           await System.addLogEvent(
             System.W,
@@ -93,7 +110,7 @@ async function ge_cv_sys_error(System) {
             sme: System.sme,
             line: line,
             match_group: matches.groups,
-            message: "datetime object null",
+            message: "datetime object null"
           };
           await System.addLogEvent(
             System.W,
@@ -123,7 +140,7 @@ async function ge_cv_sys_error(System) {
     const mappedData = mapDataToSchema(data, ge_cv_syserror_schema);
 
     console.log("\nmappedData - ge_cv");
-    console.log(System.sme)
+    console.log(System.sme);
     console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse
@@ -150,6 +167,8 @@ async function ge_cv_sys_error(System) {
 
     // ** End Persist
 
+    await System.push_file_dt_queue(System.run_log, file_metadata);
+
     // Update Redis Cache
 
     await System.updateRedisFileSize();
@@ -157,7 +176,7 @@ async function ge_cv_sys_error(System) {
     console.log(error);
     let note = {
       job_id: System.job_id,
-      sme: System.sysConfigData.id,
+      sme: System.sysConfigData.id
     };
     await System.addLogEvent(
       System.E,

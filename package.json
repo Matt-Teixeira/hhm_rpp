@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "update": "./proj.sh",
-    "read_log": "node logReader/index.js",
+    "file_dt": "node index.js file_dt",
     "ge_ct": "node index.js GE_CT",
     "ge_cv": "node index.js GE_CV",
     "ge_mri": "node index.js GE_MRI",

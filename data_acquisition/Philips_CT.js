@@ -3,8 +3,9 @@ const fs = require("node:fs").promises;
 const {
   getRedisFileSize,
   getCurrentFileSize,
-  updateRedisFileSize,
+  updateRedisFileSize
 } = require("../redis/redisHelpers");
+const { getLastModifiedTime } = require("../util/isFileModified");
 const execTail = require("../read/exec-tail");
 const execLastMod = require("../read/exec-file_last_mod");
 const { philips_re } = require("../parse/parsers");
@@ -29,7 +30,7 @@ class Philips_CT extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.file_config.file_name,
+      file: this.file_config.file_name
     };
     try {
       this.prev_file_size = await getRedisFileSize(
@@ -61,7 +62,7 @@ class Philips_CT extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.file_config.file_name,
+      file: this.file_config.file_name
     };
     try {
       this.current_file_size = await getCurrentFileSize(
@@ -91,14 +92,14 @@ class Philips_CT extends System {
     }
   }
 
-  getFileSizeDelta() {
+  async getFileSizeDelta() {
     this.delta = this.current_file_size - this.prev_file_size;
 
     let note = {
       job_id: this.job_id,
       sme: this.sme,
       file: this.file_config.file_name,
-      delta: this.delta,
+      delta: this.delta
     };
     this.addLogEvent(
       this.I,
@@ -107,13 +108,31 @@ class Philips_CT extends System {
       this.det,
       note
     );
+
+    console.log("\ndelta");
+    console.log(this.delta);
+
+    if (this.delta === 0) {
+      const last_mod_dt = await getLastModifiedTime(this.complete_file_path);
+      note.last_mod_dt = last_mod_dt;
+      console.log("\nLAST MOD:");
+      console.log(last_mod_dt);
+      await this.addLogEvent(
+        this.I,
+        this.run_log,
+        "Philips_CT: getLastModifiedTime",
+        this.det,
+        note
+      );
+      return;
+    }
   }
 
   async updateRedisFileSize() {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.file_config.file_name,
+      file: this.file_config.file_name
     };
     try {
       await updateRedisFileSize(
@@ -139,7 +158,7 @@ class Philips_CT extends System {
     let note = {
       job_id: this.job_id,
       sme: this.sme,
-      file: this.file_config.file_name,
+      file: this.file_config.file_name
     };
     await this.addLogEvent(
       this.I,
@@ -187,7 +206,7 @@ class Philips_CT extends System {
         if (this.delta === 0) {
           // Get file's last mod datetime
           const file_mod_datetime = await execLastMod(this.lastModPath, [
-            this.complete_file_path,
+            this.complete_file_path
           ]);
           note.message = `No new file data. Delta: ${this.delta}`;
           note.last_mod = file_mod_datetime;

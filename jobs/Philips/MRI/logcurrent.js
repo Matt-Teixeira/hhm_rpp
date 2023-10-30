@@ -8,7 +8,7 @@ const generateDateTime = require("../../../processing/date_processing/generateDa
 const { dt_now } = require("../../../util/dates");
 
 const {
-  pg_column_sets: pg_cs,
+  pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function phil_mri_logcurrent(file_config, System) {
@@ -19,7 +19,7 @@ async function phil_mri_logcurrent(file_config, System) {
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: file_config,
+    file: file_config
   };
 
   try {
@@ -37,6 +37,22 @@ async function phil_mri_logcurrent(file_config, System) {
     await System.getRedisFileSize();
 
     await System.getCurrentFileSize();
+
+    const last_mod = (
+      await System.getLastModifiedTime(System.complete_file_path)
+    ).toISOString();
+
+    const file_metadata = {
+      system_id: System.sme,
+      file_name: System.file_config.file_name,
+      last_mod,
+      source: "hhm"
+    };
+
+    if (System.delta === 0) {
+      await System.push_file_dt_queue(System.run_log, file_metadata);
+      return;
+    }
 
     await System.getFileData();
 
@@ -63,7 +79,7 @@ async function phil_mri_logcurrent(file_config, System) {
             file: file_config,
             line,
             line_number,
-            message: "NO MATCH FOUND",
+            message: "NO MATCH FOUND"
           };
           await System.addLogEvent(
             System.I,
@@ -105,7 +121,7 @@ async function phil_mri_logcurrent(file_config, System) {
             file: file_config,
             line,
             match_group: matches.groups,
-            message: "datetime object null",
+            message: "datetime object null"
           };
           await System.addLogEvent(
             System.W,
@@ -171,6 +187,7 @@ async function phil_mri_logcurrent(file_config, System) {
     );
 
     // Update Redis Cache
+    await System.push_file_dt_queue(System.run_log, file_metadata);
 
     await System.updateRedisFileSize();
   } catch (error) {

@@ -1,8 +1,10 @@
 const [addLogEvent] = require("../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, det, cat, seq, qaf },
+  tag: { cal, det, cat, seq, qaf }
 } = require("../utils/logger/enums");
+const { getLastModifiedTime } = require("../util/isFileModified");
+const { push_file_dt_queue } = require("../redis/redisHelpers");
 
 class System {
   constructor(sysConfigData, file_config, job_id, run_log) {
@@ -22,15 +24,16 @@ class System {
     this.qaf = qaf;
   }
 
-  async addLogEvent(
-    type,
-    run_log,
-    name,
-    tag,
-    note = null,
-    error = null
-  ) {
+  async addLogEvent(type, run_log, name, tag, note = null, error = null) {
     await addLogEvent(type, run_log, name, tag, note, error);
+  }
+
+  async getLastModifiedTime(file_path) {
+    return getLastModifiedTime(file_path);
+  }
+
+  async push_file_dt_queue(run_log, system_file_metadata) {
+    push_file_dt_queue(run_log, system_file_metadata);
   }
 }
 

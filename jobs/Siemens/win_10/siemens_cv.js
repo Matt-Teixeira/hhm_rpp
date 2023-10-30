@@ -45,10 +45,22 @@ const siemens_cv_parser = async (System) => {
     // Set last file in rmmu directory
     System.update_files_to_process();
 
-    console.log(System.files_in_dir);
-
     for await (const file of System.files_in_dir) {
       const complete_file_path = `${System.directory_path}/${file}`;
+
+      const last_mod = (
+        await System.getLastModifiedTime(complete_file_path)
+      ).toISOString();
+  
+      const file_metadata = {
+        system_id: System.sme,
+        file_name: file,
+        last_mod,
+        source: "hhm"
+      };
+  
+      await System.push_file_dt_queue(System.run_log, file_metadata);
+
       const fileData = (await fsp.readFile(complete_file_path)).toString();
 
       // ** Begin Parse
@@ -148,6 +160,7 @@ const siemens_cv_parser = async (System) => {
 
       console.log("\nmappedData - ge_mri");
       console.log(System.sme);
+      console.log(`Rows Inserted: ${mappedData.length}`);
       console.log(mappedData[mappedData.length - 1]);
 
       // ** End Persist

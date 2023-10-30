@@ -3,7 +3,7 @@ const initRedis = require("./index");
 const [addLogEvent] = require("../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, det, cat, seq, qaf },
+  tag: { cal, det, cat, seq, qaf }
 } = require("../utils/logger/enums");
 
 async function updateRedisFileSize(sme, exec_path, file_path, file, run_log) {
@@ -131,7 +131,7 @@ async function getRedisLinePositions(sme, file, run_log) {
       await addLogEvent(W, run_log, "getRedisLinePositions", det, note, null);
       return {
         eal: null,
-        events: null,
+        events: null
       };
     }
 
@@ -148,13 +148,13 @@ async function updateRedisLinePositions(sme, file, eal, events) {
     sme,
     file,
     eal,
-    events,
+    events
   };
   const redisClient = await initRedis();
   try {
     let testData = {
       eal,
-      events,
+      events
     };
 
     testData = JSON.stringify(testData);
@@ -169,6 +169,52 @@ async function updateRedisLinePositions(sme, file, eal, events) {
   }
 }
 
+async function push_file_dt_queue(run_log, system) {
+  const redisClient = await initRedis();
+  try {
+    await redisClient.sendCommand([
+      "RPUSH",
+      "file_dt:queue",
+      JSON.stringify(system)
+    ]);
+    await redisClient.quit();
+  } catch (error) {
+    await addLogEvent(E, run_log, "push_file_dt_queue", cat, { system }, error);
+  }
+}
+
+async function get_file_dt_queue(run_log) {
+  await addLogEvent(I, run_log, "get_file_dt_queue", cal, null, null);
+  const redisClient = await initRedis();
+  try {
+    const queue_data = await redisClient.sendCommand([
+      "lrange",
+      "file_dt:queue",
+      "0",
+      "1000"
+    ]);
+    await redisClient.quit();
+    const data = [];
+    for (const system of queue_data) data.push(JSON.parse(system));
+    return data;
+  } catch (error) {
+    await redisClient.quit();
+    await addLogEvent(E, run_log, "get_file_dt_queue", cat, null, error);
+  }
+}
+
+async function clear_file_dt_queue(run_log) {
+  await addLogEvent(I, run_log, "clear_file_dt_queue", cal, null, null);
+  const redisClient = await initRedis();
+  try {
+    await redisClient.sendCommand(["del", "file_dt:queue"]);
+    await redisClient.quit();
+  } catch (error) {
+    await redisClient.quit();
+    await addLogEvent(E, run_log, "clear_file_dt_queue", cat, null, error);
+  }
+}
+
 module.exports = {
   updateRedisFileSize,
   getCurrentFileSize,
@@ -178,4 +224,7 @@ module.exports = {
   getRedisLine,
   updateRedisLinePositions,
   getRedisLinePositions,
+  push_file_dt_queue,
+  get_file_dt_queue,
+  clear_file_dt_queue
 };

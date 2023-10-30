@@ -7,10 +7,13 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_cv_eventlog_schema } = require("../../../persist/pg-schemas");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const execLastMod = require("../../../read/exec-file_last_mod");
+const { getLastModifiedTime } = require("../../../util/isFileModified");
+const update_file_mod_dt = require("../../../util/file_mod_dt");
 const {
   getCurrentFileSize,
   getRedisFileSize,
   updateRedisFileSize,
+  push_file_dt_queue
 } = require("../../../redis/redisHelpers");
 const execHead = require("../../../read/exec-head");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
@@ -19,11 +22,11 @@ const { dt_now } = require("../../../util/dates");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, det, cat },
+  tag: { cal, det, cat }
 } = require("../../../utils/logger/enums");
 
 const {
-  pg_column_sets: pg_cs,
+  pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
@@ -47,7 +50,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     job_id,
     sme,
     file: file_config.file_name,
-    path: complete_file_path,
+    path: complete_file_path
   };
 
   try {
@@ -64,6 +67,17 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
       await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
       return;
     }
+
+    const last_mod = (
+      await getLastModifiedTime(complete_file_path)
+    ).toISOString();
+
+    const file_metadata = {
+      system_id: sme,
+      file_name: file_config.file_name,
+      last_mod,
+      source: "hhm"
+    };
 
     const prevFileSize = await getRedisFileSize(
       sme,
@@ -93,9 +107,11 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
         sme,
         file: file_config.file_name,
         delta: delta,
-        message: "Same file size. Do not parse",
+        message: "Same file size. Do not parse"
       };
       await addLogEvent(I, run_log, "phil_cv_eventlog", det, note, null);
+      //await update_file_mod_dt(file_metadata);
+      await push_file_dt_queue(run_log, file_metadata)
       return;
     }
 
@@ -109,7 +125,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     if (prevFileSize === null || prevFileSize === 0 || delta !== 0) {
       rl = readline.createInterface({
         input: fs.createReadStream(complete_file_path),
-        crlfDelay: Infinity,
+        crlfDelay: Infinity
       });
     }
 
@@ -148,7 +164,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
             sme: sme,
             file: file_config,
             line,
-            message: "NO MATCH FOUND",
+            message: "NO MATCH FOUND"
           };
           await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
         }
@@ -169,7 +185,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
             sme: sme,
             line,
             match_group: matches.groups,
-            message: "datetime object null",
+            message: "datetime object null"
           };
           await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
         }
@@ -182,7 +198,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
           memo_data.push({
             system_id: matches.groups.system_id,
             memo: matches.groups.memo,
-            host_datetime: matches.groups.host_datetime,
+            host_datetime: matches.groups.host_datetime
           });
         }
       }
@@ -216,7 +232,6 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     await addLogEvent(I, run_log, "phil_cv_eventlog", det, note, null);
 
     // Update Redis Cache
-
     await updateRedisFileSize(
       sme,
       updateSizePath,
@@ -224,8 +239,13 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
       file_config.file_name,
       run_log
     );
+
     // insert metadata
     if (memo_data.length > 0) await extract(job_id, memo_data, run_log);
+
+    // Update file_dt
+    //await update_file_mod_dt(file_metadata);
+    await push_file_dt_queue(run_log, file_metadata);
   } catch (error) {
     console.log(error);
     await addLogEvent(E, run_log, "phil_cv_eventlog", cat, note, error);

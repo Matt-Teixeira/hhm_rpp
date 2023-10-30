@@ -1,9 +1,11 @@
 const { philips_re } = require("../../../parse/parsers");
 const insertJsonB = require("../../../processing/phil_mri_monitor_data/bulk_jsonb_insert");
+const { getLastModifiedTime } = require("../../../util/isFileModified");
+const { push_file_dt_queue } = require("../../../redis/redisHelpers");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, cat, det },
+  tag: { cal, cat, det }
 } = require("../../../utils/logger/enums");
 
 async function phil_mri_monitor(System, directory) {
@@ -13,16 +15,30 @@ async function phil_mri_monitor(System, directory) {
 
     // Loop through monitoring files in monitoring directory
     for await (const file of directory) {
+      const complete_file_path = `${System.sysConfigData.debian_server_path}/monitoring/${file.file_name}`;
       let note = {
         job_id: System.job_id,
         sme: System.sme,
-        file: file,
+        file: file
       };
+
+      const last_mod = (
+        await getLastModifiedTime(complete_file_path)
+      ).toISOString();
+
+      const file_metadata = {
+        system_id: System.sme,
+        file_name: file.file_name,
+        last_mod,
+        source: "hhm"
+      };
+
+      await push_file_dt_queue(System.run_log, file_metadata);
+
+      console.log(last_mod);
 
       await addLogEvent(I, System.run_log, "phil_mri_monitor", det, note, null);
       //if (file.file_name === "monitor_System_TempTechRoom.dat") {
-      const complete_file_path = `${System.sysConfigData.debian_server_path}/monitoring/${file.file_name}`;
-
       let file_data;
 
       // Remove .dat from file. EX: "monitor_magnet_quench.dat"
@@ -98,7 +114,7 @@ async function phil_mri_monitor(System, directory) {
       let note = {
         job_id: System.job_id,
         sme: System.sme,
-        message: "No new monitoring data found.",
+        message: "No new monitoring data found."
       };
       await addLogEvent(W, System.run_log, "phil_mri_monitor", det, note, null);
       return [null, null, null];
@@ -106,7 +122,7 @@ async function phil_mri_monitor(System, directory) {
 
     const date = await insertJsonB(System.job_id, System.run_log, [
       System.sme,
-      jsonData,
+      jsonData
     ]);
 
     // send data to be aggregated
@@ -114,7 +130,7 @@ async function phil_mri_monitor(System, directory) {
   } catch (error) {
     let note = {
       job_id: System.job_id,
-      sme: System.sme,
+      sme: System.sme
     };
     console.log(error);
     await addLogEvent(E, System.run_log, "phil_mri_monitor", cat, note, error);

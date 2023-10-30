@@ -4,6 +4,7 @@ const pgPool = require("./utils/db/pg-pool");
 const siemens_parser = require("./jobs/Siemens");
 const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");
+const update_file_datetimes = require("./jobs/aux_jobs/update_file_datetimes");
 const queries = require("./data_acquisition/on_boot_queries");
 const [
   addLogEvent,
@@ -60,26 +61,17 @@ const onBoot = async () => {
 
     let shell_value = [process.argv[2]];
 
+    if (shell_value[0] === "file_dt") {
+      await update_file_datetimes(run_log);
+      await writeLogEvents(run_log);
+      console.log("\n*************** END ***************");
+      console.timeEnd();
+      return;
+    }
+
     let queryString = queries[shell_value];
 
     const system_array = await pgPool.any(queryString);
-    console.log(system_array);
-
-    /* 
-    const child_processes = [];
-    for await (const system of system_array) {
-      const job_id = uuidv4();
-      child_processes.push(
-        async () => await determineManufacturer(job_id, system, run_log)
-      );
-    }
-
-    // CREATE AN ARRAY OF PROMISES BY CALLING EACH child_process FUNCTION
-    const promises = child_processes.map((child_process) => child_process());
-
-    // AWAIT PROMISIS
-    await Promise.all(promises);
- */
 
     for await (const system of system_array) {
       const job_id = uuidv4();
