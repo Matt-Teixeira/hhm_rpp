@@ -1,3 +1,4 @@
+
 INSERT INTO config.acquisition(system_id, host_ip, mmb_ip, protocal, debian_server_path, credentials_group, acquisition_script, run_group, host, user_id, acqu_point)
 VALUES (
 	'SME01123',
@@ -433,7 +434,19 @@ VALUES(
 
 -->
 -->
+
+UPDATE 
+	config.acquisition
+SET 
+	host_ip = '10.0.107.10',
+	debian_server_path = '/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME10571',
+	credentials_group = '5',
+	acquisition_script = 'ge_mri_22.sh',
+	run_group = 1
+WHERE 
+	system_id = 'SME10571';
 	
+/*
 INSERT INTO config.acquisition(system_id, host_ip, mmb_ip, protocal, debian_server_path, credentials_group, acquisition_script, run_group, host, user_id, acqu_point)
 VALUES (
 	'SME10571',
@@ -448,7 +461,7 @@ VALUES (
 	NULL,
 	NULL
 );
-
+*/
 INSERT INTO config.log (system_id, file_name, dir_name, regex_models, pg_tables, column_name, agg)
 VALUES(
 	'SME10571',
@@ -603,6 +616,122 @@ INSERT INTO config.log (system_id, file_name, dir_name, regex_models, pg_tables,
 VALUES(
 	'SME17380',
 	'gesys_DVMR_HILL.log',
+	'gesys',
+	ARRAY['block', 'sub_block'],
+	ARRAY['ge_mri_gesys'],
+	NULL,
+	NULL
+);
+
+-->
+-->
+
+INSERT INTO config.acquisition(system_id, host_ip, mmb_ip, protocal, debian_server_path, credentials_group, acquisition_script, run_group, host, user_id, acqu_point)
+VALUES (
+	'SME16339',
+	'10.75.9.242',
+	NULL,
+	'lftp',
+	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME16339',
+	'6',
+	'ge_mri_22.sh',
+	1,
+	NULL,
+	NULL,
+	NULL
+);
+
+INSERT INTO config.log (system_id, file_name, dir_name, regex_models, pg_tables, column_name, agg)
+VALUES(
+	'SME16339',
+	'gesys_BIWESTGE15T.log',
+	'gesys',
+	ARRAY['block', 'sub_block'],
+	ARRAY['ge_mri_gesys'],
+	NULL,
+	NULL
+);
+
+-->
+-->
+
+INSERT INTO config.acquisition(system_id, host_ip, mmb_ip, protocal, debian_server_path, credentials_group, acquisition_script, run_group, host, user_id, acqu_point)
+VALUES (
+	'SME16341',
+	'10.35.158.235',
+	NULL,
+	'lftp',
+	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME16341',
+	'6',
+	'ge_mri_22.sh',
+	1,
+	NULL,
+	NULL,
+	NULL
+);
+
+INSERT INTO config.log (system_id, file_name, dir_name, regex_models, pg_tables, column_name, agg)
+VALUES(
+	'SME16341',
+	'gesys_BIDMCGEMR3.log',
+	'gesys',
+	ARRAY['block', 'sub_block'],
+	ARRAY['ge_mri_gesys'],
+	NULL,
+	NULL
+);
+
+-->
+-->
+
+INSERT INTO config.acquisition(system_id, host_ip, mmb_ip, protocal, debian_server_path, credentials_group, acquisition_script, run_group, host, user_id, acqu_point)
+VALUES (
+	'SME16342',
+	'10.35.11.242',
+	NULL,
+	'lftp',
+	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME16342',
+	'6',
+	'ge_mri_22.sh',
+	1,
+	NULL,
+	NULL,
+	NULL
+);
+
+INSERT INTO config.log (system_id, file_name, dir_name, regex_models, pg_tables, column_name, agg)
+VALUES(
+	'SME16342',
+	'gesys_GEMRMR2.log',
+	'gesys',
+	ARRAY['block', 'sub_block'],
+	ARRAY['ge_mri_gesys'],
+	NULL,
+	NULL
+);
+
+-->
+-->
+
+INSERT INTO config.acquisition(system_id, host_ip, mmb_ip, protocal, debian_server_path, credentials_group, acquisition_script, run_group, host, user_id, acqu_point)
+VALUES (
+	'SME16617',
+	'10.251.201.200',
+	NULL,
+	'lftp',
+	'/home/matt-teixeira/hep3/hhm_data_acquisition/files/SME16617',
+	'6',
+	'ge_mri_22.sh',
+	1,
+	NULL,
+	NULL,
+	NULL
+);
+
+INSERT INTO config.log (system_id, file_name, dir_name, regex_models, pg_tables, column_name, agg)
+VALUES(
+	'SME16617',
+	'gesys_gehc.log',
 	'gesys',
 	ARRAY['block', 'sub_block'],
 	ARRAY['ge_mri_gesys'],
