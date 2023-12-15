@@ -39,8 +39,9 @@ class PHILIPS_MRI_MONITORING {
         note,
         null
       );
-      const file_data = (await fs.readFile(complete_file_path)).toString();
-      return file_data;
+      const file_data = await fs.readFile(complete_file_path);
+      const file_data_str = file_data.toString();
+      return file_data_str;
     } catch (error) {
       await addLogEvent(
         E,

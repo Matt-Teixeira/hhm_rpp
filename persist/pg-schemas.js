@@ -27,7 +27,7 @@ const ge_mri_gesys_schema = {
   sr: null,
   en: null,
   host_datetime: null,
-  capture_datetime: null,
+  capture_datetime: null
 };
 
 const ge_ct_gesys_schema = {
@@ -59,7 +59,7 @@ const ge_ct_gesys_schema = {
   sr: null,
   en: null,
   host_datetime: null,
-  capture_datetime: null,
+  capture_datetime: null
 };
 
 const ge_cv_syserror_schema = {
@@ -83,7 +83,7 @@ const ge_cv_syserror_schema = {
   sourcefile: null,
   sourceline: null,
   host_datetime: null,
-  capture_datetime: null,
+  capture_datetime: null
 };
 
 const siemens_ct_mri = {
@@ -100,7 +100,7 @@ const siemens_ct_mri = {
   day: null,
   year: null,
   host_datetime: null,
-  capture_datetime: null,
+  capture_datetime: null
 };
 
 const siemens_cv_schema = {
@@ -137,7 +137,7 @@ const philips_ct_eal_schema = {
   info: null,
   eal_time: null,
   host_datetime: null,
-  capture_datetime: null,
+  capture_datetime: null
 };
 
 const philips_ct_events_schema = {
@@ -152,7 +152,7 @@ const philips_ct_events_schema = {
   eal: null,
   event_time: null,
   host_datetime: null,
-  capture_datetime: null,
+  capture_datetime: null
 };
 
 const phil_mri_logcurrent_schema = {
@@ -173,7 +173,7 @@ const phil_mri_logcurrent_schema = {
   reconstructor: null,
   magnet_meu: null,
   host_datetime: null,
-  capture_datetime: null,
+  capture_datetime: null
 };
 
 const phil_mri_rmmu_short_schema = {
@@ -206,7 +206,7 @@ const phil_mri_rmmu_short_schema = {
   compressorreset_state: null,
   chd_value: null,
   cpr_value: null,
-  host_datetime: null,
+  host_datetime: null
 };
 
 const phil_mri_rmmu_long_schema = {
@@ -240,7 +240,7 @@ const phil_mri_rmmu_long_schema = {
   compressorreset_state: null,
   chd_value: null,
   cpr_value: null,
-  host_datetime: null,
+  host_datetime: null
 };
 
 const philips_mri_rmmu_magnet_schema = {
@@ -260,7 +260,7 @@ const philips_mri_rmmu_magnet_schema = {
   event: null,
   data: null,
   descr: null,
-  host_datetime: null,
+  host_datetime: null
 };
 
 const philips_mri_rmmu_history = {
@@ -281,7 +281,7 @@ const philips_mri_rmmu_history = {
   cres: null,
   system_reference_number: null,
   hospital_name: null,
-  host_datetime: null,
+  host_datetime: null
 };
 
 const philips_cv_eventlog_schema = {
@@ -303,13 +303,14 @@ const philips_cv_eventlog_schema = {
   message: null,
   host_datetime: null,
   capture_datetime: null,
+  lod: null
 };
 
 const logfile_event_history_metadata = {
   system_id: null,
   power_on: null,
   software_version: null,
-  host_datetime: null,
+  host_datetime: null
 };
 
 const stt_magnet = {
@@ -323,7 +324,7 @@ const stt_magnet = {
   test_result_2: null,
   test_result: null,
   message: null,
-  host_datetime: null,
+  host_datetime: null
 };
 
 module.exports = {
@@ -341,5 +342,5 @@ module.exports = {
   ge_cv_syserror_schema,
   philips_cv_eventlog_schema,
   logfile_event_history_metadata,
-  stt_magnet,
+  stt_magnet
 };

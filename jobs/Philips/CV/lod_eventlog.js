@@ -29,7 +29,12 @@ const {
   pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
-async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
+async function phil_cv_lod_eventlog(
+  job_id,
+  sysConfigData,
+  file_config,
+  run_log
+) {
   const capture_datetime = dt_now();
   const sme = sysConfigData.id;
   // an array in each config accossiated with a file
@@ -37,8 +42,6 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
 
   const updateSizePath = "./read/sh/readFileSize.sh";
   const fileSizePath = "./read/sh/readFileSize.sh";
-  const headPath = "./read/sh/head.sh";
-  const lastModPath = "./read/sh/get_dir_last_mod.sh";
 
   const data = [];
   // Extract 'Power-On hours' and 'Commercial Version'
@@ -53,11 +56,8 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     path: complete_file_path
   };
 
-  console.log("\nIN Function");
-  console.log(note);
-
   try {
-    await addLogEvent(I, run_log, "phil_cv_eventlog", cal, note, null);
+    await addLogEvent(I, run_log, "phil_cv_lod_eventlog", cal, note, null);
 
     if (!fs.existsSync(complete_file_path)) {
       let note = {
@@ -67,9 +67,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
         path: complete_file_path,
         message: "File not found"
       };
-      console.log("\nnote");
-      console.log(note);
-      await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
+      await addLogEvent(W, run_log, "phil_cv_lod_eventlog", det, note, null);
       return;
     }
 
@@ -101,13 +99,13 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
 
     const delta = currentFileSize - prevFileSize;
 
-    console.log("\ndelta");
+    console.log("\n LOD DELTA");
     console.log(delta);
 
     note.current_file_size = currentFileSize;
     note.delta = delta;
 
-    await addLogEvent(I, run_log, "phil_cv_eventlog", det, note, null);
+    await addLogEvent(I, run_log, "phil_cv_lod_eventlog", det, note, null);
 
     if (delta === 0) {
       let note = {
@@ -117,7 +115,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
         delta: delta,
         message: "Same file size. Do not parse"
       };
-      await addLogEvent(I, run_log, "phil_cv_eventlog", det, note, null);
+      await addLogEvent(I, run_log, "phil_cv_lod_eventlog", det, note, null);
       //await update_file_mod_dt(file_metadata);
       await push_file_dt_queue(run_log, file_metadata);
       return;
@@ -174,7 +172,14 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
             line,
             message: "NO MATCH FOUND"
           };
-          await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
+          await addLogEvent(
+            W,
+            run_log,
+            "phil_cv_lod_eventlog",
+            det,
+            note,
+            null
+          );
         }
       } else {
         matches.groups.system_id = sme;
@@ -195,11 +200,20 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
             match_group: matches.groups,
             message: "datetime object null"
           };
-          await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
+          await addLogEvent(
+            W,
+            run_log,
+            "phil_cv_lod_eventlog",
+            det,
+            note,
+            null
+          );
         }
 
         matches.groups.capture_datetime = capture_datetime;
         matches.groups.host_datetime = dtObject;
+
+        matches.groups.lod = true;
 
         data.push(matches.groups);
         if (matches.groups.memo !== "") {
@@ -223,12 +237,16 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
 
     // ** Begin Persist
 
-    const query = pgp.helpers.insert(
+    const data_query = pgp.helpers.insert(
       mappedData,
       pg_cs.log.philips.philips_cv_eventlog
     );
 
-    await db.any(query);
+    await db.any(data_query);
+
+    const ref_query = `INSERT INTO log.lod_reference(system_id, capture_datetime) VALUES($1, $2)`;
+
+    await db.any(ref_query, [sme, capture_datetime]);
 
     // ** End Persist
 
@@ -237,7 +255,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     note.last_row = mappedData[mappedData.length - 1];
     note.message = "Successful Insert";
 
-    await addLogEvent(I, run_log, "phil_cv_eventlog", det, note, null);
+    await addLogEvent(I, run_log, "phil_cv_lod_eventlog", det, note, null);
 
     // Update Redis Cache
     await updateRedisFileSize(
@@ -249,15 +267,15 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     );
 
     // insert metadata
-    if (memo_data.length > 0) await extract(job_id, memo_data, run_log);
+    //if (memo_data.length > 0) await extract(job_id, memo_data, run_log);
 
     // Update file_dt
     //await update_file_mod_dt(file_metadata);
     await push_file_dt_queue(run_log, file_metadata);
   } catch (error) {
     console.log(error);
-    await addLogEvent(E, run_log, "phil_cv_eventlog", cat, note, error);
+    await addLogEvent(E, run_log, "phil_cv_lod_eventlog", cat, note, error);
   }
 }
 
-module.exports = phil_cv_eventlog;
+module.exports = phil_cv_lod_eventlog;
