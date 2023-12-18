@@ -1,33 +1,35 @@
+// Database
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
+const {
+  pg_column_sets: pg_cs
+} = require("../../../utils/db/sql/pg-helpers_hhm");
+
+// Node utils
 const fs = require("node:fs");
 const readline = require("readline");
+
+// App utils
 const { philips_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_cv_eventlog_schema } = require("../../../persist/pg-schemas");
 const { blankLineTest } = require("../../../util/regExHelpers");
-const execLastMod = require("../../../read/exec-file_last_mod");
 const { getLastModifiedTime } = require("../../../util/isFileModified");
-const update_file_mod_dt = require("../../../util/file_mod_dt");
 const {
   getCurrentFileSize,
   getRedisFileSize,
   updateRedisFileSize,
   push_file_dt_queue
 } = require("../../../redis/redisHelpers");
-const execHead = require("../../../read/exec-head");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
-const extract = require("../../../processing/date_processing/phil_cv/extract_memo_data");
 const { dt_now } = require("../../../util/dates");
+
+// Logger
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
   tag: { cal, det, cat }
 } = require("../../../utils/logger/enums");
-
-const {
-  pg_column_sets: pg_cs
-} = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function phil_cv_lod_eventlog(
   job_id,
@@ -37,14 +39,14 @@ async function phil_cv_lod_eventlog(
 ) {
   const capture_datetime = dt_now();
   const sme = sysConfigData.id;
-  // an array in each config accossiated with a file
   const parsers = file_config.parsers;
 
   const updateSizePath = "./read/sh/readFileSize.sh";
   const fileSizePath = "./read/sh/readFileSize.sh";
 
   const data = [];
-  // Extract 'Power-On hours' and 'Commercial Version'
+  
+  // Extract 'Power-On hours' and 'Commercial Version' data from log file
   const memo_data = [];
 
   const complete_file_path = `${sysConfigData.debian_server_path}/${file_config.file_name}`;
