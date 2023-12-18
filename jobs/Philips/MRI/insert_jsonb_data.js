@@ -1,6 +1,6 @@
 const { philips_re } = require("../../../parse/parsers");
 const insertJsonB = require("../../../processing/phil_mri_monitor_data/bulk_jsonb_insert");
-const { getLastModifiedTime } = require("../../../util/isFileModified");
+const { does_file_exist, getLastModifiedTime } = require("../../../util");
 const { push_file_dt_queue } = require("../../../redis/redisHelpers");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
@@ -15,16 +15,41 @@ async function phil_mri_monitor(System, directory) {
 
     // Loop through monitoring files in monitoring directory
     for await (const file of directory) {
-      const complete_file_path = `${System.sysConfigData.debian_server_path}/monitoring/${file.file_name}`;
+      const complete_file_path = `${System.sysConfigData
+        .debian_server_path}/monitoring/${file.file_name}`;
       let note = {
         job_id: System.job_id,
         sme: System.sme,
         file: file
       };
 
-      const last_mod = (
-        await getLastModifiedTime(complete_file_path)
-      ).toISOString();
+      // Check file existance
+      const file_present = await does_file_exist(complete_file_path);
+      // If not found - log and skip this file's iteration
+      if (!file_present) {
+        let note = {
+          job_id: System.job_id,
+          sme: System.sme,
+          file: file,
+          message: "File not found."
+        };
+        console.log(note);
+        await addLogEvent(
+          I,
+          System.run_log,
+          "phil_mri_monitor",
+          det,
+          note,
+          null
+        );
+        continue;
+      }
+
+      
+
+      const last_mod = (await getLastModifiedTime(
+        complete_file_path
+      )).toISOString();
 
       const file_metadata = {
         system_id: System.sme,

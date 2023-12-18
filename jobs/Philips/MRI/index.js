@@ -37,6 +37,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
         sysConfigData,
         run_log
       );
+      console.log(System_Monitor);
       await type_1(System_Monitor, sysConfigData.monitoring_config);
       return;
     }
