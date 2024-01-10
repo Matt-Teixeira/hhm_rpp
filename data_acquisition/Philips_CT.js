@@ -112,19 +112,30 @@ class Philips_CT extends System {
     console.log("\ndelta");
     console.log(this.delta);
 
-    if (this.delta === 0) {
-      const last_mod_dt = await getLastModifiedTime(this.complete_file_path);
-      note.last_mod_dt = last_mod_dt;
-      console.log("\nLAST MOD:");
-      console.log(last_mod_dt);
+    try {
+      if (this.delta === 0) {
+        const last_mod_dt = await getLastModifiedTime(this.complete_file_path);
+        note.last_mod_dt = last_mod_dt;
+        console.log("\nLAST MOD:");
+        console.log(last_mod_dt);
+        await this.addLogEvent(
+          this.I,
+          this.run_log,
+          "Philips_CT: getLastModifiedTime",
+          this.det,
+          note
+        );
+        return;
+      }
+    } catch (error) {
       await this.addLogEvent(
-        this.I,
+        this.E,
         this.run_log,
-        "Philips_CT: getLastModifiedTime",
-        this.det,
-        note
+        "Philips_CT: getFileSizeDelta",
+        this.cat,
+        note,
+        error
       );
-      return;
     }
   }
 

@@ -4,11 +4,7 @@ const {
   get_file_dt_queue,
   clear_file_dt_queue
 } = require("../../redis/redisHelpers");
-const [
-  addLogEvent,
-  writeLogEvents,
-  dbInsertLogEvents
-] = require("../../utils/logger/log");
+const [addLogEvent] = require("../../utils/logger/log");
 const {
   type: { I, W, E },
   tag: { cal, det, cat, seq, qaf }
