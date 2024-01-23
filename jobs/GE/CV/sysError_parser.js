@@ -66,8 +66,40 @@ async function ge_cv_sys_error(System) {
 
     // ** Begin Parse
 
+    let line_num = 1;
+    const sequencenumber_re = /sequencenumber,date/
+
     for await (const line of System.file_data) {
       let matches = line.match(ge_re.cv[parsers[0]]);
+
+      // Test for headers and skip iteration if headers present 
+      if (line_num === 1 && sequencenumber_re.test(matches.groups.sequencenumber)) {
+        
+      }
+
+      // matches will be null if no match - log bad match here
+      if (!matches) {
+        console.log("No Match Group");
+        let note = {
+          job_id: System.job_id,
+          system_id: System.sme,
+          message: "NO MATCH FOUND",
+          line_num,
+          line_data: line
+        };
+        await System.addLogEvent(
+          System.W,
+          System.run_log,
+          "ge_cv_sys_error",
+          System.det,
+          note,
+          null
+        );
+        continue;
+      }
+
+      line_num++;
+
       if (matches === null) {
         const isNewLine = blankLineTest(line);
         if (isNewLine) {
@@ -134,14 +166,11 @@ async function ge_cv_sys_error(System) {
       }
     }
 
-    // Remove headers - head of array
-    data.shift();
-
     const mappedData = mapDataToSchema(data, ge_cv_syserror_schema);
 
-    console.log("\nmappedData - ge_cv");
-    console.log(System.sme);
-    console.log(mappedData[mappedData.length - 1]);
+    // console.log("\nmappedData - ge_cv");
+    // console.log(System.sme);
+    // console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse
 

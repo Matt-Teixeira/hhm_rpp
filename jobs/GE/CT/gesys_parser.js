@@ -69,7 +69,7 @@ async function ge_ct_gesys(System) {
 
     // ** Begin Parse
 
-    // An array of matches
+    // An array of matches - no .groups property
     let matches = System.file_data.match(ge_re.ct.gesys[parsers[0]]);
 
     if (matches === null) {
@@ -78,7 +78,7 @@ async function ge_ct_gesys(System) {
         sme: System.sme,
         file: System.file_config.file_name,
         re: `${ge_re.ct.gesys[parsers[0]]}`,
-        message: "NO MATCH FOUND"
+        message: "NO MATCH FOUND - Big Group"
       };
       await System.addLogEvent(
         System.W,
@@ -94,15 +94,16 @@ async function ge_ct_gesys(System) {
     for await (let match of matches) {
       const matchGroups = match.match(ge_re.ct.gesys[parsers[1]]);
 
-      // matchGroups will be null if no match
+      // matchGroups will be null if no match - log bad match here
       if (!matchGroups) {
         let note = {
           job_id: System.job_id,
-          sme: System.sme,
+          system_id: System.sme,
           prev_epoch: data[data.length - 1].epoch,
           sr_group: data[data.length - 1].sr,
           re: `${ge_re.ct.gesys[parsers[1]]}`,
-          message: "NO MATCH FOUND"
+          message: "NO MATCH FOUND - Small Group",
+          file_data: match
         };
         await System.addLogEvent(
           System.W,
@@ -120,6 +121,7 @@ async function ge_ct_gesys(System) {
           ? 0 + matchGroups.groups.day
           : matchGroups.groups.day
       }-${matchGroups.groups.month}-${matchGroups.groups.year}`;
+
       matchGroups.groups.system_id = System.sysConfigData.id;
 
       const dtObject = await generateDateTime(
@@ -168,9 +170,10 @@ async function ge_ct_gesys(System) {
 
     const mappedData = mapDataToSchema(data, ge_ct_gesys_schema);
 
-    console.log("\nmappedData - ge_ct");
-    console.log(System.sme);
-    console.log(mappedData[mappedData.length - 1]);
+    // console.log("\nmappedData - ge_ct");
+    // console.log(System.sme);
+    // console.log(mappedData[mappedData.length - 1]);
+
     // ** End Parse
 
     // ** Begin Persist
@@ -178,6 +181,8 @@ async function ge_ct_gesys(System) {
     const query = pgp.helpers.insert(mappedData, pg_cs.log.ge.ge_ct_gesys);
 
     await db.any(query);
+
+    // ** End Persist
 
     note.number_of_rows = mappedData.length;
     note.first_row = mappedData[0];
@@ -192,8 +197,6 @@ async function ge_ct_gesys(System) {
       note,
       null
     );
-
-    // ** End Persist
 
     await System.push_file_dt_queue(System.run_log, file_metadata);
 
