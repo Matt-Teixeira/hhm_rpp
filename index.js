@@ -1,5 +1,6 @@
 ("use strict");
 require("dotenv").config();
+const pgp = require("pg-promise")();
 const pgPool = require("./utils/db/pg-pool");
 const siemens_parser = require("./jobs/Siemens");
 const philips_parser = require("./jobs/Philips");
@@ -79,6 +80,7 @@ const onBoot = async () => {
       await determineManufacturer(job_id, system, run_log);
     }
 
+    await dbInsertLogEvents(pgp, run_log);
     await writeLogEvents(run_log);
 
     console.log("\n*************** END ***************");
@@ -88,6 +90,8 @@ const onBoot = async () => {
   } catch (error) {
     console.log(error);
     await addLogEvent(E, run_log, "onBoot", cat, null, error);
+    await dbInsertLogEvents(pgp, run_log);
+    await writeLogEvents(run_log);
   }
 };
 
