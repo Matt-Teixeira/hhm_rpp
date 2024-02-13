@@ -11,6 +11,7 @@ const { dt_now } = require("../../../util/dates");
 const {
   pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
+const log = require("../../../utils/logger/log");
 
 /*
 NOTE ON EvtApplication_Today.txt
@@ -126,7 +127,8 @@ const win10_siemens_ct = async (System) => {
         matches.groups.system_id,
         System.file_config.pg_tables[0],
         matches.groups.host_date,
-        matches.groups.host_time
+        matches.groups.host_time,
+        System.sysConfigData.time_zone_id
       );
 
       if (dtObject === null) {
@@ -170,10 +172,10 @@ const win10_siemens_ct = async (System) => {
 
     const mappedData = mapDataToSchema(data, siemens_ct_mri);
 
-    console.log("\nmappedData - siemens_ct");
-    console.log(System.sme);
-    console.log(`Rows Inserted: ${mappedData.length}`);
-    console.log(mappedData[mappedData.length - 1]);
+    // console.log("\nmappedData - siemens_ct");
+    // console.log(System.sme);
+    // console.log(`Rows Inserted: ${mappedData.length}`);
+    // console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse
 

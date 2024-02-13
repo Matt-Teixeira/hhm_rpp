@@ -106,7 +106,8 @@ const siemens_cv_parser = async (System) => {
           matchGroups.groups.system_id,
           System.file_config.pg_tables[0],
           host_date,
-          matchGroups.groups.time
+          matchGroups.groups.time,
+          System.sysConfigData.time_zone_id
         );
 
         if (dtObject === null) {
@@ -144,10 +145,10 @@ const siemens_cv_parser = async (System) => {
 
       await db.any(query);
 
-      console.log("\nmappedData - ge_mri");
-      console.log(System.sme);
-      console.log(`Rows Inserted: ${mappedData.length}`);
-      console.log(mappedData[mappedData.length - 1]);
+      // console.log("\nmappedData - ge_mri");
+      // console.log(System.sme);
+      // console.log(`Rows Inserted: ${mappedData.length}`);
+      // console.log(mappedData[mappedData.length - 1]);
 
       // ** End Persist
 

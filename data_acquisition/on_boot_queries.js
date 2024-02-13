@@ -5,6 +5,7 @@ const queries = {
 	sys.manufacturer,
 	sys.modality,
 	ac.debian_server_path,
+	sites.time_zone_id,
 	json_agg(
 		json_build_object(
 			'file_name',
@@ -21,19 +22,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	sys.manufacturer = 'GE'
 	AND sys.modality LIKE '%CT'
 	AND ac.run_group = 1
 GROUP BY
 	sys.id,
-	ac.system_id;
+	ac.system_id,
+	sites.time_zone_id;
       `,
   GE_CV: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -53,19 +57,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	sys.manufacturer = 'GE'
 	AND sys.modality = 'CV/IR'
 	AND ac.run_group = 1
 GROUP BY
 	sys.id,
-	ac.system_id;
+	ac.system_id,
+	sites.time_zone_id;
       `,
   GE_MRI: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -83,19 +90,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	sys.manufacturer = 'GE'
 	AND sys.modality = 'MRI'
 	AND ac.run_group = 1
 GROUP BY
 	sys.id,
-	ac.system_id;
+	ac.system_id,
+	sites.time_zone_id;
     `,
   PHILIPS_CT: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -113,19 +123,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	sys.manufacturer = 'Philips'
 	AND sys.modality LIKE '%CT'
 	AND ac.run_group = 1
 GROUP BY
 	sys.id,
-	ac.system_id;
+	ac.system_id,
+	sites.time_zone_id;
     `,
   PHILIPS_CV: `
     SELECT
 	  sys.id,
     sys.manufacturer,
     sys.modality,
+	sites.time_zone_id,
     ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -143,19 +156,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	sys.manufacturer = 'Philips'
 	AND sys.modality = 'CV/IR'
 	AND ac.run_group = 1
 GROUP BY
 	sys.id,
-	ac.system_id;
+	ac.system_id,
+	sites.time_zone_id;
     `,
   PHILIPS_MRI_MONITOR_1: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -179,19 +195,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.mag mag ON mag.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	ac.run_group = 1
 	AND mag.dir_name IS NOT NULL
 	AND mag.dir_name = 'monitoring'
 GROUP BY
 	sys.id,
-	ac.system_id;
+	ac.system_id,
+	sites.time_zone_id;
       `,
   PHILIPS_MRI_MONITOR_2: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -215,19 +234,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.mag mag ON mag.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	ac.run_group = 2
 	AND mag.dir_name IS NOT NULL
 	AND mag.dir_name = 'monitoring'
 GROUP BY
 	sys.id,
-	ac.system_id;
+	ac.system_id,
+	sites.time_zone_id;
       `,
   PHILIPS_MRI_MONITOR_3: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -251,19 +273,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.mag mag ON mag.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	ac.run_group = 3
 	AND mag.dir_name IS NOT NULL
 	AND mag.dir_name = 'monitoring'
 GROUP BY
 	sys.id,
-	ac.system_id;
+	ac.system_id,
+	sites.time_zone_id;
       `,
   PHILIPS_MRI_MONITOR_4: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -287,19 +312,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.mag mag ON mag.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	ac.run_group = 4
 	AND mag.dir_name IS NOT NULL
 	AND mag.dir_name = 'monitoring'
 GROUP BY
 	sys.id,
-	ac.system_id;
+	ac.system_id,
+	sites.time_zone_id;
       `,
   PHILIPS_MRI_MONITOR_5: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -323,19 +351,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.mag mag ON mag.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	ac.run_group = 5
 	AND mag.dir_name IS NOT NULL
 	AND mag.dir_name = 'monitoring'
 GROUP BY
 	sys.id,
-	ac.system_id;
+	ac.system_id,
+	sites.time_zone_id;
   `,
   PHILIPS_MRI_RMMU_1: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -359,19 +390,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.mag mag ON mag.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	ac.run_group = 1
 	AND mag.dir_name IS NOT NULL
 	AND mag.dir_name != 'monitoring'
 GROUP BY
 	sys.id,
-	ac.system_id;
+	ac.system_id,
+	sites.time_zone_id;
   `,
   PHILIPS_MRI_RMMU_2: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -395,19 +429,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.mag mag ON mag.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id
 WHERE
 	ac.run_group = 2
 	AND mag.dir_name IS NOT NULL
 	AND mag.dir_name != 'monitoring'
 GROUP BY
 	sys.id,
-	ac.system_id;
+	ac.system_id,
+	sites.time_zone_id;
   `,
   PHILIPS_MRI_RMMU_3: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -431,18 +468,21 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.mag mag ON mag.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id
 WHERE
 	ac.run_group = 3
 	AND mag.dir_name IS NOT NULL
 	AND mag.dir_name != 'monitoring'
 GROUP BY
 	sys.id,
-	ac.system_id;`,
+	ac.system_id,
+	sites.time_zone_id;`,
   PHILIPS_MRI_RMMU_4: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -466,19 +506,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.mag mag ON mag.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id
 WHERE
 	ac.run_group = 4
 	AND mag.dir_name IS NOT NULL
 	AND mag.dir_name != 'monitoring'
 GROUP BY
 	sys.id,
-	ac.system_id;              
+	ac.system_id,
+	sites.time_zone_id;              
  `,
   PHILIPS_MRI_RMMU_5: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_agg(
 		json_build_object(
@@ -502,19 +545,22 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.mag mag ON mag.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id
 WHERE
 	ac.run_group = 5
 	AND mag.dir_name IS NOT NULL
 	AND mag.dir_name != 'monitoring'
 GROUP BY
 	sys.id,
-	ac.system_id;                                  
+	ac.system_id,
+	sites.time_zone_id;                                  
  `,
   PHILIPS_MRI_LOG_1: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_build_object(
 		'file_name',
@@ -530,6 +576,7 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	sys.manufacturer = 'Philips'
 	AND sys.modality = 'MRI'
@@ -540,13 +587,15 @@ GROUP BY
 	log.file_name,
 	log.dir_name,
 	log.regex_models,
-	log.pg_tables;
+	log.pg_tables,
+	sites.time_zone_id;
   `,
   PHILIPS_MRI_LOG_2: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_build_object(
 		'file_name',
@@ -562,6 +611,7 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id 
 WHERE
 	sys.manufacturer = 'Philips'
 	AND sys.modality = 'MRI'
@@ -572,13 +622,15 @@ GROUP BY
 	log.file_name,
 	log.dir_name,
 	log.regex_models,
-	log.pg_tables;
+	log.pg_tables,
+	sites.time_zone_id;
   `,
   PHILIPS_MRI_LOG_3: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_build_object(
 		'file_name',
@@ -594,6 +646,7 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id
 WHERE
 	sys.manufacturer = 'Philips'
 	AND sys.modality = 'MRI'
@@ -604,13 +657,15 @@ GROUP BY
 	log.file_name,
 	log.dir_name,
 	log.regex_models,
-	log.pg_tables;
+	log.pg_tables,
+	sites.time_zone_id;
   `,
   PHILIPS_MRI_LOG_4: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_build_object(
 		'file_name',
@@ -626,6 +681,7 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id
 WHERE
 	sys.manufacturer = 'Philips'
 	AND sys.modality = 'MRI'
@@ -636,13 +692,15 @@ GROUP BY
 	log.file_name,
 	log.dir_name,
 	log.regex_models,
-	log.pg_tables;
+	log.pg_tables,
+	sites.time_zone_id;
   `,
   PHILIPS_MRI_LOG_5: `
   SELECT
 	sys.id,
 	sys.manufacturer,
 	sys.modality,
+	sites.time_zone_id,
 	ac.debian_server_path,
 	json_build_object(
 		'file_name',
@@ -658,6 +716,7 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id
 WHERE
 	sys.manufacturer = 'Philips'
 	AND sys.modality = 'MRI'
@@ -668,14 +727,16 @@ GROUP BY
 	log.file_name,
 	log.dir_name,
 	log.regex_models,
-	log.pg_tables;
+	log.pg_tables,
+	sites.time_zone_id;
   `,
   SIEMENS_CT: `
   SELECT
 	sys.id,
-  sys.manufacturer,
-  sys.modality,
-  ac.debian_server_path,
+    sys.manufacturer,
+    sys.modality,
+    sites.time_zone_id,
+    ac.debian_server_path,
 		json_build_object(
 			'file_name',
 			log.file_name,
@@ -692,6 +753,7 @@ FROM
 	systems sys
 	JOIN config.acquisition ac ON ac.system_id = sys.id
 	JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id
 WHERE
 	sys.manufacturer = 'Siemens'
 	AND sys.modality LIKE '%CT'
@@ -703,13 +765,15 @@ GROUP BY
   log.dir_name,
   log.regex_models,
   log.pg_tables,
-  ac.file_version;
+  ac.file_version,
+  sites.time_zone_id;
     `,
   SIEMENS_MRI: `
     SELECT
     sys.id,
     sys.manufacturer,
     sys.modality,
+	sites.time_zone_id,
     ac.debian_server_path,
         json_build_object(
             'file_name',
@@ -727,6 +791,7 @@ GROUP BY
     systems sys
     JOIN config.acquisition ac ON ac.system_id = sys.id
     JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id
   WHERE
     sys.manufacturer = 'Siemens'
     AND sys.modality = 'MRI'
@@ -738,13 +803,15 @@ GROUP BY
     log.dir_name,
     log.regex_models,
     log.pg_tables,
-    ac.file_version;
+    ac.file_version,
+	sites.time_zone_id;
     `,
   SIEMENS_CV: `
     SELECT
     sys.id,
     sys.manufacturer,
     sys.modality,
+	sites.time_zone_id,
     ac.debian_server_path,
         json_build_object(
             'file_name',
@@ -762,6 +829,7 @@ GROUP BY
     systems sys
     JOIN config.acquisition ac ON ac.system_id = sys.id
     JOIN config.log log ON log.system_id = sys.id
+	JOIN sites ON sites.id = sys.site_id
   WHERE
     sys.manufacturer = 'Siemens'
     AND sys.modality = 'CV/IR'
@@ -773,7 +841,8 @@ GROUP BY
     log.dir_name,
     log.regex_models,
     log.pg_tables,
-    ac.file_version;
+    ac.file_version,
+	sites.time_zone_id;
     `
 };
 

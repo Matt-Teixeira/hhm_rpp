@@ -7,7 +7,7 @@ const { phil_mri_rmmu_long_schema } = require("../../../persist/pg-schemas");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
 const {
-  pg_column_sets: pg_cs,
+  pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function phil_mri_rmmu_long(System) {
@@ -18,7 +18,7 @@ async function phil_mri_rmmu_long(System) {
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: System.file_config,
+    file: System.file_config
   };
 
   try {
@@ -39,7 +39,7 @@ async function phil_mri_rmmu_long(System) {
     if (System.files_in_dir.length === 0) {
       const file_mod_datetime = await execLastMod(lastModPath, [
         System.sysConfigData.debian_server_path,
-        "rmmu_long",
+        "rmmu_long"
       ]);
 
       note.path = System.directory_path;
@@ -80,7 +80,7 @@ async function phil_mri_rmmu_long(System) {
           sme: System.sme,
           file: System.file_config,
           re: `${philips_re.mri[parsers[0]]}`,
-          message: "NO MATCH FOUND",
+          message: "NO MATCH FOUND"
         };
 
         await System.addLogEvent(
@@ -102,7 +102,7 @@ async function phil_mri_rmmu_long(System) {
             job_id: System.job_id,
             sme: System.sme,
             file: System.file_config,
-            message: "NO MATCH FOUND",
+            message: "NO MATCH FOUND"
           };
 
           await System.addLogEvent(
@@ -132,7 +132,8 @@ async function phil_mri_rmmu_long(System) {
           match.groups.system_id,
           System.file_config.pg_tables[0],
           date,
-          time
+          time,
+          System.sysConfigData.time_zone_id
         );
 
         if (dtObject === null) {
@@ -156,9 +157,9 @@ async function phil_mri_rmmu_long(System) {
 
       const mappedData = mapDataToSchema(data, phil_mri_rmmu_long_schema);
 
-      console.log("\nmappedData - rmmu_long");
-      console.log(System.sme);
-      console.log(mappedData[mappedData.length - 1]);
+      // console.log("\nmappedData - rmmu_long");
+      // console.log(System.sme);
+      // console.log(mappedData[mappedData.length - 1]);
 
       // ** End Parse
 

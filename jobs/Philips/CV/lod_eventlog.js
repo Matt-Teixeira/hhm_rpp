@@ -101,9 +101,6 @@ async function phil_cv_lod_eventlog(
 
     const delta = currentFileSize - prevFileSize;
 
-    console.log("\n LOD DELTA");
-    console.log(delta);
-
     note.current_file_size = currentFileSize;
     note.delta = delta;
 
@@ -191,7 +188,8 @@ async function phil_cv_lod_eventlog(
           matches.groups.system_id,
           file_config.pg_tables[0],
           matches.groups.host_date,
-          matches.groups.host_time
+          matches.groups.host_time,
+          sysConfigData.time_zone_id
         );
 
         if (dtObject === null) {
@@ -231,9 +229,9 @@ async function phil_cv_lod_eventlog(
     // homogenize data to prep for insert to db
     const mappedData = mapDataToSchema(data, philips_cv_eventlog_schema);
 
-    console.log("\nmappedData - philips_cv");
-    console.log(sme);
-    console.log(mappedData[mappedData.length - 1]);
+    // console.log("\nmappedData - philips_cv");
+    // console.log(sme);
+    // console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse
 

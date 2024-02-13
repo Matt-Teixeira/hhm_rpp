@@ -30,6 +30,7 @@ const {
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
+
   const capture_datetime = dt_now();
   const sme = sysConfigData.id;
   // an array in each config accossiated with a file
@@ -53,8 +54,6 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     path: complete_file_path
   };
 
-  console.log("\nIN Function");
-  console.log(note);
 
   try {
     await addLogEvent(I, run_log, "phil_cv_eventlog", cal, note, null);
@@ -67,15 +66,13 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
         path: complete_file_path,
         message: "File not found"
       };
-      console.log("\nnote");
-      console.log(note);
       await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
       return;
     }
 
-    const last_mod = (await getLastModifiedTime(
-      complete_file_path
-    )).toISOString();
+    const last_mod = (
+      await getLastModifiedTime(complete_file_path)
+    ).toISOString();
 
     const file_metadata = {
       system_id: sme,
@@ -100,9 +97,6 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     );
 
     const delta = currentFileSize - prevFileSize;
-
-    console.log("\ndelta");
-    console.log(delta);
 
     note.current_file_size = currentFileSize;
     note.delta = delta;
@@ -184,7 +178,8 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
           matches.groups.system_id,
           file_config.pg_tables[0],
           matches.groups.host_date,
-          matches.groups.host_time
+          matches.groups.host_time,
+          sysConfigData.time_zone_id
         );
 
         if (dtObject === null) {
@@ -215,9 +210,9 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     // homogenize data to prep for insert to db
     const mappedData = mapDataToSchema(data, philips_cv_eventlog_schema);
 
-    console.log("\nmappedData - philips_cv");
-    console.log(sme);
-    console.log(mappedData[mappedData.length - 1]);
+    // console.log("\nmappedData - philips_cv");
+    // console.log(sme);
+    // console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse
 

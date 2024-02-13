@@ -10,26 +10,24 @@ const {
   tag: { cal, det, cat, seq, qaf }
 } = require("../../utils/logger/enums");
 
-async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
+async function generateDateTime(
+  run_log,
+  sme,
+  pgTable,
+  hostDate,
+  hostTime,
+  time_zone_id
+) {
   try {
     let date;
     switch (pgTable) {
-      case "siemens_cv":
-        date = await dateTimeTemplate(
-          run_log,
-          sme,
-          `${hostDate}${hostTime}`,
-          "dd-MM-yyyyHH:mm:ss",
-          "America/New_York"
-        );
-        break;
       case "stt_magnet":
         date = await dateTimeTemplate(
           run_log,
           sme,
           `${hostDate}${hostTime}`,
           "dd-MMM-yyyyHH:mm:ss.SSS",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       case "philips_mri_rmmu_history":
@@ -38,7 +36,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime}`,
           "yyyy-MM-ddHH:mm:ss",
-          "America/New_York"
+          `${time_zone_id}`
         );
 
         break;
@@ -48,7 +46,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime + "0"}`,
           "yyyy-MM-ddHH:mm:ss.SSS",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       case "philips_mri_rmmu_short":
@@ -57,7 +55,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime + "0"}`,
           "yyyy-MM-ddHH:mm:ss.SSS",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       case "philips_mri_rmmu_long":
@@ -66,7 +64,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime + "0"}`,
           "yyyy-MM-ddHH:mm:ss.SSS",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       case "philips_mri_logcurrent":
@@ -75,7 +73,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime + "0"}`,
           "yyyy-MM-ddHH:mm:ss.SSS",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       case "philips_ct_events":
@@ -85,7 +83,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime}`,
           "yyyy/MM/ddHH:mm:ss.SSS",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       case "philips_ct_eal":
@@ -95,7 +93,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime}`,
           "yyyy/MM/ddHH:mm:ss.SSS",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       case "ge_ct_gesys":
@@ -104,26 +102,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime}`,
           "dd-MMM-yyyyHH:mm:ss",
-          "America/New_York"
-        );
-        break;
-      case "mmb.ge_mm3":
-        date = await dateTimeTemplate(
-          run_log,
-          sme,
-          `${hostDate}${hostTime}`,
-          "dd-MMM-yyHH:mm",
-          "America/New_York"
-        );
-        break;
-      //HHM
-      case "log.ge_ct_gesys":
-        date = await dateTimeTemplate(
-          run_log,
-          sme,
-          `${hostDate}${hostTime}`,
-          "dd-MMM-yyyyHH:mm:ss",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       case "ge_mri_gesys":
@@ -132,7 +111,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime}`,
           "dd-MMM-yyyyHH:mm:ss",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       case "ge_cv_syserror":
@@ -141,7 +120,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime}`,
           "yyyy-MM-ddHH:mm:ss.SSS",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       case "philips_cv_eventlog":
@@ -150,7 +129,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime}`,
           "yyyy-MM-ddHH:mm:ss",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       case "siemens_ct":
@@ -159,7 +138,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime}`,
           "yyyy-MM-ddHH:mm:ss",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       case "siemens_cv":
@@ -167,8 +146,8 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           run_log,
           sme,
           `${hostDate}${hostTime}`,
-          "dd-MMM-yyyyHH:mm:ss",
-          "America/New_York"
+          "dd-MM-yyyyHH:mm:ss",
+          `${time_zone_id}`
         );
         break;
       case "siemens_mri":
@@ -177,7 +156,7 @@ async function generateDateTime(run_log, sme, pgTable, hostDate, hostTime) {
           sme,
           `${hostDate}${hostTime}`,
           "yyyy-MM-ddHH:mm:ss",
-          "America/New_York"
+          `${time_zone_id}`
         );
         break;
       default:

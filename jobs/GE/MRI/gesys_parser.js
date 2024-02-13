@@ -122,7 +122,8 @@ async function ge_mri_gesys(System) {
         matchGroups.groups.system_id,
         System.file_config.pg_tables[0],
         matchGroups.groups.host_date,
-        matchGroups.groups.host_time
+        matchGroups.groups.host_time,
+        System.sysConfigData.time_zone_id
       );
 
       if (dtObject === null) {
@@ -150,7 +151,7 @@ async function ge_mri_gesys(System) {
     const mappedData = mapDataToSchema(data, ge_mri_gesys_schema);
 
     // console.log("\nmappedData - ge_mri");
-    // console.log(System.sme)
+    // console.log(System.sme);
     // console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse

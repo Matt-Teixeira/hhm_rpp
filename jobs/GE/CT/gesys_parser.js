@@ -129,7 +129,8 @@ async function ge_ct_gesys(System) {
         matchGroups.groups.system_id,
         System.file_config.pg_tables[0],
         matchGroups.groups.host_date,
-        matchGroups.groups.host_time
+        matchGroups.groups.host_time,
+        System.sysConfigData.time_zone_id
       );
 
       if (dtObject === null) {

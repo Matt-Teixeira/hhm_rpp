@@ -131,7 +131,8 @@ async function phil_mri_rmmu_magnet(System) {
           match.groups.system_id,
           System.file_config.pg_tables[0],
           date,
-          time
+          time,
+          System.sysConfigData.time_zone_id
         );
 
         if (dtObject === null) {
@@ -155,9 +156,9 @@ async function phil_mri_rmmu_magnet(System) {
 
       const mappedData = mapDataToSchema(data, philips_mri_rmmu_magnet_schema);
 
-      console.log("\nmappedData - rmmu_magnet");
-      console.log(System.sme);
-      console.log(mappedData[mappedData.length - 1]);
+      // console.log("\nmappedData - rmmu_magnet");
+      // console.log(System.sme);
+      // console.log(mappedData[mappedData.length - 1]);
 
       // ** End Parse
 

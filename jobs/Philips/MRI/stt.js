@@ -80,7 +80,8 @@ async function stt_parser(file_config, System) {
           matches.groups.system_id,
           "stt_magnet",
           matches.groups.host_date,
-          matches.groups.host_time
+          matches.groups.host_time,
+          System.sysConfigData.time_zone_id
         );
 
         // magnet_meu group does not have datetime. Ex: '0114,2022,04,01,00,06,08,17,14,00000,'
@@ -112,9 +113,9 @@ async function stt_parser(file_config, System) {
     // Homogenize data to prep for insert to db
     const mappedData = mapDataToSchema(data, stt_magnet);
 
-    console.log("\nmappedData - stt_magnet");
-    console.log(System.sme);
-    console.log(mappedData[mappedData.length - 1]);
+    // console.log("\nmappedData - stt_magnet");
+    // console.log(System.sme);
+    // console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse **
 

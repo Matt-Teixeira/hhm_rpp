@@ -98,7 +98,8 @@ async function phil_ct_events(System) {
         match.groups.system_id,
         System.file_config.pg_tables[0],
         match.groups.host_date,
-        match.groups.host_time
+        match.groups.host_time,
+        System.sysConfigData.time_zone_id
       );
 
       if (dtObject === null) {
@@ -126,9 +127,9 @@ async function phil_ct_events(System) {
 
     const mappedData = mapDataToSchema(data, philips_ct_events_schema);
 
-    console.log("\nmappedData - philips_ct - events");
-    console.log(System.sme);
-    console.log(mappedData[mappedData.length - 1]);
+    // console.log("\nmappedData - philips_ct - events");
+    // console.log(System.sme);
+    // console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse
 

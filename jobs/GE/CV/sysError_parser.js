@@ -67,14 +67,16 @@ async function ge_cv_sys_error(System) {
     // ** Begin Parse
 
     let line_num = 1;
-    const sequencenumber_re = /sequencenumber,date/
+    const sequencenumber_re = /sequencenumber,date/;
 
     for await (const line of System.file_data) {
       let matches = line.match(ge_re.cv[parsers[0]]);
 
-      // Test for headers and skip iteration if headers present 
-      if (line_num === 1 && sequencenumber_re.test(matches.groups.sequencenumber)) {
-        
+      // Test for headers and skip iteration if headers present
+      if (
+        line_num === 1 &&
+        sequencenumber_re.test(matches.groups.sequencenumber)
+      ) {
       }
 
       // matches will be null if no match - log bad match here
@@ -133,7 +135,8 @@ async function ge_cv_sys_error(System) {
           matches.groups.system_id,
           System.file_config.pg_tables[0],
           matches.groups.host_date,
-          matches.groups.host_time
+          matches.groups.host_time,
+          System.sysConfigData.time_zone_id
         );
 
         if (dtObject === null) {

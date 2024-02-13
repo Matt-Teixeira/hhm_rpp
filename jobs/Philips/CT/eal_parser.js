@@ -5,7 +5,7 @@ const { philips_ct_eal_schema } = require("../../../persist/pg-schemas");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const { remove_dub_quotes } = require("../../../util/regExHelpers");
 const {
-  pg_column_sets: pg_cs,
+  pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 const { dt_now } = require("../../../util/dates");
 
@@ -16,7 +16,7 @@ async function phil_ct_eal(System) {
   let note = {
     job_id: System.job_id,
     sme: System.sme,
-    file: System.file_config.file_name,
+    file: System.file_config.file_name
   };
 
   try {
@@ -79,7 +79,7 @@ async function phil_ct_eal(System) {
         job_id: System.job_id,
         sme: System.sme,
         file: System.file_config.file_name,
-        message: "NO MATCH FOUND",
+        message: "NO MATCH FOUND"
       };
 
       await System.addLogEvent(
@@ -100,7 +100,8 @@ async function phil_ct_eal(System) {
         match.groups.system_id,
         System.file_config.pg_tables[0],
         match.groups.host_date,
-        match.groups.host_time
+        match.groups.host_time,
+        System.sysConfigData.time_zone_id
       );
 
       if (dtObject === null) {
@@ -108,7 +109,7 @@ async function phil_ct_eal(System) {
           job_id: System.job_id,
           sme: System.sme,
           match_group: matches.groups,
-          message: "datetime object null",
+          message: "datetime object null"
         };
         await System.addLogEvent(
           System.W,
@@ -136,9 +137,9 @@ async function phil_ct_eal(System) {
 
     const mappedData = mapDataToSchema(data, philips_ct_eal_schema);
 
-    console.log("\nmappedData - philips_ct - eal");
-    console.log(System.sme);
-    console.log(mappedData[mappedData.length - 1]);
+    // console.log("\nmappedData - philips_ct - eal");
+    // console.log(System.sme);
+    // console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse
 

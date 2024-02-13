@@ -33,7 +33,6 @@ async function phil_mri_monitor(System, directory) {
           file: file,
           message: "File not found."
         };
-        console.log(note);
         await addLogEvent(
           I,
           System.run_log,
@@ -59,8 +58,6 @@ async function phil_mri_monitor(System, directory) {
       };
 
       await push_file_dt_queue(System.run_log, file_metadata);
-
-      console.log(last_mod);
 
       await addLogEvent(I, System.run_log, "phil_mri_monitor", det, note, null);
       //if (file.file_name === "monitor_System_TempTechRoom.dat") {

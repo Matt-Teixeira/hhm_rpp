@@ -138,7 +138,8 @@ async function phil_rmmu_history(System) {
           match.groups.system_id,
           System.file_config.pg_tables[0],
           date,
-          time
+          time,
+          System.sysConfigData.time_zone_id
         );
 
         if (dtObject === null) {
@@ -165,10 +166,10 @@ async function phil_rmmu_history(System) {
 
       const mappedData = mapDataToSchema(data, philips_mri_rmmu_history);
 
-      console.log("\nmappedData - rmmu_history");
-      console.log(System.sme);
-      console.log(mappedData.length);
-      console.log(mappedData[mappedData.length - 1]);
+      // console.log("\nmappedData - rmmu_history");
+      // console.log(System.sme);
+      // console.log(mappedData.length);
+      // console.log(mappedData[mappedData.length - 1]);
 
       // ** End Parse **
 

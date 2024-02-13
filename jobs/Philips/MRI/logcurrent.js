@@ -99,7 +99,8 @@ async function phil_mri_logcurrent(file_config, System) {
           matches.groups.system_id,
           System.file_config.pg_tables[0],
           matches.groups.host_date,
-          matches.groups.host_time
+          matches.groups.host_time,
+          System.sysConfigData.time_zone_id
         );
 
         // Matches astray data no related to anything. Skip this iteration
@@ -143,12 +144,13 @@ async function phil_mri_logcurrent(file_config, System) {
     // Homogenize data to prep for insert to db
     const mappedData = mapDataToSchema(data, phil_mri_logcurrent_schema);
 
-    console.log("\nmappedData - logcurrent.log");
-    console.log(System.sme);
-    console.log(mappedData[mappedData.length - 1]);
-    console.log(mappedData.length);
+    // console.log("\nmappedData - logcurrent.log");
+    // console.log(System.sme);
+    // console.log(mappedData[mappedData.length - 1]);
+    // console.log(mappedData.length);
 
     if (mappedData.length > 1_000_000) {
+      // Cut array in half
       const mappedData_2 = mappedData.splice(
         0,
         Math.floor(mappedData.length / 2)
