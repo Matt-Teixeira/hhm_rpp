@@ -49,6 +49,23 @@ const siemens_cv_parser = async (System) => {
       const complete_file_path = `${System.directory_path}/${file}`;
       const fileData = (await fsp.readFile(complete_file_path)).toString();
 
+      if (fileData === "" || fileData === null) {
+        let data_note = {
+          system_id: System.sme,
+          complete_file_path,
+          message: "No file data",
+        };
+        await System.addLogEvent(
+          System.W,
+          System.run_log,
+          "siemens_cv_parser",
+          System.det,
+          data_note,
+          null
+        );
+        continue;
+      }
+
       // ** Begin Parse
 
       let matches = fileData.match(siemens[parsers[0]]);

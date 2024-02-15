@@ -45,7 +45,7 @@ async function phil_cv_lod_eventlog(
   const fileSizePath = "./read/sh/readFileSize.sh";
 
   const data = [];
-  
+
   // Extract 'Power-On hours' and 'Commercial Version' data from log file
   const memo_data = [];
 
@@ -73,9 +73,9 @@ async function phil_cv_lod_eventlog(
       return;
     }
 
-    const last_mod = (await getLastModifiedTime(
-      complete_file_path
-    )).toISOString();
+    const last_mod = (
+      await getLastModifiedTime(complete_file_path)
+    ).toISOString();
 
     const file_metadata = {
       system_id: sme,
