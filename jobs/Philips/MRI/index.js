@@ -76,7 +76,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
         null
       );
       switch (dir) {
-        case "rmmu-1": // Needs re-config
+        case "rmmu": // Needs re-config
           const Rmmu_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory,
@@ -100,7 +100,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
           await phil_mri_rmmu_short(Rmmu_Short_System);
           break;
 
-        case "rmmu_long-1":
+        case "rmmu_long":
           const Rmmu_Long_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory,
@@ -111,7 +111,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
           await phil_mri_rmmu_long(Rmmu_Long_System);
           break;
 
-        case "rmmu_magnet-1":
+        case "rmmu_magnet":
           const Rmmu_Magnet_System = new PHILIPS_MRI_RMMU(
             sysConfigData,
             directory,
@@ -122,7 +122,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
           await phil_mri_rmmu_magnet(Rmmu_Magnet_System);
           break;
 
-        case "stt_magnet-1":
+        case "stt_magnet":
           const STT_Magnet_System = new PHILIPS_MRI_LOGCURRENT_STT(
             sysConfigData,
             directory,
