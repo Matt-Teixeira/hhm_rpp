@@ -9,7 +9,11 @@ const {
   pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
+const { dt_now } = require("../../../util/dates");
+
 async function stt_parser(file_config, System) {
+  const capture_datetime = dt_now();
+
   const parsers = file_config.parsers;
   const data = [];
 
@@ -105,6 +109,7 @@ async function stt_parser(file_config, System) {
         }
 
         matches.groups.host_datetime = dtObject;
+        matches.groups.capture_datetime = capture_datetime;
 
         data.push(matches.groups);
       }

@@ -13,7 +13,11 @@ const {
   pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
+const { dt_now } = require("../../../util/dates");
+
 async function phil_rmmu_history(System) {
+  const capture_datetime = dt_now();
+
   const parsers = System.file_config.parsers;
   const data = [];
 
@@ -160,6 +164,7 @@ async function phil_rmmu_history(System) {
         }
 
         match.groups.host_datetime = dtObject;
+        match.groups.capture_datetime = capture_datetime;
 
         data.push(match.groups);
       }

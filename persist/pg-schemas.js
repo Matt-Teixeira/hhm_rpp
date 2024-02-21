@@ -206,7 +206,8 @@ const phil_mri_rmmu_short_schema = {
   compressorreset_state: null,
   chd_value: null,
   cpr_value: null,
-  host_datetime: null
+  host_datetime: null,
+  capture_datetime: null
 };
 
 const phil_mri_rmmu_long_schema = {
@@ -240,7 +241,8 @@ const phil_mri_rmmu_long_schema = {
   compressorreset_state: null,
   chd_value: null,
   cpr_value: null,
-  host_datetime: null
+  host_datetime: null,
+  capture_datetime: null
 };
 
 const philips_mri_rmmu_magnet_schema = {
@@ -260,7 +262,8 @@ const philips_mri_rmmu_magnet_schema = {
   event: null,
   data: null,
   descr: null,
-  host_datetime: null
+  host_datetime: null,
+  capture_datetime: null
 };
 
 const philips_mri_rmmu_history = {
@@ -281,7 +284,8 @@ const philips_mri_rmmu_history = {
   cres: null,
   system_reference_number: null,
   hospital_name: null,
-  host_datetime: null
+  host_datetime: null,
+  capture_datetime: null
 };
 
 const philips_cv_eventlog_schema = {
@@ -324,7 +328,8 @@ const stt_magnet = {
   test_result_2: null,
   test_result: null,
   message: null,
-  host_datetime: null
+  host_datetime: null,
+  capture_datetime: null
 };
 
 module.exports = {

@@ -12,7 +12,11 @@ const {
   pg_column_sets: pg_cs,
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
+const { dt_now } = require("../../../util/dates");
+
 async function phil_mri_rmmu_magnet(System) {
+  const capture_datetime = dt_now();
+
   const parsers = System.file_config.parsers;
   const data = [];
   lastModPath = "./read/sh/get_dir_last_mod.sh";
@@ -150,6 +154,7 @@ async function phil_mri_rmmu_magnet(System) {
         }
 
         match.groups.host_datetime = dtObject;
+        match.groups.capture_datetime = capture_datetime;
 
         data.push(match.groups);
       }
