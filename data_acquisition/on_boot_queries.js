@@ -128,6 +128,7 @@ WHERE
 	sys.manufacturer = 'Philips'
 	AND sys.modality LIKE '%CT'
 	AND ac.run_group = 1
+	AND sys.id = 'SME02471'
 GROUP BY
 	sys.id,
 	ac.system_id,

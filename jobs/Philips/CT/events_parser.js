@@ -1,7 +1,10 @@
 const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
-const { philips_ct_events_schema } = require("../../../persist/pg-schemas");
+const {
+  philips_ct_events_schema,
+  philips_ct_eal_events_schema
+} = require("../../../persist/pg-schemas");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const {
   pg_column_sets: pg_cs
@@ -125,11 +128,11 @@ async function phil_ct_events(System) {
       data.push(match.groups);
     }
 
-    const mappedData = mapDataToSchema(data, philips_ct_events_schema);
+    const mappedData = mapDataToSchema(data, philips_ct_eal_events_schema);
 
-    // console.log("\nmappedData - philips_ct - events");
-    // console.log(System.sme);
-    // console.log(mappedData[mappedData.length - 1]);
+    console.log("\nmappedData - philips_ct - events");
+    console.log(System.sme);
+    console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse
 
@@ -137,7 +140,7 @@ async function phil_ct_events(System) {
 
     const query = pgp.helpers.insert(
       mappedData,
-      pg_cs.log.philips.philips_ct_events
+      pg_cs.log.philips.philips_ct_eal_events
     );
 
     await db.any(query);
