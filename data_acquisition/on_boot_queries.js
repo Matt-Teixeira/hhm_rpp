@@ -128,7 +128,6 @@ WHERE
 	sys.manufacturer = 'Philips'
 	AND sys.modality LIKE '%CT'
 	AND ac.run_group = 1
-	AND sys.id = 'SME02471'
 GROUP BY
 	sys.id,
 	ac.system_id,
@@ -396,7 +395,6 @@ WHERE
 	ac.run_group = 1
 	AND mag.dir_name IS NOT NULL
 	AND mag.dir_name != 'monitoring'
-	AND sys.id = 'SME01138'
 GROUP BY
 	sys.id,
 	ac.system_id,
