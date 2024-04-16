@@ -14,7 +14,7 @@ async function extract(job_id, extraction_data, run_log) {
   const data = [];
   const tube_data_re =
     /scan\sseconds.*=\s(?<scan_seconds>\d+)?.*tubeSerialNo:\s(?<tube_serial_no>\d+).*TubeType:\s(?<tube_type>\w+)/;
-  const tube_data_re_2 = /TubeScanSeconds:\s(?<scan_seconds>\d+)/;
+  const tube_data_re_2 = /TubeScanSeconds:\s(?<scan_seconds>\d+).+SystemScanSeconds:\s(?<system_scan_seconds>\d+)/;
   let note = {
     job_id
   };
