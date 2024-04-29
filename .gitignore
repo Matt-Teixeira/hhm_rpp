@@ -24,4 +24,6 @@ Philips_Cath
 Philips_MRI
 Siemens_Files
 
+capture_with_re.js
+
 configWriter/*.sql
