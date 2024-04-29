@@ -73,10 +73,8 @@ async function ge_cv_sys_error(System) {
       let matches = line.match(ge_re.cv[parsers[0]]);
 
       // Test for headers and skip iteration if headers present
-      if (
-        line_num === 1 &&
-        sequencenumber_re.test(matches.groups.sequencenumber)
-      ) {
+      if (line_num === 1 && sequencenumber_re.test(line)) {
+        continue;
       }
 
       // matches will be null if no match - log bad match here

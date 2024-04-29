@@ -154,7 +154,7 @@ const win10_siemens_ct = async (System) => {
 
       data.push(matches.groups);
 
-      const scan_sec_test_re = /scan\sseconds/;
+      const scan_sec_test_re = /scan\sseconds|TubeScanSeconds:\s/;
       if (scan_sec_test_re.test(matches.groups.text_group)) {
         extracted_metadata.push({
           system_id: matches.groups.system_id,

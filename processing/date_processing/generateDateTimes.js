@@ -18,6 +18,7 @@ async function generateDateTime(
   hostTime,
   time_zone_id
 ) {
+  if (!time_zone_id) time_zone_id = "America/New_York";
   try {
     let date;
     switch (pgTable) {

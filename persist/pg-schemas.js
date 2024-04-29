@@ -155,6 +155,34 @@ const philips_ct_events_schema = {
   capture_datetime: null
 };
 
+const philips_ct_eal_events_schema = {
+  system_id: null,
+  host_date: null,
+  host_time: null,
+  controller: null,
+  data_type: null,
+  log_number: null,
+  tm_stamp: null,
+  err_type: null,
+  err_number: null,
+  vxw_err_no: null,
+  file: null,
+  line: null,
+  param_1: null,
+  param_2: null,
+  info: null,
+  eal_time: null,
+  type: null,
+  level: null,
+  module: null,
+  time_stamp: null,
+  message: null,
+  eal: null,
+  event_time: null,
+  host_datetime: null,
+  capture_datetime: null
+};
+
 const phil_mri_logcurrent_schema = {
   system_id: null,
   host_date: null,
@@ -338,6 +366,7 @@ module.exports = {
   siemens_cv_schema,
   philips_ct_eal_schema,
   philips_ct_events_schema,
+  philips_ct_eal_events_schema,
   phil_mri_logcurrent_schema,
   phil_mri_rmmu_short_schema,
   phil_mri_rmmu_long_schema,
