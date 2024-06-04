@@ -6,6 +6,7 @@ const { ge_ct_gesys_schema } = require("../../../persist/pg-schemas");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const extract = require("../../../processing/date_processing/ge_ct/extract_metadata");
 const { dt_now } = require("../../../util/dates");
+const { build_upsert_str } = require("../../../util");
 
 const {
   pg_column_sets: pg_cs
@@ -173,6 +174,7 @@ async function ge_ct_gesys(System) {
 
     // console.log("\nmappedData - ge_ct");
     // console.log(System.sme);
+    // console.log(mappedData);
     // console.log(mappedData[mappedData.length - 1]);
 
     // ** End Parse
@@ -201,12 +203,20 @@ async function ge_ct_gesys(System) {
 
     await System.push_file_dt_queue(System.run_log, file_metadata);
 
-    // Update Redis Cache
-
+    // Insert metadata
     if (extraction_data.length > 0)
       await extract(System.job_id, extraction_data, System.run_log);
 
+    // Update Redis Cache
     await System.updateRedisFileSize();
+
+    // Update alert.offline_hhm_conn table with host_datetime
+    const resent_host_datetime =
+      mappedData[mappedData.length - 1].host_datetime;
+
+    const upsert_str = build_upsert_str(System.sme, resent_host_datetime);
+
+    await db.any(upsert_str);
   } catch (error) {
     console.log(error);
     await System.addLogEvent(

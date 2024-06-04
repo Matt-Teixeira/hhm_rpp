@@ -74,6 +74,9 @@ const onBoot = async () => {
 
     const system_array = await pgPool.any(queryString);
 
+    console.log("\nsystem_array");
+    console.log(system_array);
+
     for await (const system of system_array) {
       const job_id = uuidv4();
 
