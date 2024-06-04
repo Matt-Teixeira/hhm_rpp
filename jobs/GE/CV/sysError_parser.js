@@ -7,6 +7,8 @@ const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const { remove_dub_quotes } = require("../../../util/regExHelpers");
 const { dt_now } = require("../../../util/dates");
+const { build_upsert_str } = require("../../../util");
+
 const {
   pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
@@ -200,8 +202,14 @@ async function ge_cv_sys_error(System) {
     await System.push_file_dt_queue(System.run_log, file_metadata);
 
     // Update Redis Cache
-
     await System.updateRedisFileSize();
+
+    // Update alert.offline_hhm_conn table with host_datetime
+    const resent_host_datetime =
+      mappedData[mappedData.length - 1].host_datetime;
+
+    const upsert_str = build_upsert_str(System.sme, resent_host_datetime);
+    await db.any(upsert_str);
   } catch (error) {
     console.log(error);
     let note = {

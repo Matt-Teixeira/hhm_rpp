@@ -6,6 +6,7 @@ const generateDateTime = require("../../../processing/date_processing/generateDa
 const { dt_now } = require("../../../util/dates");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { siemens_cv_schema } = require("../../../persist/pg-schemas");
+const { build_upsert_str } = require("../../../util");
 
 const {
   pg_column_sets: pg_cs
@@ -53,7 +54,7 @@ const siemens_cv_parser = async (System) => {
         let data_note = {
           system_id: System.sme,
           complete_file_path,
-          message: "No file data",
+          message: "No file data"
         };
         await System.addLogEvent(
           System.W,
@@ -166,6 +167,14 @@ const siemens_cv_parser = async (System) => {
       // console.log(System.sme);
       // console.log(`Rows Inserted: ${mappedData.length}`);
       // console.log(mappedData[mappedData.length - 1]);
+
+      // Update alert.offline_hhm_conn table with host_datetime
+      const resent_host_datetime =
+        mappedData[mappedData.length - 1].host_datetime;
+
+      const upsert_str = build_upsert_str(System.sme, resent_host_datetime);
+
+      await db.any(upsert_str);
 
       // ** End Persist
 

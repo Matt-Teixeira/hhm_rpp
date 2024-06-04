@@ -19,6 +19,7 @@ const execHead = require("../../../read/exec-head");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const extract = require("../../../processing/date_processing/phil_cv/extract_memo_data");
 const { dt_now } = require("../../../util/dates");
+const { build_upsert_str } = require("../../../util");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
@@ -249,6 +250,14 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     // Update file_dt
     //await update_file_mod_dt(file_metadata);
     await push_file_dt_queue(run_log, file_metadata);
+
+    // Update alert.offline_hhm_conn table with host_datetime
+    const resent_host_datetime =
+      mappedData[mappedData.length - 1].host_datetime;
+
+    const upsert_str = build_upsert_str(sme, resent_host_datetime);
+
+    await db.any(upsert_str);
   } catch (error) {
     console.log(error);
     await addLogEvent(E, run_log, "phil_cv_eventlog", cat, note, error);

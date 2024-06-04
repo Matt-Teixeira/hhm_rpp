@@ -11,6 +11,7 @@ const {
   pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 const { dt_now } = require("../../../util/dates");
+const { build_upsert_str } = require("../../../util");
 
 async function phil_ct_eal(System) {
   const capture_datetime = dt_now();
@@ -172,10 +173,17 @@ async function phil_ct_eal(System) {
     );
 
     // Update Redis Cache
-
     await System.push_file_dt_queue(System.run_log, file_metadata);
 
     await System.updateRedisFileSize();
+
+    // Update alert.offline_hhm_conn table with host_datetime
+    const resent_host_datetime =
+      mappedData[mappedData.length - 1].host_datetime;
+
+    const upsert_str = build_upsert_str(System.sme, resent_host_datetime);
+
+    await db.any(upsert_str);
   } catch (error) {
     await System.addLogEvent(
       System.E,

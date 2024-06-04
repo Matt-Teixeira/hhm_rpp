@@ -7,6 +7,8 @@ const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
 const { dt_now } = require("../../../util/dates");
+const { build_upsert_str } = require("../../../util");
+
 const {
   pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
@@ -164,6 +166,14 @@ const win10_siemens_mri = async (System) => {
     const query = pgp.helpers.insert(mappedData, pg_cs.log.siemens.siemens_mri);
 
     await db.any(query);
+
+    // Update alert.offline_hhm_conn table with host_datetime
+    const resent_host_datetime =
+      mappedData[mappedData.length - 1].host_datetime;
+
+    const upsert_str = build_upsert_str(System.sme, resent_host_datetime);
+
+    await db.any(upsert_str);
 
     // ** End Persist
 
