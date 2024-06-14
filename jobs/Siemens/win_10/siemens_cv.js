@@ -213,7 +213,7 @@ const map_month = {
   March: "03",
   April: "04",
   May: "05",
-  June: "03",
+  June: "06",
   July: "07",
   August: "08",
   September: "09",
