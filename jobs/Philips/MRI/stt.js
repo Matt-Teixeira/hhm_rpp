@@ -122,6 +122,18 @@ async function stt_parser(file_config, System) {
     // console.log(System.sme);
     // console.log(mappedData[mappedData.length - 1]);
 
+    for (let obj of mappedData) {
+      if (obj.header_2 === "MMU_pressure" && obj.status_value !== null) {
+        console.log(obj);
+        obj.helium_pressure_status_value = parseFloat(obj.status_value);
+      }
+      if (obj.header_2 === "MMU_helium_level" && obj.status_value !== null) {
+        // obj.status_value IS A STRING SO I'M GETTING FIRST SIX CHARS TO THEN PARSE TO FLOAT WHILE ALSO TRUNCATING ALL DIGITS PAST THE 3rd SIG FIG.
+        let status_value = obj.status_value.slice(0, 6);
+        obj.helium_level_status_value = parseFloat(status_value);
+      }
+    }
+
     // ** End Parse **
 
     // ** Begin Persist **

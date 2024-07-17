@@ -357,7 +357,9 @@ const stt_magnet = {
   test_result: null,
   message: null,
   host_datetime: null,
-  capture_datetime: null
+  capture_datetime: null,
+  helium_level_status_value: null,
+  helium_pressure_status_value: null
 };
 
 module.exports = {

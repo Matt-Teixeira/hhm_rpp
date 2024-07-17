@@ -24,6 +24,7 @@ const determineManufacturer = async (job_id, system, run_log) => {
     job_id: job_id,
     sme: system.id
   };
+  console.log(note);
   try {
     await addLogEvent(I, run_log, "determineManufacturer", cal, note, null);
 
@@ -32,6 +33,7 @@ const determineManufacturer = async (job_id, system, run_log) => {
         await siemens_parser(job_id, system, run_log);
         break;
       case "Philips":
+        console.log("PHILIPS")
         await philips_parser(job_id, system, run_log);
         break;
       case "GE":
