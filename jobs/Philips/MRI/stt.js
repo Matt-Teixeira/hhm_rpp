@@ -2,7 +2,7 @@ const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
 const { philips_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
-const { stt_magnet } = require("../../../persist/pg-schemas");
+const { stt_magnet, mag_stt_magnet } = require("../../../persist/pg-schemas");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const {
@@ -122,25 +122,53 @@ async function stt_parser(file_config, System) {
     // console.log(System.sme);
     // console.log(mappedData[mappedData.length - 1]);
 
+    const mag_stt_magnet_data = [];
+
     for (let obj of mappedData) {
+      let new_obj = {
+        system_id: obj.system_id,
+        field_name: obj.header_2.toLowerCase(),
+        he_level_value: null,
+        he_pressure_value: null,
+        he_boil_off_value: null,
+        host_datetime: obj.host_datetime,
+        capture_datetime: obj.capture_datetime
+      };
       if (obj.header_2 === "MMU_pressure" && obj.status_value !== null) {
-        console.log(obj);
-        obj.helium_pressure_status_value = parseFloat(obj.status_value);
+        new_obj.he_pressure_value = obj.status_value;
+        mag_stt_magnet_data.push(new_obj);
       }
       if (obj.header_2 === "MMU_helium_level" && obj.status_value !== null) {
         // obj.status_value IS A STRING SO I'M GETTING FIRST SIX CHARS TO THEN PARSE TO FLOAT WHILE ALSO TRUNCATING ALL DIGITS PAST THE 3rd SIG FIG.
-        let status_value = obj.status_value.slice(0, 6);
-        obj.helium_level_status_value = parseFloat(status_value);
+        // let status_value = obj.status_value.slice(0, 6);
+        new_obj.he_level_value = obj.status_value;
+        mag_stt_magnet_data.push(new_obj);
+      }
+      if (
+        obj.header_2 === "MMU_helium_boil_off_UlPh" &&
+        obj.status_value !== null
+      ) {
+        new_obj.he_boil_off_value = obj.status_value;
+        mag_stt_magnet_data.push(new_obj);
       }
     }
+
+    console.log(mag_stt_magnet_data);
 
     // ** End Parse **
 
     // ** Begin Persist **
 
     const query = pgp.helpers.insert(mappedData, pg_cs.log.philips.stt_magnet);
+    const query_2 = pgp.helpers.insert(
+      mag_stt_magnet_data,
+      pg_cs.mag.philips.mag_stt_magnet
+    );
 
-    await db.any(query);
+    //await db.any(query);
+    await db.any(query_2);
+
+    return;
 
     // ** End Persist **
 

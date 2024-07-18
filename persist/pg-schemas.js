@@ -358,8 +358,15 @@ const stt_magnet = {
   message: null,
   host_datetime: null,
   capture_datetime: null,
-  helium_level_status_value: null,
-  helium_pressure_status_value: null
+};
+
+const mag_stt_magnet = {
+  system_id: null,
+  he_level_value: null,
+  he_pressure_value: null,
+  he_boil_off_value: null,
+  host_datetime: null,
+  capture_datetime: null,
 };
 
 module.exports = {
@@ -378,5 +385,6 @@ module.exports = {
   ge_cv_syserror_schema,
   philips_cv_eventlog_schema,
   logfile_event_history_metadata,
-  stt_magnet
+  stt_magnet,
+  mag_stt_magnet
 };
