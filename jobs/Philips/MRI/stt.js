@@ -153,8 +153,6 @@ async function stt_parser(file_config, System) {
       }
     }
 
-    console.log(mag_stt_magnet_data);
-
     // ** End Parse **
 
     // ** Begin Persist **
@@ -165,10 +163,8 @@ async function stt_parser(file_config, System) {
       pg_cs.mag.philips.mag_stt_magnet
     );
 
-    //await db.any(query);
+    await db.any(query);
     await db.any(query_2);
-
-    return;
 
     // ** End Persist **
 
