@@ -22,6 +22,7 @@ const {
   push_file_dt_queue
 } = require("../../../redis/redisHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
+const { gzip_n_save } = require("../../../util");
 const { dt_now } = require("../../../util/dates");
 
 // Logger
@@ -121,6 +122,16 @@ async function phil_cv_lod_eventlog(
     }
 
     // END: Check Redis delta
+
+    // Save LOD File to DB
+    await gzip_n_save(
+      job_id,
+      run_log,
+      sme,
+      file_config.file_name,
+      capture_datetime,
+      complete_file_path
+    );
 
     // rl is set conditionaly. Holds file data
     let rl;

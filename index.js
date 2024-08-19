@@ -24,7 +24,6 @@ const determineManufacturer = async (job_id, system, run_log) => {
     job_id: job_id,
     sme: system.id
   };
-  console.log(note);
   try {
     await addLogEvent(I, run_log, "determineManufacturer", cal, note, null);
 
@@ -33,7 +32,6 @@ const determineManufacturer = async (job_id, system, run_log) => {
         await siemens_parser(job_id, system, run_log);
         break;
       case "Philips":
-        console.log("PHILIPS")
         await philips_parser(job_id, system, run_log);
         break;
       case "GE":
@@ -76,8 +74,13 @@ const onBoot = async () => {
 
     const system_array = await pgPool.any(queryString);
 
-    console.log("\nsystem_array");
-    console.log(system_array);
+    // FOR DEV TESTING TO REACH DEV DATA ACQU FILES
+    if (process.env.DEV_ENV === "dev") {
+      let dv_path = "/home/matt-teixeira/hep3/hhm_data_acquisition";
+      for (let system of system_array) {
+        system.debian_server_path = `${dv_path}/files/${system.id}`;
+      }
+    }
 
     for await (const system of system_array) {
       const job_id = uuidv4();

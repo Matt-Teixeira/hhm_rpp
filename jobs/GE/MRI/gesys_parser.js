@@ -4,15 +4,13 @@ const { ge_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { ge_mri_gesys_schema } = require("../../../persist/pg-schemas");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
-const { dt_now } = require("../../../util/dates");
 const { build_upsert_str } = require("../../../util");
 
 const {
   pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
-async function ge_mri_gesys(System) {
-  const capture_datetime = dt_now();
+async function ge_mri_gesys(System, capture_datetime) {
   // an array in each config accossiated with a file
   const parsers = System.file_config.parsers;
   const data = [];

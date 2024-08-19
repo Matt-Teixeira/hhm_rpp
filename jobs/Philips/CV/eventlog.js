@@ -20,6 +20,7 @@ const generateDateTime = require("../../../processing/date_processing/generateDa
 const extract = require("../../../processing/date_processing/phil_cv/extract_memo_data");
 const { dt_now } = require("../../../util/dates");
 const { build_upsert_str } = require("../../../util");
+const { gzip_n_save } = require("../../../util");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
@@ -31,7 +32,6 @@ const {
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
-
   const capture_datetime = dt_now();
   const sme = sysConfigData.id;
   // an array in each config accossiated with a file
@@ -54,7 +54,6 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
     file: file_config.file_name,
     path: complete_file_path
   };
-
 
   try {
     await addLogEvent(I, run_log, "phil_cv_eventlog", cal, note, null);
@@ -118,7 +117,20 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
       return;
     }
 
+    // SET DELTA --- set SME11677.EventLog.txe "3150170"
+
     // END: Check Redis delta
+
+    // Save EventLog.txe File to DB
+
+    await gzip_n_save(
+      job_id,
+      run_log,
+      sme,
+      file_config.file_name,
+      capture_datetime,
+      complete_file_path
+    );
 
     // rl is set conditionaly. Holds file data
     let rl;

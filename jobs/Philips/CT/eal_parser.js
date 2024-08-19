@@ -10,11 +10,9 @@ const { remove_dub_quotes } = require("../../../util/regExHelpers");
 const {
   pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
-const { dt_now } = require("../../../util/dates");
 const { build_upsert_str } = require("../../../util");
 
-async function phil_ct_eal(System) {
-  const capture_datetime = dt_now();
+async function phil_ct_eal(System, capture_datetime) {
   const data = [];
 
   let note = {

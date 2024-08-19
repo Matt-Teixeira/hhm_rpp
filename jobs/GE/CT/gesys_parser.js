@@ -5,7 +5,6 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { ge_ct_gesys_schema } = require("../../../persist/pg-schemas");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const extract = require("../../../processing/date_processing/ge_ct/extract_metadata");
-const { dt_now } = require("../../../util/dates");
 const { build_upsert_str } = require("../../../util");
 
 const {
@@ -13,8 +12,7 @@ const {
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 // File data parsed in bulk. One regex to group array of data blocks. Second regex to parse blocks.
-async function ge_ct_gesys(System) {
-  const capture_datetime = dt_now();
+async function ge_ct_gesys(System, capture_datetime) {
   // an array in each parser accossiated with a file
   const parsers = System.file_config.parsers;
   const data = [];

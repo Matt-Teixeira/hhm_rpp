@@ -5,15 +5,13 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { phil_mri_logcurrent_schema } = require("../../../persist/pg-schemas");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
-const { dt_now } = require("../../../util/dates");
 const { build_upsert_str } = require("../../../util");
 
 const {
   pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
-async function phil_mri_logcurrent(file_config, System) {
-  const capture_datetime = dt_now();
+async function phil_mri_logcurrent(file_config, System, capture_datetime) {
   const parsers = file_config.parsers;
   const data = [];
 

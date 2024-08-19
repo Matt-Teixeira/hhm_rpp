@@ -5,6 +5,8 @@ const phil_mri_rmmu_magnet = require("./rmmu_magnet");
 const phil_rmmu_history = require("./rmmu_history");
 const stt_parser = require("./stt");
 const { type_1 } = require("./monitoring");
+const { gzip_n_save } = require("../../../util");
+const { dt_now } = require("../../../util/dates");
 const PHILIPS_MRI_MONITORING = require("../../../data_acquisition/Philips_MRI_Monitor");
 const PHILIPS_MRI_LOGCURRENT_STT = require("../../../data_acquisition/Philips_MRI_Logcurrent");
 const PHILIPS_MRI_RMMU = require("../../../data_acquisition/Philips_MRI_Rmmu");
@@ -43,6 +45,7 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
     }
 
     if (sysConfigData.log_config) {
+      const capture_datetime = dt_now();
       await addLogEvent(
         I,
         run_log,
@@ -58,7 +61,24 @@ const philips_mri_parsers = async (job_id, sysConfigData, run_log) => {
         run_log,
         sysConfigData.log_config.dir_name
       );
-      await phil_mri_logcurrent(sysConfigData.log_config, Logcurrent_System);
+      await phil_mri_logcurrent(
+        sysConfigData.log_config,
+        Logcurrent_System,
+        capture_datetime
+      );
+
+      // Save logcurrent log to DB
+      const path = `${sysConfigData.debian_server_path}/${sysConfigData.log_config.file_name}`;
+
+      await gzip_n_save(
+        job_id,
+        run_log,
+        sysConfigData.id,
+        sysConfigData.log_config.file_name,
+        capture_datetime,
+        path
+      );
+
       return;
     }
 

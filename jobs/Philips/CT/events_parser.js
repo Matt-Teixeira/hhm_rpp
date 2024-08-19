@@ -9,10 +9,8 @@ const generateDateTime = require("../../../processing/date_processing/generateDa
 const {
   pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
-const { dt_now } = require("../../../util/dates");
 
-async function phil_ct_events(System) {
-  const capture_datetime = dt_now();
+async function phil_ct_events(System, capture_datetime) {
   const data = [];
 
   let note = {

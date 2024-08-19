@@ -3,7 +3,6 @@ const db = require("../../../utils/db/pg-pool");
 const pgp = require("pg-promise")();
 const { siemens } = require("../../../parse/parsers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
-const { dt_now } = require("../../../util/dates");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { siemens_cv_schema } = require("../../../persist/pg-schemas");
 const { build_upsert_str } = require("../../../util");
@@ -12,8 +11,7 @@ const {
   pg_column_sets: pg_cs
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
-const siemens_cv_parser = async (System) => {
-  const capture_datetime = dt_now();
+const siemens_cv_parser = async (System, capture_datetime) => {
   const parsers = System.file_config.parsers;
   const data = [];
 

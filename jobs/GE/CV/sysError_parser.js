@@ -6,7 +6,6 @@ const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const { remove_dub_quotes } = require("../../../util/regExHelpers");
-const { dt_now } = require("../../../util/dates");
 const { build_upsert_str } = require("../../../util");
 
 const {
@@ -14,8 +13,7 @@ const {
 } = require("../../../utils/db/sql/pg-helpers_hhm");
 
 // File data streamed line by line
-async function ge_cv_sys_error(System) {
-  const capture_datetime = dt_now();
+async function ge_cv_sys_error(System, capture_datetime) {
   // an array in each config accossiated with a file
   const parsers = System.file_config.parsers;
   const data = [];

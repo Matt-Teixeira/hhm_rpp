@@ -6,7 +6,6 @@ const { siemens_ct_mri } = require("../../../persist/pg-schemas");
 const { blankLineTest } = require("../../../util/regExHelpers");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const execLastMod = require("../../../read/exec-file_last_mod");
-const { dt_now } = require("../../../util/dates");
 const { build_upsert_str } = require("../../../util");
 
 const {
@@ -18,8 +17,7 @@ const {
   New data is added to file head. 
 */
 
-const win10_siemens_mri = async (System) => {
-  const capture_datetime = dt_now();
+const win10_siemens_mri = async (System, capture_datetime) => {
   const data = [];
   lastModPath = "./read/sh/get_file_last_mod.sh";
 

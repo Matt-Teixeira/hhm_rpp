@@ -21,8 +21,7 @@ This file turns over on a 24 hour intervolve; however, it also accumulates data 
 New data is added to file head. 
 */
 
-const win10_siemens_ct = async (System) => {
-  const capture_datetime = dt_now();
+const win10_siemens_ct = async (System, capture_datetime) => {
   const data = [];
   const extracted_metadata = [];
 
