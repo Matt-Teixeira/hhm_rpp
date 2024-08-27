@@ -6,6 +6,7 @@ const siemens_parser = require("./jobs/Siemens");
 const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");
 const update_file_datetimes = require("./jobs/aux_jobs/update_file_datetimes");
+const delete_old_db_files = require("./jobs/aux_jobs/clear_old_db_files");
 const queries = require("./data_acquisition/on_boot_queries");
 const [
   addLogEvent,
@@ -67,6 +68,11 @@ const onBoot = async () => {
       await writeLogEvents(run_log);
       console.log("\n*************** END ***************");
       console.timeEnd();
+      return;
+    }
+
+    if (shell_value[0] === "delete_old_files") {
+      await delete_old_db_files();
       return;
     }
 

@@ -28,7 +28,8 @@
     "philips_mri_log_5": "node --max-old-space-size=4096 index.js PHILIPS_MRI_LOG_5",
     "siemens_ct": "node index.js SIEMENS_CT",
     "siemens_mri": "node index.js SIEMENS_MRI",
-    "siemens_cv": "node index.js SIEMENS_CV"
+    "siemens_cv": "node index.js SIEMENS_CV",
+    "delete_old_db_files": "node index.js delete_old_files"
   },
   "keywords": [],
   "author": "",
