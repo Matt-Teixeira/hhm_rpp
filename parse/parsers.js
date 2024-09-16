@@ -65,6 +65,9 @@ const philips_re = {
   cv: {
     eventlog:
       /(?<category>[\w\. \-\$&\.]+)�(?<host_date>[\d-]+)�(?<host_time>[\d:]+)�(?<error_type>\w*)�(?<num_1>\d+)�(?:Technical ?Event ?ID: {1,3}(?<technical_event_id>\d+) ?�Description: (?<description>[^�\r\n]+)�Channel Identification: (?<channel_id>[^�]+)�Module: (?<module>[^�]+)�Source [Ff]ile: (?<source>[^�]+)�Line Number: (?<line>\d+) ?�Memo: ?(?<memo>[^\r\n�]*)(?:�SubsystemNumber: (?<subsystem_number>\d+)�ThreadName: ?(?<thread_name>[\w \-]*))?|(?<message>[^\r\n]*))/,
+    eventlog_2:
+      /(?<category>[\w\. \-\$&\.]+)�(?<host_date>[\d-]+)�(?<host_time>[\d:]+)�(?<error_type>\w*)�(?<num_1>\d+)�Technical ?Event ?ID:\s+(?<technical_event_id>\d+) ?�Description: (?<description>[^�\r\n]+)�Module: (?<module>[^�]+)�Source [Ff]ile: (?<source>[^�]+)�Line Number: (?<line>\d+) ?�Memo: ?(?<memo>[^\r\n�]*)�SubsystemNumber: (?<subsystem_number>\d+)?�ThreadName: ?(?<thread_name>[\w \-]*)/,
+
     eventlogsystem:
       /(?<subject>.*?)�(?<host_date>.*?)�(?<host_time>.*?)�(?<info_1>.*?)�(?<num_1>.*?)�((?<info_2>.*?)[\n|�])?((?<info_3>.*?)[\n|�])?((?<info_4>.*?)[\n|�])?((?<info_5>.*?)[\n|�])?((?<info_6>.*?)[\n|�])?/
   },
