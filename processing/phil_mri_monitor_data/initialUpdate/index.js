@@ -7,16 +7,25 @@ const {
   tag: { cal, cat, det }
 } = require("../../../utils/logger/enums");
 
-async function initialUpdate(job_id, sme, file_config, data, run_log) {
+async function initialUpdate(
+  job_id,
+  sme,
+  capture_datetime,
+  file_config,
+  data,
+  run_log
+) {
   console.log(data);
   let process_type = file_config.agg;
   let successful_agg = false;
   let note = {
     job_id,
     sme,
+    capture_datetime,
     file: file_config.file_name,
     process_type
   };
+
   try {
     await addLogEvent(I, run_log, "initialUpdate", cal, note, null);
 
@@ -26,7 +35,8 @@ async function initialUpdate(job_id, sme, file_config, data, run_log) {
           run_log,
           sme,
           data,
-          file_config.column_name
+          file_config.column_name,
+          capture_datetime
         );
         break;
       case "min":
@@ -34,7 +44,8 @@ async function initialUpdate(job_id, sme, file_config, data, run_log) {
           run_log,
           sme,
           data,
-          file_config.column_name
+          file_config.column_name,
+          capture_datetime
         );
         break;
       case "bool":
@@ -42,7 +53,8 @@ async function initialUpdate(job_id, sme, file_config, data, run_log) {
           run_log,
           sme,
           data,
-          file_config.column_name
+          file_config.column_name,
+          capture_datetime
         );
         break;
       default:

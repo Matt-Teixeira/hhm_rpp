@@ -13,7 +13,7 @@ async function getSystemDbData(job_id, run_log, sme) {
   try {
     await addLogEvent(I, run_log, "getSystemDbData", cal, note, null);
     const queryStr =
-      "SELECT system_id, host_datetime FROM mag.philips_mri_monitoring_data WHERE system_id = $1 ORDER BY host_datetime DESC LIMIT 1";
+      "SELECT system_id, host_datetime FROM mag.philips_mri_monitoring_data_agg WHERE system_id = $1 ORDER BY host_datetime DESC LIMIT 1";
 
     return await db.any(queryStr, [sme]);
   } catch (error) {
@@ -25,7 +25,7 @@ async function getSystemDbData(job_id, run_log, sme) {
 async function getExistingDates(run_log, sme) {
   try {
     const queryStr =
-      "SELECT date FROM mag.philips_mri_monitoring_data WHERE system_id = $1";
+      "SELECT date FROM mag.philips_mri_monitoring_data_agg WHERE system_id = $1";
     const v = [sme];
     const systemDates = await db.any(queryStr, v);
 
@@ -48,6 +48,29 @@ async function updateTable(run_log, col_name, arr) {
   } catch (error) {
     console.log(error);
     await addLogEvent(E, run_log, "updateTable", cat, { col_name, arr }, error);
+  }
+}
+
+async function updateTable_agg(run_log, col_name, arr) {
+  try {
+    if (arr[0] === -Infinity) return;
+    const queryStr = `UPDATE mag.philips_mri_monitoring_data_agg SET ${col_name} = $1 WHERE system_id = $2 AND date = $3`;
+    await db.none(queryStr, arr);
+  } catch (error) {
+    console.log(error);
+    await addLogEvent(E, run_log, "updateTable", cat, { col_name, arr }, error);
+  }
+}
+
+async function insertData_agg(run_log, col_name, arr) {
+  try {
+    if (arr[3] === -Infinity) return;
+    const queryStr = `INSERT INTO mag.philips_mri_monitoring_data_agg(system_id, capture_datetime, host_datetime, date, ${col_name}) VALUES($1, $2, $3, $4, $5)`;
+    await db.none(queryStr, arr);
+  } catch (error) {
+    let note = { col_name, arr };
+    console.log(error);
+    await addLogEvent(E, run_log, "insertData", cat, note, error);
   }
 }
 
@@ -165,4 +188,6 @@ module.exports = {
   get_captured_datetime_entry,
   insert_into_secondary_table,
   update_secondary_table,
+  updateTable_agg,
+  insertData_agg
 };

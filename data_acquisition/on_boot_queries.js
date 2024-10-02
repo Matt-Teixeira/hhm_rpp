@@ -203,7 +203,8 @@ WHERE
 GROUP BY
 	sys.id,
 	ac.system_id,
-	sites.time_zone_id;
+	sites.time_zone_id,
+	ac.debian_server_path;
       `,
   PHILIPS_MRI_MONITOR_2: `
   SELECT

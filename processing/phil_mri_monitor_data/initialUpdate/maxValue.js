@@ -1,16 +1,16 @@
 const {
   getExistingDates,
-  updateTable,
-  insertData,
+  updateTable_agg,
+  insertData_agg
 } = require("../../../util/phil_mri_monitor_helpers"); //cryo_comp_malf_minutes
 const { convertDT } = require("../../../util/dates");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, cat, det },
+  tag: { cal, cat, det }
 } = require("../../../utils/logger/enums");
 
-async function maxValue(run_log, sme, data, column) {
+async function maxValue(run_log, sme, data, column, capture_datetime) {
   try {
     // Get all rows/dates for this sme
     const systemDates = await getExistingDates(run_log, sme);
@@ -32,7 +32,7 @@ async function maxValue(run_log, sme, data, column) {
 
         if (systemDates.includes(prevData)) {
           // If date exists for sme: UPDATE row
-          await updateTable(run_log, column, [maxValue, sme, prevData]);
+          await updateTable_agg(run_log, column, [maxValue, sme, prevData]);
           bucket = [];
           prevData = obs.host_date;
           bucket.push(obs[column]);
@@ -40,7 +40,13 @@ async function maxValue(run_log, sme, data, column) {
           // If date dose not exist: INSERT new row
           let dtObj = await convertDT(prevData);
 
-          await insertData(run_log, column, [sme, dtObj, prevData, maxValue]);
+          await insertData_agg(run_log, column, [
+            sme,
+            capture_datetime,
+            dtObj,
+            prevData,
+            maxValue
+          ]);
           bucket = [];
           prevData = obs.host_date;
           bucket.push(obs[column]);
@@ -52,20 +58,21 @@ async function maxValue(run_log, sme, data, column) {
     if (systemDates.includes(prevData)) {
       // If date exists for sme: UPDATE row
       const maxValue = Math.max(...bucket);
-      await updateTable(run_log, column, [
+      await updateTable_agg(run_log, column, [
         maxValue,
         sme,
-        data[data.length - 1].host_date,
+        data[data.length - 1].host_date
       ]);
     } else {
       // If date dose not exist: INSERT new row
       const maxValue = Math.max(...bucket);
       let dtObj = await convertDT(data[data.length - 1].host_date);
-      await insertData(run_log, column, [
+      await insertData_agg(run_log, column, [
         sme,
+        capture_datetime,
         dtObj,
         data[data.length - 1].host_date,
-        maxValue,
+        maxValue
       ]);
     }
 
@@ -73,7 +80,7 @@ async function maxValue(run_log, sme, data, column) {
   } catch (error) {
     let note = {
       sme: sme,
-      column: column,
+      column: column
     };
     console.log(error);
     await addLogEvent(E, run_log, "initUpdate: maxValue", cat, note, error);

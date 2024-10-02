@@ -45,14 +45,14 @@ async function insertDisplayData(
     if (has_prev_data.length === 0 || hours_diff >= 48) {
       // Create entry for new SME
       for (const prop in data) {
-        
         const file_config = monitoring_configs.find(
           (monitor_object) => monitor_object.file_name.split(".")[0] === prop
         );
- 
+
         successful_agg = await initialUpdate(
           job_id,
           sme,
+          date,
           file_config,
           data[prop],
           run_log

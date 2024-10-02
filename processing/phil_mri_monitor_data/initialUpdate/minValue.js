@@ -1,11 +1,11 @@
 const {
   getExistingDates,
-  updateTable,
-  insertData,
+  updateTable_agg,
+  insertData_agg
 } = require("../../../util/phil_mri_monitor_helpers");
 const { convertDT } = require("../../../util/dates");
 
-async function minValue(run_log, sme, data, column) {
+async function minValue(run_log, sme, data, column, capture_datetime) {
   try {
     // Get all rows/dates for this sme
     const systemDates = await getExistingDates(run_log, sme);
@@ -27,14 +27,20 @@ async function minValue(run_log, sme, data, column) {
 
         if (systemDates.includes(prevData)) {
           // If date exists for sme: UPDATE row
-          await updateTable(run_log, column, [minValue, sme, prevData]);
+          await updateTable_agg(run_log, column, [minValue, sme, prevData]);
           bucket = [];
           prevData = obs.host_date;
           bucket.push(obs[column]);
         } else {
           // If date dose not exist: INSERT new row
           let dtObj = await convertDT(prevData);
-          await insertData(run_log, column, [sme, dtObj, prevData, minValue]);
+          await insertData_agg(run_log, column, [
+            sme,
+            capture_datetime,
+            dtObj,
+            prevData,
+            minValue
+          ]);
           bucket = [];
           prevData = obs.host_date;
           bucket.push(obs[column]);
@@ -46,27 +52,28 @@ async function minValue(run_log, sme, data, column) {
     if (systemDates.includes(prevData)) {
       // If date exists for sme: UPDATE row
       const minValue = Math.min(...bucket);
-      await updateTable(run_log, column, [
+      await updateTable_agg(run_log, column, [
         minValue,
         sme,
-        data[data.length - 1].host_date,
+        data[data.length - 1].host_date
       ]);
     } else {
       // If date dose not exist: INSERT new row
       const minValue = Math.min(...bucket);
       let dtObj = await convertDT(data[data.length - 1].host_date);
-      await insertData(run_log, column, [
+      await insertData_agg(run_log, column, [
         sme,
+        capture_datetime,
         dtObj,
         data[data.length - 1].host_date,
-        minValue,
+        minValue
       ]);
     }
     return true;
   } catch (error) {
     let note = {
       sme: sme,
-      column: column,
+      column: column
     };
     console.log(error);
     await addLogEvent(E, run_log, "initUpdate: minValue", cat, note, error);

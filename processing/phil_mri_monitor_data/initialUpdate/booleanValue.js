@@ -1,16 +1,16 @@
 const {
   getExistingDates,
-  updateTable,
-  insertData,
+  updateTable_agg,
+  insertData_agg
 } = require("../../../util/phil_mri_monitor_helpers"); //cryo_comp_comm_error
 const { convertDT } = require("../../../util/dates");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, cat, det },
+  tag: { cal, cat, det }
 } = require("../../../utils/logger/enums");
 
-async function booleanValue(run_log, sme, data, column) {
+async function booleanValue(run_log, sme, data, column, capture_datetime) {
   try {
     // Get all rows/dates for this sme
     const systemDates = await getExistingDates(run_log, sme);
@@ -38,14 +38,20 @@ async function booleanValue(run_log, sme, data, column) {
 
         if (systemDates.includes(prevData)) {
           // If date exists for sme: UPDATE row
-          await updateTable(run_log, column, [maxValue, sme, prevData]);
+          await updateTable_agg(run_log, column, [maxValue, sme, prevData]);
           bucket = [];
           prevData = obs.host_date;
           bucket.push(obs[column]);
         } else {
           // If date dose not exist: INSERT new row
           let dtObj = await convertDT(prevData);
-          await insertData(run_log, column, [sme, dtObj, prevData, maxValue]);
+          await insertData_agg(run_log, column, [
+            sme,
+            capture_datetime,
+            dtObj,
+            prevData,
+            maxValue
+          ]);
           bucket = [];
           prevData = obs.host_date;
           bucket.push(obs[column]);
@@ -64,10 +70,10 @@ async function booleanValue(run_log, sme, data, column) {
         maxValue = 0;
       }
 
-      await updateTable(run_log, column, [
+      await updateTable_agg(run_log, column, [
         maxValue,
         sme,
-        data[data.length - 1].host_date,
+        data[data.length - 1].host_date
       ]);
     } else {
       // If date dose not exist: INSERT new row
@@ -80,18 +86,19 @@ async function booleanValue(run_log, sme, data, column) {
       }
 
       let dtObj = await convertDT(data[data.length - 1].host_date);
-      await insertData(run_log, column, [
+      await insertData_agg(run_log, column, [
         sme,
+        capture_datetime,
         dtObj,
         data[data.length - 1].host_date,
-        maxValue,
+        maxValue
       ]);
     }
     return true;
   } catch (error) {
     let note = {
       sme: sme,
-      column: column,
+      column: column
     };
     await addLogEvent(E, run_log, "initUpdate: booleanValue", cat, note, error);
     return false;
