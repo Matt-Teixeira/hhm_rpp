@@ -11,7 +11,8 @@ async function updatePhilMriTable(
   file_config,
   data,
   date,
-  run_log
+  run_log,
+  time_zone_id
 ) {
   let note = {
     job_id,
@@ -30,7 +31,8 @@ async function updatePhilMriTable(
       file_config,
       data,
       date,
-      run_log
+      run_log,
+      time_zone_id
     );
 
     return successful_agg;

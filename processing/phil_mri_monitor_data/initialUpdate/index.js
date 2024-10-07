@@ -13,9 +13,9 @@ async function initialUpdate(
   capture_datetime,
   file_config,
   data,
-  run_log
+  run_log,
+  time_zone_id
 ) {
-  console.log(data);
   let process_type = file_config.agg;
   let successful_agg = false;
   let note = {
@@ -36,7 +36,8 @@ async function initialUpdate(
           sme,
           data,
           file_config.column_name,
-          capture_datetime
+          capture_datetime,
+          time_zone_id
         );
         break;
       case "min":
@@ -45,7 +46,8 @@ async function initialUpdate(
           sme,
           data,
           file_config.column_name,
-          capture_datetime
+          capture_datetime,
+          time_zone_id
         );
         break;
       case "bool":
@@ -54,12 +56,14 @@ async function initialUpdate(
           sme,
           data,
           file_config.column_name,
-          capture_datetime
+          capture_datetime,
+          time_zone_id
         );
         break;
       default:
         break;
     }
+
     note.successful_agg = successful_agg;
     await addLogEvent(I, run_log, "initialUpdate", det, note, null);
     return successful_agg;

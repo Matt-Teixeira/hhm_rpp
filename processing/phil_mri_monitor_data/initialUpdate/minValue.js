@@ -3,9 +3,16 @@ const {
   updateTable_agg,
   insertData_agg
 } = require("../../../util/phil_mri_monitor_helpers");
-const { convertDT } = require("../../../util/dates");
+const { dt_from_pattern } = require("../../../util/dates");
 
-async function minValue(run_log, sme, data, column, capture_datetime) {
+async function minValue(
+  run_log,
+  sme,
+  data,
+  column,
+  capture_datetime,
+  time_zone_id
+) {
   try {
     // Get all rows/dates for this sme
     const systemDates = await getExistingDates(run_log, sme);
@@ -14,6 +21,11 @@ async function minValue(run_log, sme, data, column, capture_datetime) {
     let prevData = data[0].host_date; //Set to first date in file data(file capture groups)
 
     for await (const obs of data) {
+      const insert_this_dt = await dt_from_pattern(
+        `${obs.host_date} ${obs.host_time}`,
+        "yyyy-MM-dd HH:mm:ss",
+        time_zone_id
+      );
       let currentDate = obs.host_date;
 
       if (currentDate === prevData) {
@@ -33,11 +45,10 @@ async function minValue(run_log, sme, data, column, capture_datetime) {
           bucket.push(obs[column]);
         } else {
           // If date dose not exist: INSERT new row
-          let dtObj = await convertDT(prevData);
           await insertData_agg(run_log, column, [
             sme,
             capture_datetime,
-            dtObj,
+            insert_this_dt,
             prevData,
             minValue
           ]);
@@ -58,13 +69,17 @@ async function minValue(run_log, sme, data, column, capture_datetime) {
         data[data.length - 1].host_date
       ]);
     } else {
+      const insert_this_dt = await dt_from_pattern(
+        `${data[data.length - 1].host_date} ${data[data.length - 1].host_time}`,
+        "yyyy-MM-dd HH:mm:ss",
+        time_zone_id
+      );
       // If date dose not exist: INSERT new row
       const minValue = Math.min(...bucket);
-      let dtObj = await convertDT(data[data.length - 1].host_date);
       await insertData_agg(run_log, column, [
         sme,
         capture_datetime,
-        dtObj,
+        insert_this_dt,
         data[data.length - 1].host_date,
         minValue
       ]);

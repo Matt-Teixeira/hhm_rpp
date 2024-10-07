@@ -23,8 +23,6 @@ async function type_1(System, directory) {
       directory
     );
 
-    console.log(json_data);
-
     if (json_data) {
       // Find index of monitoring object within config data
       /* let monitoring_index;
@@ -40,10 +38,9 @@ async function type_1(System, directory) {
         System.sysConfigData.monitoring_config, // System.sysConfigData.hhm_file_config[monitoring_index].monitoring,
         json_data,
         date,
-        System.run_log
+        System.run_log,
+        System.sysConfigData.time_zone_id
       );
-
-      console.log(successful_agg);
 
       if (successful_agg) {
         for await (const file_data of redis_cache) {

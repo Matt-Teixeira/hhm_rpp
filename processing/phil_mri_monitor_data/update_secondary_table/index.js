@@ -14,7 +14,8 @@ async function philMonitorTableUpdate(
   file_config,
   data,
   capture_datetime,
-  run_log
+  run_log,
+  time_zone_id
 ) {
   let processType = file_config.agg;
   let successful_agg = false;
@@ -34,7 +35,8 @@ async function philMonitorTableUpdate(
           sme,
           data,
           col_name,
-          capture_datetime
+          capture_datetime,
+          time_zone_id
         );
         break;
       case "min":
@@ -43,7 +45,8 @@ async function philMonitorTableUpdate(
           sme,
           data,
           col_name,
-          capture_datetime
+          capture_datetime,
+          time_zone_id
         );
         break;
       case "bool":
@@ -52,7 +55,8 @@ async function philMonitorTableUpdate(
           sme,
           data,
           col_name,
-          capture_datetime
+          capture_datetime,
+          time_zone_id
         );
         break;
       default:

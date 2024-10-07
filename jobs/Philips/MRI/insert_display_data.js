@@ -15,7 +15,8 @@ async function insertDisplayData(
   monitoring_configs,
   data,
   date,
-  run_log
+  run_log,
+  time_zone_id
 ) {
   let note = {
     job_id,
@@ -55,7 +56,8 @@ async function insertDisplayData(
           date,
           file_config,
           data[prop],
-          run_log
+          run_log,
+          time_zone_id
         );
 
         if (successful_agg === false) break;
@@ -73,7 +75,8 @@ async function insertDisplayData(
           file_config,
           data[prop],
           date,
-          run_log
+          run_log,
+          time_zone_id
         );
         if (successful_agg === false) break;
       }
