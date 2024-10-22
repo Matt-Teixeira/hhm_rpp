@@ -21,11 +21,21 @@ async function minValue(
     let prevData = data[0].host_date; //Set to first date in file data(file capture groups)
 
     for await (const obs of data) {
-      const insert_this_dt = await dt_from_pattern(
-        `${obs.host_date} ${obs.host_time}`,
-        "yyyy-MM-dd HH:mm:ss",
-        time_zone_id
-      );
+      let insert_this_dt;
+      if ((sme = "SME15816")) {
+        insert_this_dt = await dt_from_pattern(
+          `${obs.host_date} ${obs.host_time}`,
+          "dd-MMM-yyyy HH:mm:ss", // Adjust format for '21-OCT-2024'
+          time_zone_id
+        );
+      } else {
+        insert_this_dt = await dt_from_pattern(
+          `${obs.host_date} ${obs.host_time}`,
+          "yyyy-MM-dd HH:mm:ss",
+          time_zone_id
+        );
+      }
+
       let currentDate = obs.host_date;
 
       if (currentDate === prevData) {
@@ -69,11 +79,24 @@ async function minValue(
         data[data.length - 1].host_date
       ]);
     } else {
-      const insert_this_dt = await dt_from_pattern(
-        `${data[data.length - 1].host_date} ${data[data.length - 1].host_time}`,
-        "yyyy-MM-dd HH:mm:ss",
-        time_zone_id
-      );
+      let insert_this_dt;
+      if ((sme = "SME15816")) {
+        insert_this_dt = await dt_from_pattern(
+          `${data[data.length - 1].host_date} ${
+            data[data.length - 1].host_time
+          }`,
+          "dd-MMM-yyyy HH:mm:ss", // Adjust format for '21-OCT-2024'
+          time_zone_id
+        );
+      } else {
+        insert_this_dt = await dt_from_pattern(
+          `${data[data.length - 1].host_date} ${
+            data[data.length - 1].host_time
+          }`,
+          "yyyy-MM-dd HH:mm:ss",
+          time_zone_id
+        );
+      }
       // If date dose not exist: INSERT new row
       const minValue = Math.min(...bucket);
       await insertData_agg(run_log, column, [
