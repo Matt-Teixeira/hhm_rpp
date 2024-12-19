@@ -22,7 +22,7 @@ async function minValue(
 
     for await (const obs of data) {
       let insert_this_dt;
-      if ((sme = "SME15816")) {
+      if (sme == "SME15816") {
         insert_this_dt = await dt_from_pattern(
           `${obs.host_date} ${obs.host_time}`,
           "dd-MMM-yyyy HH:mm:ss", // Adjust format for '21-OCT-2024'

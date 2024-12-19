@@ -36,11 +36,20 @@ async function minValue(
     }
 
     if (previous_entries.length < 1) {
-      const host_datetime = await dt_from_pattern(
-        `${min_value.host_date} ${min_value.host_time}`,
-        "yyyy-MM-dd HH:mm:ss",
-        time_zone_id
-      );
+      let host_datetime;
+      if (sme == "SME15816") {
+        host_datetime = await dt_from_pattern(
+          `${min_value.host_date} ${min_value.host_time}`,
+          "dd-MMM-yyyy HH:mm:ss", // Adjust format for '21-OCT-2024'
+          time_zone_id
+        );
+      } else {
+        host_datetime = await dt_from_pattern(
+          `${min_value.host_date} ${min_value.host_time}`,
+          "yyyy-MM-dd HH:mm:ss",
+          time_zone_id
+        );
+      }
       // const c = await convertDT(min_value.host_date);
       await insert_into_secondary_table(run_log, sme, column, [
         sme,

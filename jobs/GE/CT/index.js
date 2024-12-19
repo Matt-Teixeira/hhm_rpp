@@ -21,9 +21,13 @@ const ge_ct_parsers = async (job_id, sysConfigData, run_log) => {
       const capture_datetime = dt_now();
       switch (file.dir_name) {
         case "gesys":
-          const System = new GE_CT_CV_MRI(sysConfigData, file, job_id, run_log);
-          await ge_ct_gesys(System, capture_datetime);
-          break;
+          const System_Gesys = new GE_CT_CV_MRI(
+            sysConfigData,
+            file,
+            job_id,
+            run_log
+          );
+          await ge_ct_gesys(System_Gesys, capture_datetime);
         default:
           break;
       }
