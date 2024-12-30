@@ -170,6 +170,7 @@ async function updateRedisLinePositions(sme, file, eal, events) {
 }
 
 async function push_file_dt_queue(run_log, system) {
+  return;
   const redisClient = await initRedis();
   try {
     await redisClient.sendCommand([
