@@ -265,7 +265,7 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
 
     // Update alert.offline_hhm_conn table with host_datetime
     const resent_host_datetime =
-      mappedData[mappedData.length - 1].host_datetime;
+      mappedData[0].host_datetime;
 
     const upsert_str = build_upsert_str(sme, resent_host_datetime);
 
