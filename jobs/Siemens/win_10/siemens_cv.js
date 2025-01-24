@@ -44,10 +44,12 @@ const siemens_cv_parser = async (System, capture_datetime) => {
     // Set last file in rmmu directory
     System.update_files_to_process();
 
+    // Loop through each file that needs to be parsed
     for await (const file of System.files_in_dir) {
       const complete_file_path = `${System.directory_path}/${file}`;
       const fileData = (await fsp.readFile(complete_file_path)).toString();
 
+      // Check for file and contents
       if (fileData === "" || fileData === null) {
         let data_note = {
           system_id: System.sme,
@@ -88,6 +90,7 @@ const siemens_cv_parser = async (System, capture_datetime) => {
         );
       }
 
+      // Looping through each match block
       for await (const m of matches) {
         const matchGroups = m.match(siemens[parsers[1]]);
 

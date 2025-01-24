@@ -760,13 +760,16 @@ WHERE
 	AND sys.modality LIKE '%CT'
 	AND ac.run_group = 1
 GROUP BY
-	sys.id,
-	ac.system_id,
+  sys.id,
+  sys.manufacturer,
+  sys.modality,
+  ac.system_id,
   log.file_name,
   log.dir_name,
   log.regex_models,
   log.pg_tables,
   ac.file_version,
+  ac.debian_server_path,
   sites.time_zone_id;
     `,
   SIEMENS_MRI: `

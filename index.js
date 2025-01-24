@@ -7,6 +7,7 @@ const philips_parser = require("./jobs/Philips");
 const ge_parser = require("./jobs/GE");
 const update_file_datetimes = require("./jobs/aux_jobs/update_file_datetimes");
 const delete_old_db_files = require("./jobs/aux_jobs/clear_old_db_files");
+const reset_daily_system_totals = require("./jobs/aux_jobs/reset_daily_system_reset_totals");
 const queries = require("./data_acquisition/on_boot_queries");
 const [
   addLogEvent,
@@ -73,6 +74,11 @@ const onBoot = async () => {
 
     if (shell_value[0] === "delete_old_files") {
       await delete_old_db_files();
+      return;
+    }
+
+    if (shell_value[0] === "reset_daily_system_totals") {
+      await reset_daily_system_totals();
       return;
     }
 
