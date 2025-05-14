@@ -6,6 +6,35 @@ const {
   tag: { cal, det, cat, seq, qaf }
 } = require("../utils/logger/enums");
 
+async function get_last_parsed_daily(sme) {
+  try {
+    const redisClient = await initRedis();
+    const getKey = `${sme}.last_parsed_phil_cv_daily`;
+    const last_parsed = await redisClient.get(getKey);
+    await redisClient.quit();
+
+    return last_parsed;
+  } catch (error) {
+    await redisClient.quit();
+    console.log(error);
+    return null;
+  }
+}
+
+async function update_last_parsed_daily(sme, daily_dir) {
+  const redisClient = await initRedis();
+
+  try {
+    const setKey = `${sme}.last_parsed_phil_cv_daily`;
+    await redisClient.set(setKey, daily_dir);
+    await redisClient.quit();
+    return;
+  } catch (error) {
+    await redisClient.quit();
+    console.log(error);
+  }
+}
+
 async function updateRedisFileSize(sme, exec_path, file_path, file, run_log) {
   let note = { sme, exec_path, file_path, file };
   const redisClient = await initRedis();
@@ -227,5 +256,7 @@ module.exports = {
   getRedisLinePositions,
   push_file_dt_queue,
   get_file_dt_queue,
-  clear_file_dt_queue
+  clear_file_dt_queue,
+  get_last_parsed_daily,
+  update_last_parsed_daily
 };
