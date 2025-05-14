@@ -6,16 +6,11 @@ const { philips_re } = require("../../../parse/parsers");
 const mapDataToSchema = require("../../../persist/map-data-to-schema");
 const { philips_cv_eventlog_schema } = require("../../../persist/pg-schemas");
 const { blankLineTest } = require("../../../util/regExHelpers");
-const execLastMod = require("../../../read/exec-file_last_mod");
-const { getLastModifiedTime } = require("../../../util/isFileModified");
-const update_file_mod_dt = require("../../../util/file_mod_dt");
 const {
-  getCurrentFileSize,
-  getRedisFileSize,
-  updateRedisFileSize,
-  push_file_dt_queue
+  get_last_parsed_daily,
+  update_last_parsed_daily
 } = require("../../../redis/redisHelpers");
-const execHead = require("../../../read/exec-head");
+const exec_read_dir = require("../../../read/exec-dir_list");
 const generateDateTime = require("../../../processing/date_processing/generateDateTimes");
 const extract = require("../../../processing/date_processing/phil_cv/extract_memo_data");
 const { dt_now } = require("../../../util/dates");
@@ -24,7 +19,7 @@ const { gzip_n_save } = require("../../../util");
 const [addLogEvent] = require("../../../utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, det, cat }
+  tag: { cal, det, cat, war }
 } = require("../../../utils/logger/enums");
 
 const {
@@ -37,242 +32,207 @@ async function phil_cv_eventlog(job_id, sysConfigData, file_config, run_log) {
   // an array in each config accossiated with a file
   const parsers = file_config.parsers;
 
-  const updateSizePath = "./read/sh/readFileSize.sh";
-  const fileSizePath = "./read/sh/readFileSize.sh";
-  const headPath = "./read/sh/head.sh";
-  const lastModPath = "./read/sh/get_dir_last_mod.sh";
+  const read_directories_path = "./read/sh/phil_cv_file_list.sh";
 
-  const data = [];
-  // Extract 'Power-On hours' and 'Commercial Version'
-  const memo_data = [];
+  // READ DIRECTORIES IN FILE
 
-  const complete_file_path = `${sysConfigData.debian_server_path}/${file_config.file_name}`;
+  const dir_list = await exec_read_dir(read_directories_path, [
+    sysConfigData.debian_server_path
+  ]);
 
-  let note = {
-    job_id,
-    sme,
-    file: file_config.file_name,
-    path: complete_file_path
-  };
+  //Get Last daily_dir that was parsed!
 
-  try {
-    await addLogEvent(I, run_log, "phil_cv_eventlog", cal, note, null);
+  let previous_daily_file = await get_last_parsed_daily(sysConfigData.id); // Some Redis Ref
 
-    if (!fs.existsSync(complete_file_path)) {
-      let note = {
-        job_id,
-        sme,
-        file: file_config.file_name,
-        path: complete_file_path,
-        message: "File not found"
-      };
-      await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
-      return;
+  const unfiltered_dirs_arr = dir_list.split(" ");
+
+  const daily_re = /daily_\d{4}_\d{2}_\d{2}|daily_\d{4}\d{2}\d{2}/;
+
+  const filtered_dirs_arr = [];
+  for (let dir of unfiltered_dirs_arr) {
+    const matching_file = daily_re.test(dir);
+    if (matching_file) {
+      dir = dir.trim();
+      filtered_dirs_arr.push(dir);
     }
+  }
 
-    const last_mod = (
-      await getLastModifiedTime(complete_file_path)
-    ).toISOString();
+  // RETURN FROM RPP FUNCTION IF THERE ARE NO daily DIRECTORIES
+  if (!filtered_dirs_arr.length) {
+    let note = {
+      id: sme,
+      message: "THERE ARE NO DAILY DIRECTORIES ON DEBIAN FOR THIS SYSTEM"
+    };
+    await addLogEvent(I, run_log, "phil_cv_eventlog", war, note, null);
+    return null;
+  }
 
-    const file_metadata = {
-      system_id: sme,
-      file_name: file_config.file_name,
-      last_mod,
-      source: "hhm"
+  let files_to_parse = [];
+  // if !previous_daily_file BLOCK WILL RUN IF NO REFERENCE TO A DAILY DIRECTORY IN REDIS: NEW SYSTEM STATE
+  if (!previous_daily_file) {
+    files_to_parse.push(filtered_dirs_arr[filtered_dirs_arr.length - 1].trim());
+  }
+  // IF REDIS REFERENC: BUILD ARRAY OF DIRECORIES THAT NEED TO BE ACCESSED AND PARSED. COULD BE A SINGLE NEW DIR OR MORE THAN ONE
+  else {
+    for (let i = filtered_dirs_arr.length - 1; i >= 0; i--) {
+      if (previous_daily_file === filtered_dirs_arr[i]) {
+        break;
+      } else {
+        files_to_parse.unshift(filtered_dirs_arr[i]);
+      }
+    }
+  }
+
+  // TRACK LAST DIR/INDEX TO THEN SAVE THE LAST FILE IN log.saved_files
+  let index = 0;
+
+  for await (let file of files_to_parse) {
+    // data ARRAY HOLDS ALL PARSED DATA TO INSERT INTO TABLE
+    const data = [];
+    // memo_data: HOLDS EXTRACTED 'Power-On hours' and 'Commercial Version' DATA TO INSERT INTO logfile_event_history_metadata TABLE
+    const memo_data = [];
+    // isLast: SET TO true IF LAST ITER OF ARRAY OF DIRECTORIES
+    let isLast = index === files_to_parse.length - 1;
+
+    const complete_file_path = `${sysConfigData.debian_server_path}/${file}/${file_config.file_name}`;
+
+    let note = {
+      job_id,
+      id: sme,
+      dir: file,
+      path: complete_file_path
     };
 
-    const prevFileSize = await getRedisFileSize(
-      sme,
-      file_config.file_name,
-      run_log
-    );
+    try {
+      await addLogEvent(I, run_log, "phil_cv_eventlog", cal, note, null);
 
-    // START: Check Redis delta. Delta === 0 if file not rotated (previously parsed data)
-    const currentFileSize = await getCurrentFileSize(
-      sme,
-      fileSizePath,
-      sysConfigData.debian_server_path,
-      file_config.file_name,
-      run_log
-    );
+      // ENSURE FILE EXISTS
+      if (!fs.existsSync(complete_file_path)) {
+        let note = {
+          job_id,
+          id: sme,
+          file: file_config.file_name,
+          path: complete_file_path,
+          message: "File not found"
+        };
+        await addLogEvent(W, run_log, "phil_cv_eventlog", war, note, null);
+        return;
+      }
 
-    const delta = currentFileSize - prevFileSize;
-
-    note.current_file_size = currentFileSize;
-    note.delta = delta;
-
-    await addLogEvent(I, run_log, "phil_cv_eventlog", det, note, null);
-
-    if (delta === 0) {
-      let note = {
-        job_id,
-        sme,
-        file: file_config.file_name,
-        delta: delta,
-        message: "Same file size. Do not parse"
-      };
-      await addLogEvent(I, run_log, "phil_cv_eventlog", det, note, null);
-      //await update_file_mod_dt(file_metadata);
-      await push_file_dt_queue(run_log, file_metadata);
-      return;
-    }
-
-    // SET DELTA --- set SME11677.EventLog.txe "3150170"
-
-    // END: Check Redis delta
-
-    // Save EventLog.txe File to DB
-
-    await gzip_n_save(
-      job_id,
-      run_log,
-      sme,
-      file_config.file_name,
-      capture_datetime,
-      complete_file_path
-    );
-
-    // rl is set conditionaly. Holds file data
-    let rl;
-    // prevFileSize will be null if it is new system (first time running rpp).
-    // prevFileSize will be 0 if log has rotated.
-    // In both scenarios, read and parse entire file.
-    if (prevFileSize === null || prevFileSize === 0 || delta !== 0) {
+      // CREATE READLINE INTERFACE TO PROCESS A FILE LINE-BY-LINE: PREVENTS LOADING FILE ENTIRELY INTO MEMORY
+      let rl;
       rl = readline.createInterface({
         input: fs.createReadStream(complete_file_path),
         crlfDelay: Infinity
       });
-    }
 
-    /*     Old condition prior to node data acquisition app
-    if (prevFileSize > 0 && prevFileSize !== null) {
-      const currentFileSize = await getCurrentFileSize(
-        sme,
-        fileSizePath,
-        sysConfigData.hhm_config.file_path,
-        file_config.file_name
-    );
-
-      const delta = currentFileSize - prevFileSize;
-      
-
-      if (delta === 0) {
-        
-        return;
-      }
-
-      let headDelta = await execHead(headPath, delta, complete_file_path);
-
-      rl = headDelta.toString().split(/(?:\r\n|\r|\n)/g);
-    } 
-    */
-
-    for await (const line of rl) {
-      let matches = line.match(philips_re.cv[parsers[0]]);
-      if (matches === null) {
-        const isNewLine = blankLineTest(line);
-        if (isNewLine) {
-          continue;
+      for await (const line of rl) {
+        let matches = line.match(philips_re.cv[parsers[0]]);
+        if (matches === null) {
+          const isNewLine = blankLineTest(line);
+          if (isNewLine) {
+            continue;
+          } else {
+            let note = {
+              job_id,
+              id: sme,
+              file: file_config,
+              line,
+              message: "NO MATCH FOUND"
+            };
+            await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
+          }
         } else {
-          let note = {
+          matches.groups.system_id = sme;
+
+          const dtObject = await generateDateTime(
             job_id,
-            sme: sme,
-            file: file_config,
-            line,
-            message: "NO MATCH FOUND"
-          };
-          await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
-        }
-      } else {
-        matches.groups.system_id = sme;
+            matches.groups.system_id,
+            file_config.pg_tables[0],
+            matches.groups.host_date,
+            matches.groups.host_time,
+            sysConfigData.time_zone_id
+          );
 
-        const dtObject = await generateDateTime(
-          job_id,
-          matches.groups.system_id,
-          file_config.pg_tables[0],
-          matches.groups.host_date,
-          matches.groups.host_time,
-          sysConfigData.time_zone_id
-        );
+          // CHECK FOR null DATETIME VALUES
+          if (dtObject === null) {
+            let note = {
+              job_id,
+              id: sme,
+              line,
+              match_group: matches.groups,
+              message: "datetime object null"
+            };
+            await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
+          }
 
-        if (dtObject === null) {
-          let note = {
-            job_id,
-            sme: sme,
-            line,
-            match_group: matches.groups,
-            message: "datetime object null"
-          };
-          await addLogEvent(W, run_log, "phil_cv_eventlog", det, note, null);
-        }
+          matches.groups.capture_datetime = capture_datetime;
+          matches.groups.host_datetime = dtObject;
 
-        matches.groups.capture_datetime = capture_datetime;
-        matches.groups.host_datetime = dtObject;
-
-        data.push(matches.groups);
-        if (matches.groups.memo !== "") {
-          memo_data.push({
-            system_id: matches.groups.system_id,
-            memo: matches.groups.memo,
-            host_datetime: matches.groups.host_datetime
-          });
+          data.push(matches.groups);
+          if (matches.groups.memo !== "") {
+            memo_data.push({
+              system_id: matches.groups.system_id,
+              memo: matches.groups.memo,
+              host_datetime: matches.groups.host_datetime
+            });
+          }
         }
       }
+
+      // HOMOGENIZE DATA TO PREP FOR INSERT TO DB
+      const mappedData = mapDataToSchema(data, philips_cv_eventlog_schema);
+
+      // ** End Parse
+
+      // ** Begin Persist
+
+      const query = pgp.helpers.insert(
+        mappedData,
+        pg_cs.log.philips.philips_cv_eventlog
+      );
+
+      await db.any(query);
+
+      // ** End Persist
+
+      note.number_of_rows = mappedData.length;
+      note.first_row = mappedData[0];
+      note.last_row = mappedData[mappedData.length - 1];
+      note.message = "Successful Insert";
+
+      await addLogEvent(I, run_log, "phil_cv_eventlog", det, note, null);
+
+      // UPDATE REDIS WITH DIRECTORY THAT WAS JUST PARSED
+      await update_last_parsed_daily(sme, file);
+
+      // INSERT METADATA
+      if (memo_data.length > 0) await extract(job_id, memo_data, run_log);
+
+      // UPDATE: alert.offline_hhm_conn TABLE WITH HOST_DATETIME
+      const resent_host_datetime = mappedData[0].host_datetime;
+
+      const upsert_str = build_upsert_str(sme, resent_host_datetime);
+
+      await db.any(upsert_str);
+
+      // SAVE EventLog.txe FILE TO DB TABLE log.saved_files
+      if (isLast) {
+        await gzip_n_save(
+          job_id,
+          run_log,
+          sme,
+          file_config.file_name,
+          capture_datetime,
+          complete_file_path
+        );
+      }
+
+      index++;
+    } catch (error) {
+      console.log(error);
+      await addLogEvent(E, run_log, "phil_cv_eventlog", cat, note, error);
     }
-
-    // homogenize data to prep for insert to db
-    const mappedData = mapDataToSchema(data, philips_cv_eventlog_schema);
-
-    // console.log("\nmappedData - philips_cv");
-    // console.log(sme);
-    // console.log(mappedData[mappedData.length - 1]);
-
-    // ** End Parse
-
-    // ** Begin Persist
-
-    const query = pgp.helpers.insert(
-      mappedData,
-      pg_cs.log.philips.philips_cv_eventlog
-    );
-
-    await db.any(query);
-
-    // ** End Persist
-
-    note.number_of_rows = mappedData.length;
-    note.first_row = mappedData[0];
-    note.last_row = mappedData[mappedData.length - 1];
-    note.message = "Successful Insert";
-
-    await addLogEvent(I, run_log, "phil_cv_eventlog", det, note, null);
-
-    // Update Redis Cache
-    await updateRedisFileSize(
-      sme,
-      updateSizePath,
-      sysConfigData.debian_server_path,
-      file_config.file_name,
-      run_log
-    );
-
-    // insert metadata
-    if (memo_data.length > 0) await extract(job_id, memo_data, run_log);
-
-    // Update file_dt
-    //await update_file_mod_dt(file_metadata);
-    await push_file_dt_queue(run_log, file_metadata);
-
-    // Update alert.offline_hhm_conn table with host_datetime
-    const resent_host_datetime =
-      mappedData[0].host_datetime;
-
-    const upsert_str = build_upsert_str(sme, resent_host_datetime);
-
-    await db.any(upsert_str);
-  } catch (error) {
-    console.log(error);
-    await addLogEvent(E, run_log, "phil_cv_eventlog", cat, note, error);
   }
 }
 

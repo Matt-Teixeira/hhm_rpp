@@ -67,8 +67,6 @@ const onBoot = async () => {
     if (shell_value[0] === "file_dt") {
       await update_file_datetimes(run_log);
       await writeLogEvents(run_log);
-      // console.log("\n*************** END ***************");
-      // console.timeEnd();
       return;
     }
 
@@ -103,7 +101,6 @@ const onBoot = async () => {
     await dbInsertLogEvents(pgp, run_log);
     await writeLogEvents(run_log);
 
-    // console.log("\n*************** END ***************");
     console.timeEnd();
 
     process.exit();
