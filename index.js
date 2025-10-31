@@ -13,18 +13,18 @@ const [
   addLogEvent,
   writeLogEvents,
   dbInsertLogEvents,
-  makeAppRunLog
+  makeAppRunLog,
 ] = require("./utils/logger/log");
 const {
   type: { I, W, E },
-  tag: { cal, det, cat, seq, qaf }
+  tag: { cal, det, cat, seq, qaf },
 } = require("./utils/logger/enums");
 const { v4: uuidv4 } = require("uuid");
 
 const determineManufacturer = async (job_id, system, run_log) => {
   let note = {
     job_id: job_id,
-    sme: system.id
+    sme: system.id,
   };
   try {
     await addLogEvent(I, run_log, "determineManufacturer", cal, note, null);
@@ -55,7 +55,7 @@ const onBoot = async () => {
     REDIS_IP: process.env.REDIS_IP,
     PG_USER: process.env.PG_USER,
     PG_DB: process.env.PG_DB,
-    argv: process.argv
+    argv: process.argv,
   };
 
   try {
@@ -95,8 +95,12 @@ const onBoot = async () => {
     for await (const system of system_array) {
       const job_id = uuidv4();
 
+      console.log("\n*** RUNNING APP ***");
+      return;
+
       await determineManufacturer(job_id, system, run_log);
     }
+    return;
 
     await dbInsertLogEvents(pgp, run_log);
     await writeLogEvents(run_log);

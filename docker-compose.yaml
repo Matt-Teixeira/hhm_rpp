@@ -1,0 +1,56 @@
+# no "version" key
+
+x-common-env: &common_env
+# Load environment variables from .env in the project root
+  env_file:
+    - .env
+
+  # Allow containers to reach services on the host via this hostname
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+  # Runtime env vars
+  environment:
+    # Don't write into root's $HOME inside the image; use a tmp home
+    HOME: /tmp
+
+    # Keep npm's cache ephemeral (avoids permission issues on bind mounts)
+    NPM_CONFIG_CACHE: /tmp/.npm
+
+x-common-mounts: &common_mounts
+  working_dir: /workspace
+  volumes:
+  # --- Bind mounts (host paths must exist) ---
+
+    # 1) Project source → live edit on host reflects in container
+    - ./:/workspace
+    
+    # 2) Cache node_modules on host (survives container removal)
+    #    Make sure /opt/resources/node_mod_cache/dev/hhm_rpp exists and is writable
+    #    Use when deploying: /opt/resources/node_mod_cache/staging/hhm_rpp
+    - /opt/resources/node_mod_cache/dev/hhm_rpp:/workspace/node_modules
+
+    # 3) Centralized run logs on host (ensure directory exists/writable)
+    - /opt/run-logs/hhm_rpp:/opt/run-logs/hhm_rpp
+
+# ---------- Services ----------
+services:
+  # Lightweight container for running the app as-is
+  app:
+    # Base Node image (moves with LTS). For reproducibility, consider pinning:
+    # image: node:22-bookworm (10/30/25)
+    image: node:lts
+
+    # Merge in common env + mounts
+    <<: [*common_env, *common_mounts]
+
+# Tooling container that has extra CLI deps baked in: build from docker/Dockerfile.runtime
+  app_tools:
+    image: utility-app_tools:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.runtime # extends node:lts, adds lftp/rsync
+      args:
+        APP_UID: "${APP_UID}"
+        APP_GID: "${APP_GID}"
+    <<: [*common_env, *common_mounts]
